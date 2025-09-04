@@ -1,0 +1,190 @@
+/* Ensure full-viewport canvas */
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Split-screen wrapper (override any framework .container limits) */
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;        /* NEW: take full viewport width */
+  max-width: 100vw;    /* NEW: override any global max-width */
+  padding: 0;          /* NEW: kill framework side padding */
+  overflow: hidden;
+}
+
+/* Left side (image) */
+.left {
+  flex: 1 1 50%;       /* CHANGED: was width: 50% */
+}
+
+.left img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Right side (form) */
+.right {
+  flex: 1 1 50%;       /* CHANGED: was width: 50% */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Logo */
+.logo {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.logo-img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+/* Title */
+h1 {
+  margin-left: 60px;
+  margin-right: 60px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 24px;
+}
+
+/* Form */
+form {
+  width: 80%;
+  max-width: 350px; /* Reduced width to make form more compact */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 75vh; /* Adjusted height to ensure visibility */
+}
+
+/* Field group */
+.form-group {
+  margin-bottom: 10px;
+  position: relative;
+  flex: 1;
+}
+
+/* Labels */
+label {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 12px; /* Reduced font size for compactness */
+}
+
+/* Inputs */
+input, select {
+  width: 100%;
+  padding: 4px 0;
+  border: none;
+  border-bottom: 1px solid #000;
+  background: transparent;
+  font-size: 12px; /* Reduced font size for compactness */
+  position: relative;
+  z-index: 1;
+}
+
+input:focus, select:focus {
+  outline: none;
+}
+
+/* Validation colors */
+input.ng-touched.ng-invalid {
+  border-bottom-color: red; /* Red border when invalid and touched */
+}
+
+select.ng-touched.ng-invalid {
+  border-bottom-color: red; /* Red border when invalid and touched */
+}
+
+/* Notes and errors */
+.note {
+  display: block;
+  font-size: 10px; /* Reduced font size for compactness */
+  color: gray;
+  margin-top: 3px;
+}
+
+.error {
+  color: red;
+}
+
+.error-msg-in-field {
+  color: red;
+  font-size: 10px; /* Reduced font size for compactness */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.form-group:hover .error-msg-in-field,
+.form-group:focus-within .error-msg-in-field {
+  opacity: 1;
+}
+
+/* Checkbox row */
+.checkbox-group {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  flex: 1;
+}
+
+.checkbox-group input {
+  width: auto;
+  margin-right: 5px;
+  margin-top: 2px;
+}
+
+.checkbox-group label {
+  font-size: 10px; /* Reduced font size for compactness */
+  display: inline;
+}
+
+/* Button */
+button {
+  width: 100%;
+  padding: 8px;
+  background-color: lightgray; /* Default = grey */
+  border: none;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-top: 5px;
+  flex: 0 0 auto;
+  transition: background-color 0.3s;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: lightgray; /* Grey when disabled */
+}
+
+button:not(:disabled) {
+  background-color: #0f00ff; /* Bootstrap iconic blue */
+  color: white;
+}

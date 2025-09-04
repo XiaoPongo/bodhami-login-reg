@@ -1,0 +1,81 @@
+<div class="login-wrapper">
+<!-- Background Image -->
+<img src="https://placehold.co/1920x1080" class="bg-img" />
+
+<!-- Left Side: Form -->
+<div class="login-container">
+  <img
+    src="https://raw.githubusercontent.com/XiaoPongo/Bodhami-Internship-assets-dump/main/assets/signuplogo.jpg"
+    class="logo"
+  />
+  <h2>Login to Your Elevana Account!</h2>
+
+  <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+    <!-- Email -->
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Email</mat-label>
+      <input
+        matInput
+        type="email"
+        name="email"
+        [(ngModel)]="email"
+        #emailRef="ngModel"
+        required
+        email
+      />
+      <mat-error *ngIf="emailRef.invalid && (emailRef.touched || loginForm.submitted)">
+        <span *ngIf="emailRef.errors?.['required']">Field is Required</span>
+        <span *ngIf="emailRef.errors?.['email']">Invalid email format</span>
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Password -->
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Password</mat-label>
+      <input
+        matInput
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        #passRef="ngModel"
+        required
+        minlength="6"
+        pattern="^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,}$"
+      />
+      <mat-error *ngIf="passRef.invalid && (passRef.touched || loginForm.submitted)">
+        <div *ngIf="passRef.errors?.['required']">Field is Required</div>
+        <div *ngIf="passRef.errors?.['minlength']">Password must be at least 6 characters</div>
+        <div *ngIf="passRef.errors?.['pattern']">Must contain a letter, number, and special character</div>
+      </mat-error>
+    </mat-form-field>
+
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      class="login-btn"
+      [disabled]="loginForm.invalid"
+    >
+      LOG IN
+    </button>
+  </form>
+
+  <a class="forgot" href="#">Forgot Password?</a>
+  <p class="no-account">Don't have an account?</p>
+
+  <div class="signup-links">
+    <a mat-stroked-button color="primary" routerLink="/student-reg">Register as Student</a>
+    <a mat-stroked-button color="accent" routerLink="/mentor-reg">Register as Partner</a>
+  </div>
+</div>
+
+<!-- Right Side: Title -->
+<div class="title-container">
+  <h1>Log-in to <span>Elevana</span></h1>
+</div>
+
+<!-- Floating Error -->
+<div class="floating-error" *ngIf="showError" role="alert">
+  {{ loginMessage }}
+</div>
+</div>
