@@ -1,37 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-
-// Angular Material
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { MatError } from '@angular/material/form-field';
-
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-mentor-reg',
   standalone: true,
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './mentor-reg.component.html',
-  styleUrls: ['./mentor-reg.component.css'],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-
-    // Material
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatIconModule,
-    MatCardModule
-  ]
+  styleUrls: ['./mentor-reg.component.css']
 })
 export class MentorRegComponent implements OnInit {
   form!: FormGroup;
@@ -103,5 +80,31 @@ export class MentorRegComponent implements OnInit {
     if (control) {
       control.markAsTouched();
     }
+  }
+
+  // ✅ Getters for template access
+  get firstName() {
+    return this.form.get('firstName');
+  }
+  get lastName() {
+    return this.form.get('lastName');
+  }
+  get email() {
+    return this.form.get('email');
+  }
+  get country() {
+    return this.form.get('country');
+  }
+  get phone() {
+    return this.form.get('phone');
+  }
+  get password() {
+    return this.form.get('password');
+  }
+  get postalCode() {
+    return this.form.get('postalCode');
+  }
+  get accept() {
+    return this.form.get('accept');
   }
 }
