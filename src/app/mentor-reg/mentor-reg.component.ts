@@ -20,6 +20,7 @@ export class MentorRegComponent implements OnInit {
   countries: string[] = [
     'India', 'United States', 'United Kingdom', 'Canada', 'Australia',
     'Germany', 'France', 'Japan', 'Singapore', 'Brazil'
+    // you can add back your full list here later
   ];
 
   ngOnInit() {
@@ -54,6 +55,32 @@ export class MentorRegComponent implements OnInit {
     });
   }
 
+  // ✅ Non-nullable getters (fixes strict template errors on Vercel)
+  get firstName(): FormControl {
+    return this.form.get('firstName') as FormControl;
+  }
+  get lastName(): FormControl {
+    return this.form.get('lastName') as FormControl;
+  }
+  get email(): FormControl {
+    return this.form.get('email') as FormControl;
+  }
+  get country(): FormControl {
+    return this.form.get('country') as FormControl;
+  }
+  get phone(): FormControl {
+    return this.form.get('phone') as FormControl;
+  }
+  get password(): FormControl {
+    return this.form.get('password') as FormControl;
+  }
+  get postalCode(): FormControl {
+    return this.form.get('postalCode') as FormControl;
+  }
+  get accept(): FormControl {
+    return this.form.get('accept') as FormControl;
+  }
+
   // ✅ Signup
   async onSubmit() {
     if (this.form.invalid) {
@@ -80,31 +107,5 @@ export class MentorRegComponent implements OnInit {
     if (control) {
       control.markAsTouched();
     }
-  }
-
-  // ✅ Getters for template access
-  get firstName() {
-    return this.form.get('firstName');
-  }
-  get lastName() {
-    return this.form.get('lastName');
-  }
-  get email() {
-    return this.form.get('email');
-  }
-  get country() {
-    return this.form.get('country');
-  }
-  get phone() {
-    return this.form.get('phone');
-  }
-  get password() {
-    return this.form.get('password');
-  }
-  get postalCode() {
-    return this.form.get('postalCode');
-  }
-  get accept() {
-    return this.form.get('accept');
   }
 }
