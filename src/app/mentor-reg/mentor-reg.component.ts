@@ -1,14 +1,37 @@
 import { Component, OnInit } from '@angular/core';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+
+// Angular Material
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCardModule } from '@angular/material/card';
+import { MatError } from '@angular/material/form-field';
+
 import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-mentor-reg',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './mentor-reg.component.html',
-  styleUrls: ['./mentor-reg.component.css']
+  styleUrls: ['./mentor-reg.component.css'],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+
+    // Material
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatIconModule,
+    MatCardModule
+  ]
 })
 export class MentorRegComponent implements OnInit {
   form!: FormGroup;
@@ -20,7 +43,6 @@ export class MentorRegComponent implements OnInit {
   countries: string[] = [
     'India', 'United States', 'United Kingdom', 'Canada', 'Australia',
     'Germany', 'France', 'Japan', 'Singapore', 'Brazil'
-    // ℹ️ trim your big list for now if you want smaller bundle on Vercel
   ];
 
   ngOnInit() {
