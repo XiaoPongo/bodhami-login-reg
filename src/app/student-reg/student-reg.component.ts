@@ -64,27 +64,23 @@ export class StudentRegComponent implements OnInit {
 
   // ✅ Signup logic with popup messages
   async onSubmit() {
-    if (this.form.invalid) {
-      this.error = 'Please fix the errors in the form.';
-      this.success = '';
-      return;
-    }
-
-    const { email, password } = this.form.value;
-    const { user, error } = await this.authService.register(email, password, 'student');
-
-
+    if (this.form.invalid) return;
+  
+    const formData = {
+      ...this.form.value,
+      role: 'student'
+    };
+  
+    const { user, error } = await this.authService.register(formData);
+  
     if (error) {
-      this.error = error.message || 'Signup failed. Try another email.';
-      this.success = '';
-      alert(this.error); // ⚡ popup for errors
+      console.error('Registration error:', error.message);
     } else {
-      this.success = 'Signup successful! 🎉 Check your email for the verification link.';
-      this.error = '';
-      alert(this.success); // ⚡ popup for success
-      console.log('Student signup success:', user);
+      console.log('Student registered:', user);
+      alert('Check your email for the confirmation/magic link!');
     }
   }
+  
 
   onInput(controlName: string) {
     const control = this.form.get(controlName);
