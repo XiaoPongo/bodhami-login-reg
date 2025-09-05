@@ -11,11 +11,6 @@ interface UserMetadata {
   // Define properties as per your AuthService implementation
 }
 
-interface UserPreferences {
-  theme?: string;
-  notifications?: boolean;
-}
-
 interface User {
   id: string; // Matches the string id from AuthService
   app_metadata: UserAppMetadata;
@@ -34,7 +29,6 @@ interface User {
   role?: string;
   firstName?: string; // Already saved separately
   lastName?: string;  // Already saved separately
-  // Removed preferences from User interface since it doesn't exist
 }
 
 interface Month {
@@ -81,8 +75,7 @@ export class HeaderComponent {
   constructor(private authService: AuthService) {}
 
   get user(): User | null {
-    const currentUser = this.authService.getCurrentUser();
-    return currentUser ? currentUser : null;
+    return this.authService.getCurrentUser() || null;
   }
 
   get notifications() {
