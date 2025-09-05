@@ -39,27 +39,32 @@ export class LoginComponent {
       return;
     }
 
-    const { user, error } = await this.authService.login(this.email, this.password);
+    try {
+      const { user } = await this.authService.login(this.email, this.password);
 
-    if (error || !user) {
+      if (!user) {
+        this.showError = true;
+        this.loginMessage = 'Login failed. Please try again.';
+        return;
+      }
+
+      // ✅ Success
+      this.showError = false;
+      this.loginMessage = 'Login successful! Redirecting...';
+
+      // ✅ Get role safely
+      const role = user.user_metadata?.['role'];
+
+      if (role === 'mentor') {
+        this.router.navigate(['/mentor-dashboard']);
+      } else if (role === 'student') {
+        this.router.navigate(['/student-dashboard']);
+      } else {
+        this.loginMessage = 'No role assigned. Please contact admin.';
+      }
+    } catch (err: any) {
       this.showError = true;
-      this.loginMessage = error?.message || 'Login failed. Please try again.';
-      return;
-    }
-
-    // ✅ Success
-    this.showError = false;
-    this.loginMessage = 'Login successful! Redirecting...';
-
-    // ✅ Check role from user_metadata
-    const role = (user.user_metadata as any)?.['role'];
-
-    if (role === 'mentor') {
-      this.router.navigate(['/mentor-dashboard']);
-    } else if (role === 'student') {
-      this.router.navigate(['/student-dashboard']);
-    } else {
-      this.loginMessage = 'No role assigned. Please contact admin.';
+      this.loginMessage = err.message || 'Unexpected error occurred.';
     }
   }
 }

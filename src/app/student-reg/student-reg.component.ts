@@ -2,7 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../auth.service'; // ✅ shared auth
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-student-reg',
@@ -52,7 +52,7 @@ export class StudentRegComponent implements OnInit {
     });
   }
 
-  // ✅ Easy getters for template binding
+  // ✅ Easy getters
   get firstName() { return this.form.get('firstName') as FormControl; }
   get lastName() { return this.form.get('lastName') as FormControl; }
   get email() { return this.form.get('email') as FormControl; }
@@ -62,30 +62,39 @@ export class StudentRegComponent implements OnInit {
   get postalCode() { return this.form.get('postalCode') as FormControl; }
   get accept() { return this.form.get('accept') as FormControl; }
 
-  // ✅ Signup logic with popup messages
+  // ✅ Signup logic
   async onSubmit() {
     if (this.form.invalid) return;
-  
-    const formData = {
-      ...this.form.value,
-      role: 'student'
-    };
-  
-    const { user, error } = await this.authService.register(formData);
-  
-    if (error) {
-      console.error('Registration error:', error.message);
-    } else {
-      console.log('Student registered:', user);
-      alert('Check your email for the confirmation/magic link!');
+
+    try {
+      const { user } = await this.authService.register(
+        this.email.value,
+        this.password.value,
+        {
+          role: 'student',
+          firstName: this.firstName.value,
+          lastName: this.lastName.value,
+          country: this.country.value,
+          phone: this.phone.value,
+          postalCode: this.postalCode.value
+        }
+      );
+
+      if (user) {
+        this.success = 'Registration successful! You can now login.';
+        this.error = '';
+        this.form.reset();
+      }
+    } catch (err: any) {
+      this.error = err.message || 'Registration failed.';
+      this.success = '';
     }
   }
-  
 
+  // ✅ Mark control touched on input
   onInput(controlName: string) {
     const control = this.form.get(controlName);
-    if (control) {
-      control.markAsTouched();
-    }
+    if (control) control.markAsTouched();
   }
 }
+

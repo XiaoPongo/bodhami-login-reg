@@ -1,3 +1,4 @@
+// src/app/mentor-reg/mentor-reg.component.ts
 import { Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -42,9 +43,7 @@ export class MentorRegComponent implements OnInit {
       ]),
       password: new FormControl('', [
         Validators.required,
-        Validators.pattern(
-          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/
-        )
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/)
       ]),
       postalCode: new FormControl('', [
         Validators.required,
@@ -54,7 +53,7 @@ export class MentorRegComponent implements OnInit {
     });
   }
 
-  // ✅ Expose getters for template usage
+  // ✅ Getters
   get firstName() { return this.form.get('firstName') as FormControl; }
   get lastName() { return this.form.get('lastName') as FormControl; }
   get email() { return this.form.get('email') as FormControl; }
@@ -67,28 +66,35 @@ export class MentorRegComponent implements OnInit {
   // ✅ Signup action
   async onSubmit() {
     if (this.form.invalid) return;
-  
-    const formData = {
-      ...this.form.value,
-      role: 'mentor'
-    };
-  
-    const { user, error } = await this.authService.register(formData);
-  
-    if (error) {
-      console.error('Registration error:', error.message);
-    } else {
-      console.log('Mentor registered:', user);
-      alert('Check your email for the confirmation/magic link!');
+
+    try {
+      const { user } = await this.authService.register(
+        this.email.value,
+        this.password.value,
+        {
+          role: 'mentor',
+          firstName: this.firstName.value,
+          lastName: this.lastName.value,
+          country: this.country.value,
+          phone: this.phone.value,
+          postalCode: this.postalCode.value
+        }
+      );
+
+      if (user) {
+        this.success = 'Mentor registration successful! You can now login.';
+        this.error = '';
+        this.form.reset();
+      }
+    } catch (err: any) {
+      this.error = err.message || 'Registration failed.';
+      this.success = '';
     }
   }
-  
 
-  // ✅ Mark field as touched for validation feedback
+  // ✅ Mark field touched
   onInput(controlName: string) {
     const control = this.form.get(controlName);
-    if (control) {
-      control.markAsTouched();
-    }
+    if (control) control.markAsTouched();
   }
 }

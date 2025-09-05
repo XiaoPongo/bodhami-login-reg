@@ -1,87 +1,71 @@
-// src/app/auth.service.ts
 import { Injectable } from '@angular/core';
-import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
+import { createClient, SupabaseClient, Session, User } from '@supabase/supabase-js';
+import { BehaviorSubject } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class AuthService {
   private supabase: SupabaseClient;
-  private currentUser: User | null = null;
+  private session = new BehaviorSubject<Session | null>(null);
 
   constructor() {
     this.supabase = createClient(
-      'https://qjlmzggdecjcbqjsoceh.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqbG16Z2dkZWNqY2JxanNvY2VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyMjg2ODAsImV4cCI6MjA3MTgwNDY4MH0.j5aIEMr2jODCdrS_Pqg4hVwKC5Ev4TUUEz9pd5CY9h0'
+      'https://YOUR-PROJECT-ID.supabase.co',   // 👈 replace
+      'YOUR-ANON-KEY',                         // 👈 replace
+      {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+        },
+      }
     );
 
-    const savedUser = localStorage.getItem('loggedInUser');
-    if (savedUser) {
-      this.currentUser = JSON.parse(savedUser);
-    }
+    // Load current session
+    this.supabase.auth.getSession().then(({ data }) => {
+      this.session.next(data.session);
+    });
+
+    // Subscribe to auth changes
+    this.supabase.auth.onAuthStateChange((_event, session) => {
+      this.session.next(session);
+    });
   }
 
-  // ✅ Login with email/password
-  async login(
-    email: string,
-    password: string
-  ): Promise<{ user: User | null; error: any }> {
+  async login(email: string, password: string) {
     const { data, error } = await this.supabase.auth.signInWithPassword({
       email,
       password,
     });
-
-    if (error) return { user: null, error };
-
-    this.currentUser = data.user;
-    localStorage.setItem('loggedInUser', JSON.stringify(data.user));
-    return { user: data.user, error: null };
+    if (error) throw error;
+    return data; // contains { user, session }
   }
-
-  // ✅ Register (store everything inside user_metadata for MVP)
-  async register(formData: {
-    email: string;
-    password: string;
-    role: 'mentor' | 'student';
-    firstName?: string;
-    lastName?: string;
-    country?: string;
-    phone?: string;
-    postalCode?: string;
-  }): Promise<{ user: User | null; error: any }> {
+  
+  async register(email: string, password: string, meta: any = {}) {
     const { data, error } = await this.supabase.auth.signUp({
-      email: formData.email,
-      password: formData.password,
-      options: {
-        data: {
-          role: formData.role,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          country: formData.country,
-          phone: formData.phone,
-          postalCode: formData.postalCode,
-        },
-      },
+      email,
+      password,
+      options: { data: meta },
     });
-
-    if (error) return { user: null, error };
-
-    this.currentUser = data.user;
-    localStorage.setItem('loggedInUser', JSON.stringify(data.user));
-    return { user: data.user, error: null };
+    if (error) throw error;
+    return data; // contains { user, session }
   }
 
-  // ✅ Logout
-  async logout(): Promise<void> {
-    await this.supabase.auth.signOut();
-    this.currentUser = null;
-    localStorage.removeItem('loggedInUser');
-  }
-
-  // ✅ Session helpers
-  isLoggedIn(): boolean {
-    return this.currentUser !== null;
+  async logout() {
+    return await this.supabase.auth.signOut();
   }
 
   getCurrentUser(): User | null {
-    return this.currentUser;
+    return this.session.value?.user ?? null;
+  }
+
+  // ✅ If you want to listen to session
+  getSession$() {
+    return this.session.asObservable();
+  }
+
+  getSession() {
+    return this.session.value;
   }
 }
