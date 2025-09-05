@@ -68,21 +68,30 @@ export class MentorRegComponent implements OnInit {
   async onSubmit() {
     if (this.form.invalid) {
       this.error = 'Please fix the errors in the form.';
+      this.success = '';
+      this.form.markAllAsTouched();
       return;
     }
-
+  
     const { email, password } = this.form.value;
-    const { user, error } = await this.authService.register(email, password, 'mentor');
-
-    if (error) {
-      this.error = error.message || 'Signup failed';
+  
+    try {
+      const { user, error } = await this.authService.register(email, password, 'mentor');
+      if (error) {
+        this.error = error.message || 'Signup failed';
+        this.success = '';
+      } else {
+        this.success = '✅ Signup successful! Check your email for verification.';
+        this.error = '';
+        alert(this.success); // optional popup
+        console.log('Signup success:', user);
+      }
+    } catch (err) {
+      console.error(err);
+      this.error = 'Something went wrong. Try again.';
       this.success = '';
-    } else {
-      this.success = 'Signup successful! 🎉 Check your email for verification.';
-      this.error = '';
-      console.log('Signup success:', user);
     }
-  }
+  }  
 
   // ✅ Mark field as touched when user types (for validation feedback)
   onInput(controlName: string) {
