@@ -2,6 +2,41 @@ import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../auth.service';
 
+// Interfaces based on the actual data structure from AuthService
+interface UserAppMetadata {
+  // Define properties as per your AuthService implementation
+}
+
+interface UserMetadata {
+  // Define properties as per your AuthService implementation
+}
+
+interface UserPreferences {
+  theme?: string;
+  notifications?: boolean;
+}
+
+interface User {
+  id: string; // Matches the string id from AuthService
+  app_metadata: UserAppMetadata;
+  user_metadata: UserMetadata;
+  aud: string;
+  confirmation_sent_at?: string;
+  recovery_sent_at?: string;
+  email_confirmed_at?: string;
+  invited_at?: string;
+  action_link?: string;
+  email?: string;
+  phone?: string;
+  created_at?: string;
+  updated_at?: string;
+  last_sign_in_at?: string;
+  role?: string;
+  firstName?: string; // Already saved separately
+  lastName?: string;  // Already saved separately
+  // Removed preferences from User interface since it doesn't exist
+}
+
 interface Month {
   name: string;
   startDay: number;
@@ -12,26 +47,14 @@ interface Month {
 interface Notification {
   id: number;
   text: string;
-  date?: string; // Added to match potential template usage
-  message?: string; // Added to match potential template usage
+  date?: string;
+  message?: string;
 }
 
 interface Deliverable {
   id: number;
   title: string;
   date: string;
-}
-
-interface UserPreferences {
-  theme?: string;
-  notifications?: boolean;
-}
-
-interface User {
-  id: number;
-  firstName?: string;
-  lastName?: string;
-  preferences?: UserPreferences;
 }
 
 @Component({
@@ -57,8 +80,9 @@ export class HeaderComponent {
 
   constructor(private authService: AuthService) {}
 
-  get user() {
-    return this.authService.getCurrentUser();
+  get user(): User | null {
+    const currentUser = this.authService.getCurrentUser();
+    return currentUser ? currentUser : null;
   }
 
   get notifications() {
