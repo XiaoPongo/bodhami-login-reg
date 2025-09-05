@@ -40,9 +40,9 @@ export class LoginComponent {
     }
 
     try {
-      const { user } = await this.authService.login(this.email, this.password);
+      const { user, session } = await this.authService.login(this.email, this.password);
 
-      if (!user) {
+      if (!user || !session) {
         this.showError = true;
         this.loginMessage = 'Login failed. Please try again.';
         return;
@@ -52,7 +52,7 @@ export class LoginComponent {
       this.showError = false;
       this.loginMessage = 'Login successful! Redirecting...';
 
-      // ✅ Get role safely
+      // ✅ Get role from user_metadata
       const role = user.user_metadata?.['role'];
 
       if (role === 'mentor') {

@@ -1,15 +1,23 @@
-import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+// src/app/auth.guard.ts
+import { Injectable } from '@angular/core';
+import { CanActivate, Router } from '@angular/router';
+import { AuthService } from './auth.service';
 
-export const AuthGuard: CanActivateFn = () => {
-  const router = inject(Router);
-  const isLoggedIn = !!localStorage.getItem('loggedInUser');
+@Injectable({
+  providedIn: 'root',
+})
+export class AuthGuard implements CanActivate {
+  constructor(private authService: AuthService, private router: Router) {}
 
-  if (!isLoggedIn) {
-    alert('You must log in to access the dashboard.');
-    router.navigate(['/login']);
+  canActivate(): boolean {
+    const user = this.authService.getCurrentUser();
+
+    if (user) {
+      return true; // ✅ user exists, allow access
+    }
+
+    // ❌ No user, redirect to login
+    this.router.navigate(['/login']);
     return false;
   }
-
-  return true;
-};
+}
