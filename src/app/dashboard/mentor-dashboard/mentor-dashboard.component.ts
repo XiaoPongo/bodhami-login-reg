@@ -1,42 +1,56 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
-import { AuthService } from '../../auth.service';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { User } from '../../user';  // path to your User model
 
 @Component({
   selector: 'app-mentor-dashboard',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
   templateUrl: './mentor-dashboard.component.html',
   styleUrls: ['./mentor-dashboard.component.css']
 })
-export class MentorDashboardComponent {
-  constructor(private authService: AuthService, private router: Router) {}
+export class MentorDashboardComponent implements OnInit {
+  user: User | null = null;
 
-  // ✅ Get user from AuthService
-  get user() {
-    return this.authService.getCurrentUser();
+  classes = [
+    { name: 'Math 101' },
+    { name: 'Science 201' }
+  ];
+
+  topStudents = [
+    { name: 'Alice', xp: 1200, progress: 80 },
+    { name: 'Bob', xp: 1100, progress: 70 },
+    { name: 'Charlie', xp: 950, progress: 60 }
+  ];
+
+  constructor(private router: Router) {}
+
+  ngOnInit(): void {
+    // Example: fetch user from localStorage or Supabase session
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      this.user = JSON.parse(storedUser) as User;
+    } else {
+      // fallback dummy user
+      this.user = {
+        email: 'mentor@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        country: 'India',
+        postalCode: '403001',
+        phone: '9876543210',
+        role: 'mentor'
+      };
+    }
   }
 
-  // ✅ Placeholder data (replace with real API/service later)
-  get classes() {
-    return [
-      { name: 'Physics 101', students: 32 },
-      { name: 'Maths Advanced', students: 28 }
-    ];
+  navigateToCreate(): void {
+    this.router.navigate(['/create-class']);
   }
 
-  get topStudents() {
-    return [
-      { name: 'Alice', score: 98 },
-      { name: 'Bob', score: 94 },
-      { name: 'Charlie', score: 91 }
-    ];
+  editClass(cls: any): void {
+    console.log('Editing class:', cls);
   }
 
-  logout() {
-    this.authService.logout().then(() => {
-      this.router.navigate(['/login']);
-    });
+  deleteClass(cls: any): void {
+    this.classes = this.classes.filter(c => c !== cls);
   }
 }

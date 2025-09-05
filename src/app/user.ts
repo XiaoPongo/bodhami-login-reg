@@ -14,3 +14,13 @@ export class UserService {
     return this.http.get<any[]>(this.apiUrl);
   }
 }
+export interface User {
+  id?: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  country?: string;
+  postalCode?: string;
+  phone?: string;
+  role?: string;
+}

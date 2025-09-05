@@ -3,7 +3,6 @@
   <p class="subtitle">Create a new class to engage your students</p>
   <button class="create-btn" (click)="navigateToCreate()" type="button">+ Create</button>
 
-  <!-- Top Feature Boxes -->
   <div class="boxes">
     <div class="box study">
       <i class="fas fa-upload"></i>
@@ -22,11 +21,8 @@
     </div>
   </div>
 
-  <!-- Lower Section -->
   <div class="lower-section">
-    <!-- Class List -->
     <div class="classes-list">
-      <h2>Your Classes</h2>
       <div class="scroll-container">
         <div class="class-box" *ngFor="let cls of classes">
           {{ cls.name }}
@@ -37,8 +33,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Top Students -->
     <div class="top-students-list">
       <div class="top-students-title">Top 3 Students</div>
       <ul>
