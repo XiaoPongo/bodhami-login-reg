@@ -1,3 +1,4 @@
+// src/app/login/login.component.ts
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -5,7 +6,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterLink } from '@angular/router'; // 👈 import this
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +15,7 @@ import { RouterLink } from '@angular/router'; // 👈 import this
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,           // 👈 add here
+    RouterLink,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
@@ -28,6 +30,8 @@ export class LoginComponent {
   showError: boolean = false;
   loginMessage: string = '';
 
+  constructor(private authService: AuthService, private router: Router) {}
+
   async onLogin() {
     if (!this.email || !this.password) {
       this.showError = true;
@@ -35,9 +39,27 @@ export class LoginComponent {
       return;
     }
 
-    // 👉 Later connect with your AuthService
-    console.log('Logging in with:', this.email, this.password);
+    const { user, error } = await this.authService.login(this.email, this.password);
+
+    if (error || !user) {
+      this.showError = true;
+      this.loginMessage = error?.message || 'Login failed. Please try again.';
+      return;
+    }
+
+    // ✅ Success
     this.showError = false;
-    this.loginMessage = '';
+    this.loginMessage = 'Login successful! Redirecting...';
+
+    // ✅ Check role from user_metadata
+    const role = (user.user_metadata as any)?.['role'];
+
+    if (role === 'mentor') {
+      this.router.navigate(['/mentor-dashboard']);
+    } else if (role === 'student') {
+      this.router.navigate(['/student-dashboard']);
+    } else {
+      this.loginMessage = 'No role assigned. Please contact admin.';
+    }
   }
 }
