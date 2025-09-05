@@ -1,7 +1,8 @@
+// src/app/student-reg/student-reg.component.ts
 import { Component, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../auth.service'; // ✅ make sure path is correct
+import { AuthService } from '../auth.service'; // ✅ shared auth
 
 @Component({
   selector: 'app-student-reg',
@@ -12,34 +13,20 @@ import { AuthService } from '../auth.service'; // ✅ make sure path is correct
 })
 export class StudentRegComponent implements OnInit {
   form!: FormGroup;
+  error: string = '';
+  success: string = '';
 
-  // ✅ Keeping your hardcoded list for now
+  constructor(private authService: AuthService) {}
+
   countries: string[] = [
-    'Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina','Armenia','Australia','Austria',
-    'Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan',
-    'Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cabo Verde',
-    'Cambodia','Cameroon','Canada','Central African Republic','Chad','Chile','China','Colombia','Comoros',
-    'Congo (Congo-Brazzaville)','Costa Rica','Croatia','Cuba','Cyprus','Czechia (Czech Republic)',
-    'Democratic Republic of the Congo','Denmark','Djibouti','Dominica','Dominican Republic','Ecuador','Egypt',
-    'El Salvador','Equatorial Guinea','Eritrea','Estonia','Eswatini (fmr. "Swaziland")','Ethiopia','Fiji','Finland',
-    'France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada','Guatemala','Guinea','Guinea-Bissau',
-    'Guyana','Haiti','Honduras','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy',
-    'Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kiribati','Kosovo','Kuwait','Kyrgyzstan','Laos','Latvia',
-    'Lebanon','Lesotho','Liberia','Libya','Liechtenstein','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia',
-    'Maldives','Mali','Malta','Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia','Moldova','Monaco',
-    'Mongolia','Montenegro','Morocco','Mozambique','Myanmar (formerly Burma)','Namibia','Nauru','Nepal','Netherlands',
-    'New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman','Pakistan','Palau',
-    'Palestine State','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Qatar',
-    'Romania','Russia','Rwanda','Saint Kitts and Nevis','Saint Lucia','Saint Vincent and the Grenadines','Samoa',
-    'San Marino','Sao Tome and Principe','Saudi Arabia','Senegal','Serbia','Seychelles','Sierra Leone','Singapore',
-    'Slovakia','Slovenia','Solomon Islands','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka',
-    'Sudan','Suriname','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Timor-Leste',
-    'Togo','Tonga','Trinidad and Tobago','Tunisia','Turkey','Turkmenistan','Tuvalu','Uganda','Ukraine',
-    'United Arab Emirates','United Kingdom','United States of America','Uruguay','Uzbekistan','Vanuatu',
-    'Vatican City','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe'
+    'Afghanistan','Albania','Algeria','Andorra','Angola','Argentina','Australia','Austria',
+    'Bangladesh','Belgium','Bhutan','Brazil','Canada','China','Denmark','Egypt','Finland','France',
+    'Germany','Greece','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel',
+    'Italy','Japan','Kenya','Luxembourg','Malaysia','Mexico','Nepal','Netherlands','New Zealand',
+    'Nigeria','Norway','Pakistan','Philippines','Poland','Portugal','Qatar','Russia','Saudi Arabia',
+    'Singapore','South Africa','South Korea','Spain','Sri Lanka','Sweden','Switzerland','Thailand',
+    'Turkey','UAE','UK','USA','Vietnam','Zimbabwe'
   ];
-
-  constructor(private authService: AuthService) {} // ✅ Inject AuthService
 
   ngOnInit() {
     this.form = new FormGroup({
@@ -65,27 +52,37 @@ export class StudentRegComponent implements OnInit {
     });
   }
 
-  // ✅ Getters stay as-is
-  get firstName() { return this.form.get('firstName')!; }
-  get lastName() { return this.form.get('lastName')!; }
-  get email() { return this.form.get('email')!; }
-  get country() { return this.form.get('country')!; }
-  get phone() { return this.form.get('phone')!; }
-  get password() { return this.form.get('password')!; }
-  get postalCode() { return this.form.get('postalCode')!; }
-  get accept() { return this.form.get('accept')!; }
+  // ✅ Easy getters for template binding
+  get firstName() { return this.form.get('firstName') as FormControl; }
+  get lastName() { return this.form.get('lastName') as FormControl; }
+  get email() { return this.form.get('email') as FormControl; }
+  get country() { return this.form.get('country') as FormControl; }
+  get phone() { return this.form.get('phone') as FormControl; }
+  get password() { return this.form.get('password') as FormControl; }
+  get postalCode() { return this.form.get('postalCode') as FormControl; }
+  get accept() { return this.form.get('accept') as FormControl; }
 
-  onSubmit() {
-    if (this.form.valid) {
-      const { email, password } = this.form.value;
+  // ✅ Signup logic with popup messages
+  async onSubmit() {
+    if (this.form.invalid) {
+      this.error = 'Please fix the errors in the form.';
+      this.success = '';
+      return;
+    }
 
-      this.authService.register(email, password).then(({ user, error }) => {
-        if (error) {
-          console.error('Signup failed:', error.message);
-        } else {
-          console.log('Signup success:', user);
-        }
-      });
+    const { email, password } = this.form.value;
+    const { user, error } = await this.authService.register(email, password, 'student');
+
+
+    if (error) {
+      this.error = error.message || 'Signup failed. Try another email.';
+      this.success = '';
+      alert(this.error); // ⚡ popup for errors
+    } else {
+      this.success = 'Signup successful! 🎉 Check your email for the verification link.';
+      this.error = '';
+      alert(this.success); // ⚡ popup for success
+      console.log('Student signup success:', user);
     }
   }
 

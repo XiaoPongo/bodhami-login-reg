@@ -10,45 +10,42 @@ export class AuthService {
   constructor() {
     this.supabase = createClient(
       'https://qjlmzggdecjcbqjsoceh.supabase.co',
-      'bMHghSb7kEfD06ak' // ⚠️ replace with anon key from Supabase settings
+      'bMHghSb7kEfD06ak' // ⚠️ replace with anon key
     );
 
-    // Restore session from localStorage if exists
     const savedUser = localStorage.getItem('loggedInUser');
     if (savedUser) {
       this.currentUser = JSON.parse(savedUser);
     }
   }
 
-  // ✅ Login with Supabase
-  async login(email: string, password: string): Promise<{ user: User | null, error: any }> {
-    const { data, error } = await this.supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+  // ✅ Login
+  async login(email: string, password: string): Promise<{ user: User | null; error: any }> {
+    const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      return { user: null, error };
-    }
+    if (error) return { user: null, error };
 
     this.currentUser = data.user;
-    localStorage.setItem('loggedInUser', JSON.stringify(data.user)); // 🔑 persist
+    localStorage.setItem('loggedInUser', JSON.stringify(data.user));
     return { user: data.user, error: null };
   }
 
-  // ✅ Register with Supabase
-  async register(email: string, password: string): Promise<{ user: User | null, error: any }> {
+  // ✅ Register (with role metadata)
+  async register(
+    email: string,
+    password: string,
+    role: 'mentor' | 'student'
+  ): Promise<{ user: User | null; error: any }> {
     const { data, error } = await this.supabase.auth.signUp({
       email,
       password,
+      options: { data: { role } } // 🎯 store role in user_metadata
     });
 
-    if (error) {
-      return { user: null, error };
-    }
+    if (error) return { user: null, error };
 
     this.currentUser = data.user;
-    localStorage.setItem('loggedInUser', JSON.stringify(data.user)); // 🔑 persist
+    localStorage.setItem('loggedInUser', JSON.stringify(data.user));
     return { user: data.user, error: null };
   }
 
@@ -56,10 +53,10 @@ export class AuthService {
   async logout(): Promise<void> {
     await this.supabase.auth.signOut();
     this.currentUser = null;
-    localStorage.removeItem('loggedInUser'); // 🔑 clear
+    localStorage.removeItem('loggedInUser');
   }
 
-  // ✅ Session Helpers
+  // ✅ Session helpers
   isLoggedIn(): boolean {
     return this.currentUser !== null;
   }
