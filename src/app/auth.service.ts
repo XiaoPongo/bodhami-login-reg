@@ -10,7 +10,7 @@ export class AuthService {
   constructor() {
     this.supabase = createClient(
       'https://qjlmzggdecjcbqjsoceh.supabase.co',
-      'bMHghSb7kEfD06ak' // ⚠️ replace with anon key
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqbG16Z2dkZWNqY2JxanNvY2VoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyMjg2ODAsImV4cCI6MjA3MTgwNDY4MH0.j5aIEMr2jODCdrS_Pqg4hVwKC5Ev4TUUEz9pd5CY9h0'
     );
 
     const savedUser = localStorage.getItem('loggedInUser');
