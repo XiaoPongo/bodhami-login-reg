@@ -1,13 +1,37 @@
-// src/app/mentor-dashboard/header/header.component.ts
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../auth.service'; // ✅ correct import
+import { AuthService } from '../../auth.service';
 
 interface Month {
   name: string;
   startDay: number;
   days: number;
   weeks: number[][];
+}
+
+interface Notification {
+  id: number;
+  text: string;
+  date?: string; // Added to match potential template usage
+  message?: string; // Added to match potential template usage
+}
+
+interface Deliverable {
+  id: number;
+  title: string;
+  date: string;
+}
+
+interface UserPreferences {
+  theme?: string;
+  notifications?: boolean;
+}
+
+interface User {
+  id: number;
+  firstName?: string;
+  lastName?: string;
+  preferences?: UserPreferences;
 }
 
 @Component({
@@ -33,16 +57,14 @@ export class HeaderComponent {
 
   constructor(private authService: AuthService) {}
 
-  // ✅ Replace userService.user
   get user() {
     return this.authService.getCurrentUser();
   }
 
-  // ✅ Mock placeholders (replace with Supabase data later if needed)
   get notifications() {
     return [
-      { id: 1, text: 'New class assigned' },
-      { id: 2, text: 'Profile updated' }
+      { id: 1, text: 'New class assigned', date: '2025-09-05', message: 'New class assigned' },
+      { id: 2, text: 'Profile updated', date: '2025-09-04', message: 'Profile updated' }
     ];
   }
 

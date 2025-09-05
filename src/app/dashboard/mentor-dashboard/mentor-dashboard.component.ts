@@ -1,11 +1,11 @@
-// src/app/dashboard/mentor-dashboard/mentor-dashboard.component.ts
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../auth.service';
+import { CommonModule } from '@angular/common'; // Added for *ngFor support
 
 @Component({
   selector: 'app-mentor-dashboard',
   standalone: true,
-  imports: [],
+  imports: [CommonModule], // Added CommonModule
   templateUrl: './mentor-dashboard.component.html',
   styleUrls: ['./mentor-dashboard.component.css'],
 })
