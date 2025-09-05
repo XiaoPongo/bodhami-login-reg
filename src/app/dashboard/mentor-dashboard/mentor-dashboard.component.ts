@@ -7,8 +7,8 @@ import { AuthService } from '../../auth.service';
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  templateUrl: './mentor-dashboard.component.html',
+  styleUrls: ['./mentor-dashboard.component.css']
 })
 export class DashboardComponent {
   constructor(private authService: AuthService, private router: Router) {}
