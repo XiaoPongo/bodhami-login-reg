@@ -54,7 +54,7 @@ export class MentorRegComponent implements OnInit {
     });
   }
 
-  // ✅ Expose getters so template can use firstName.invalid, etc.
+  // ✅ Expose getters for template usage
   get firstName() { return this.form.get('firstName') as FormControl; }
   get lastName() { return this.form.get('lastName') as FormControl; }
   get email() { return this.form.get('email') as FormControl; }
@@ -72,18 +72,25 @@ export class MentorRegComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-  
-    const { email, password } = this.form.value;
-  
+
+    const { email, password, firstName, lastName, country, phone, postalCode } = this.form.value;
+
     try {
-      const { user, error } = await this.authService.register(email, password, 'mentor');
+      const { user, error } = await this.authService.register(email, password, 'mentor', {
+        firstName,
+        lastName,
+        country,
+        phone,
+        postalCode
+      });
+
       if (error) {
         this.error = error.message || 'Signup failed';
         this.success = '';
       } else {
-        this.success = '✅ Signup successful! Check your email for verification.';
+        this.success = '✅ Signup successful! Please check your email for verification.';
         this.error = '';
-        alert(this.success); // optional popup
+        alert(this.success); // popup confirmation
         console.log('Signup success:', user);
       }
     } catch (err) {
@@ -91,9 +98,9 @@ export class MentorRegComponent implements OnInit {
       this.error = 'Something went wrong. Try again.';
       this.success = '';
     }
-  }  
+  }
 
-  // ✅ Mark field as touched when user types (for validation feedback)
+  // ✅ Mark field as touched for validation feedback
   onInput(controlName: string) {
     const control = this.form.get(controlName);
     if (control) {
