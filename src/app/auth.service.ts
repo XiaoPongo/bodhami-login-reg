@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient, Session, User } from '@supabase/supabase-js';
 import { BehaviorSubject } from 'rxjs';
-import { environment } from '../environments/environment'; // 👈 your env
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -20,12 +20,12 @@ export class AuthService {
       },
     });
 
-    // Load current session on init
+    // Load current session
     this.supabase.auth.getSession().then(({ data }) => {
       this.session.next(data.session);
     });
 
-    // Subscribe to session changes
+    // Subscribe to auth changes
     this.supabase.auth.onAuthStateChange((_event, session) => {
       this.session.next(session);
     });
@@ -34,7 +34,7 @@ export class AuthService {
   async login(email: string, password: string) {
     const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    return { user: data.user, session: data.session };
+    return data;
   }
 
   async register(email: string, password: string, meta: any = {}) {
@@ -44,7 +44,7 @@ export class AuthService {
       options: { data: meta },
     });
     if (error) throw error;
-    return { user: data.user, session: data.session };
+    return data;
   }
 
   async logout() {

@@ -1,15 +1,19 @@
+// src/app/app.routes.ts
 import { Routes } from '@angular/router';
 import { LoginComponent } from './login/login.component';
-import { StudentRegComponent } from './student-reg/student-reg.component';
-import { MentorRegComponent } from './mentor-reg/mentor-reg.component';
+import { MentorLayoutComponent } from './dashboard/layout/mentor-layout/mentor-layout.component';
 import { MentorDashboardComponent } from './dashboard/mentor-dashboard/mentor-dashboard.component';
 import { AuthGuard } from './auth.guard';
 
-export const appRoutes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+export const routes: Routes = [
   { path: 'login', component: LoginComponent },
-  { path: 'student-reg', component: StudentRegComponent },
-  { path: 'mentor-reg', component: MentorRegComponent },
-  { path: 'mentor-dashboard', component: MentorDashboardComponent, canActivate: [AuthGuard] },
-  { path: '**', redirectTo: 'login' }
+  {
+    path: 'mentor',
+    component: MentorLayoutComponent,
+    canActivate: [AuthGuard],
+    children: [
+      { path: 'dashboard', component: MentorDashboardComponent },
+    ],
+  },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
 ];

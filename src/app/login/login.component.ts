@@ -19,10 +19,10 @@ import { AuthService } from '../auth.service';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
   ],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
   email: string = '';
@@ -40,9 +40,9 @@ export class LoginComponent {
     }
 
     try {
-      const { user, session } = await this.authService.login(this.email, this.password);
+      const { user } = await this.authService.login(this.email, this.password);
 
-      if (!user || !session) {
+      if (!user) {
         this.showError = true;
         this.loginMessage = 'Login failed. Please try again.';
         return;
@@ -52,13 +52,12 @@ export class LoginComponent {
       this.showError = false;
       this.loginMessage = 'Login successful! Redirecting...';
 
-      // ✅ Get role from user_metadata
       const role = user.user_metadata?.['role'];
 
       if (role === 'mentor') {
-        this.router.navigate(['/mentor-dashboard']);
+        this.router.navigate(['/mentor/dashboard']);
       } else if (role === 'student') {
-        this.router.navigate(['/student-dashboard']);
+        this.router.navigate(['/student/dashboard']);
       } else {
         this.loginMessage = 'No role assigned. Please contact admin.';
       }

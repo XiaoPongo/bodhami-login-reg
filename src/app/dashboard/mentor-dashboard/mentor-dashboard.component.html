@@ -1,7 +1,11 @@
 <div class="dashboard-container">
-  <h1 class="welcome">Welcome, {{ user?.firstName }}</h1>
+  <h1 class="welcome">
+    Welcome, {{ user?.user_metadata?.firstName || 'Mentor' }}
+  </h1>
   <p class="subtitle">Create a new class to engage your students</p>
-  <button class="create-btn" (click)="navigateToCreate()" type="button">+ Create</button>
+  <button class="create-btn" (click)="navigateToCreate()" type="button">
+    + Create
+  </button>
 
   <div class="boxes">
     <div class="box study">
@@ -27,8 +31,8 @@
         <div class="class-box" *ngFor="let cls of classes">
           {{ cls.name }}
           <div class="actions">
-            <i class="fas fa-pencil-alt" (click)="editClass(cls)"></i>
-            <i class="fas fa-trash" (click)="deleteClass(cls)"></i>
+            <i class="fas fa-pencil-alt"></i>
+            <i class="fas fa-trash"></i>
           </div>
         </div>
       </div>
@@ -37,9 +41,12 @@
       <div class="top-students-title">Top 3 Students</div>
       <ul>
         <li *ngFor="let student of topStudents; let i = index">
-          <span>{{ i + 1 }}. {{ student.name }} - {{ student.xp }} XP</span>
+          <span>{{ i + 1 }}. {{ student.name }} {{ student.xp }}xp</span>
           <div class="progress-container">
-            <div class="progress" [style.width.%]="student.progress"></div>
+            <div
+              class="progress"
+              [style.width.%]="student.progress"
+            ></div>
           </div>
         </li>
       </ul>

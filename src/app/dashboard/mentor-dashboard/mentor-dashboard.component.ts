@@ -1,56 +1,34 @@
+// src/app/dashboard/mentor-dashboard/mentor-dashboard.component.ts
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { User } from '../../user';  // path to your User model
+import { AuthService } from '../../auth.service';
 
 @Component({
   selector: 'app-mentor-dashboard',
+  standalone: true,
+  imports: [],
   templateUrl: './mentor-dashboard.component.html',
-  styleUrls: ['./mentor-dashboard.component.css']
+  styleUrls: ['./mentor-dashboard.component.css'],
 })
 export class MentorDashboardComponent implements OnInit {
-  user: User | null = null;
-
+  user: any = null;
   classes = [
-    { name: 'Math 101' },
-    { name: 'Science 201' }
+    { name: 'Math Class' },
+    { name: 'Science Class' },
+    { name: 'History Class' },
   ];
-
   topStudents = [
     { name: 'Alice', xp: 1200, progress: 80 },
-    { name: 'Bob', xp: 1100, progress: 70 },
-    { name: 'Charlie', xp: 950, progress: 60 }
+    { name: 'Bob', xp: 950, progress: 60 },
+    { name: 'Charlie', xp: 870, progress: 55 },
   ];
 
-  constructor(private router: Router) {}
+  constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
-    // Example: fetch user from localStorage or Supabase session
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      this.user = JSON.parse(storedUser) as User;
-    } else {
-      // fallback dummy user
-      this.user = {
-        email: 'mentor@example.com',
-        firstName: 'John',
-        lastName: 'Doe',
-        country: 'India',
-        postalCode: '403001',
-        phone: '9876543210',
-        role: 'mentor'
-      };
-    }
+    this.user = this.authService.getCurrentUser();
   }
 
   navigateToCreate(): void {
-    this.router.navigate(['/create-class']);
-  }
-
-  editClass(cls: any): void {
-    console.log('Editing class:', cls);
-  }
-
-  deleteClass(cls: any): void {
-    this.classes = this.classes.filter(c => c !== cls);
+    // future: route to create-class
   }
 }
