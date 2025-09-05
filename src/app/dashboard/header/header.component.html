@@ -1,42 +1,27 @@
-<div class="header">
-    <div class="right">
-      <button #bellButton class="bell-button" (click)="toggleNotification()"><i class="fas fa-bell"></i></button>
-      <button #calendarButton class="calendar-button" (click)="toggleCalendar()"><i class="fas fa-calendar-alt"></i></button>
-      <button #profileButton class="profile-button" (click)="toggleProfile()"><i class="fas fa-user-circle"></i></button>
-      <div class="app-title">
-        <span class="main-title">Elevana</span>
-        <span class="sub-title">By Bodhami</span>
-      </div>
+<header class="header">
+  <!-- Profile section -->
+  <div class="profile">
+    <p>Hello, {{ user.firstName }}</p>
+    <button #profileButton (click)="toggleProfile()">Profile</button>
+    <div #profilePopup *ngIf="showProfile" class="popup">
+      <p>Profile content placeholder</p>
+      <button (click)="signOut()">Sign Out</button>
     </div>
   </div>
-  <div *ngIf="showNotification" #notificationPopup class="popup">
-    Notifications
-    <ul>
-      <li *ngFor="let notif of notifications | slice:0:3">{{notif.date}}: {{notif.message}}</li>
-    </ul>
-  </div>
-  <div *ngIf="showCalendar" #calendarPopup class="popup calendar-popup">
-    Calendar for 2025
-    <div *ngFor="let month of calendarMonths; let m = index" class="month">
-      <h3>{{month.name}}</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>S</th><th>M</th><th>T</th><th>W</th><th>T</th><th>F</th><th>S</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let week of month.weeks">
-            <td *ngFor="let d of week" [class.highlight]="d > 0 && isDeliverable(m + 1, d)">{{d > 0 ? d : ''}}</td>
-          </tr>
-        </tbody>
-      </table>
+
+  <!-- Notifications section -->
+  <div class="notifications">
+    <button #bellButton (click)="toggleNotification()">Notifications</button>
+    <div #notificationPopup *ngIf="showNotification" class="popup">
+      <p>Notification content placeholder</p>
     </div>
   </div>
-  <div *ngIf="showProfile" #profilePopup class="popup">
-    Profile
-    <p>{{ user.firstName }} {{ user.lastName }}</p>
-    <p>Theme: {{ user.preferences.theme }}</p>
-    <p>Notifications: {{ user.preferences.notifications ? 'Enabled' : 'Disabled' }}</p>
-    <button (click)="signOut()">Sign Out</button>
+
+  <!-- Calendar section -->
+  <div class="calendar">
+    <button #calendarButton (click)="toggleCalendar()">Calendar</button>
+    <div #calendarPopup *ngIf="showCalendar" class="popup">
+      <p>Calendar content placeholder</p>
+    </div>
   </div>
+</header>
