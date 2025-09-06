@@ -9,7 +9,7 @@
 }
 
 .layout__header {
-  flex: 0 0 60px; /* Fixed header height (adjust based on actual height) */
+  flex: 0 0 60px; /* Fixed header height (adjust if different) */
   width: 100%;
   background-color: #ffffff;
   border-bottom: 1px solid #ddd;
@@ -44,6 +44,7 @@
   align-items: center;
   padding: 30px 0;
   position: relative; /* Relative to layout, not fixed */
+  margin-top: 0; /* Ensure no overlap with header */
 }
 
 .layout__right-half {

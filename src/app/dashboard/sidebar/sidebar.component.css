@@ -1,65 +1,66 @@
 .sidebar {
-    width: 220px;
-    height: 100vh;
-    background: #1e1e2f;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 30px 0;
-    position: fixed;
-    z-index: 1000;
-  }
-  
-  .logo {
-    width: 100px;
-    height: 100px;
-    border-radius: 20px;
-    overflow: hidden;
-    margin-bottom: 50px;
-    background: #4a90e2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  ul {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-  }
-  
-  li {
-    margin-bottom: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 12px 20px;
-    border-radius: 8px;
-    transition: background 0.3s ease, transform 0.2s ease;
-  }
-  
-  li:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateX(5px);
-  }
-  
-  li.active {
-    background: #4a90e2;
-  }
-  
-  i {
-    font-size: 18px;
-  }
-  
-  span {
-    font-size: 16px;
-    font-weight: 500;
-  }
+  width: 288px; /* Match the 30% of left half (288px) */
+  min-height: calc(100vh - 60px); /* Full height minus header */
+  background: #1e1e2f;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 90px 0 30px 0; /* Top padding (60px header + 30px) for visibility */
+  position: relative; /* Relative to parent layout */
+  z-index: 900; /* Below header z-index (1000) */
+  box-sizing: border-box; /* Include padding in width/height */
+}
+
+.logo {
+  width: 100px;
+  height: 100px;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 50px;
+  background: #4a90e2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+
+li {
+  margin-bottom: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+li:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(5px);
+}
+
+li.active {
+  background: #4a90e2;
+}
+
+i {
+  font-size: 18px;
+}
+
+span {
+  font-size: 16px;
+  font-weight: 500;
+}
