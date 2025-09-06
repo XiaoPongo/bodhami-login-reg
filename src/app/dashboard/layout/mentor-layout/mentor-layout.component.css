@@ -28,7 +28,7 @@
 }
 
 .layout__left-half {
-  flex: 0 0 960px; /* Fixed left half width (half of 1920px) */
+  flex: 1; /* Half of the page */
   display: flex;
   justify-content: flex-start;
   background-color: #f0f0f0; /* Optional: for visual distinction */
@@ -47,19 +47,20 @@
 }
 
 .layout__right-half {
-  flex: 1; /* Remaining space after left half */
+  flex: 1; /* Half of the page */
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   background-color: #f4f5f7; /* Optional: for visual distinction */
 }
 
 .layout__content {
-  flex: 1; /* Take full space of expanded area */
+  flex: 1; /* Take full space of right half */
   overflow-y: auto; /* Vertical scrolling only */
   overflow-x: hidden;
   padding: 20px; /* Add padding for content */
-  width: calc(960px + 672px); /* Explicitly 960px (right half) + 672px (remaining 70% of left half) */
+  width: 100%; /* Ensure full width of right half */
   box-sizing: border-box; /* Include padding in width calculation */
   margin-left: 288px; /* Offset for fixed sidebar */
+  margin-top: 0; /* Ensure no overlap with header */
   height: calc(100vh - 60px); /* Match viewport height minus header */
 }
