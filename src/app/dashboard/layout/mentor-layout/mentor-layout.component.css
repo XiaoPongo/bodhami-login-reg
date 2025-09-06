@@ -20,4 +20,11 @@
     overflow: auto;
     padding: 20px; /* keep your page padding */
   }
-  
+
+  .dashboard-container {
+    width: 100%;          /* instead of max-width */
+    height: 100%;
+    margin: 0;            /* remove auto-centering */
+    padding: 20px;        /* keep spacing */
+    box-sizing: border-box;
+  }  

@@ -1,0 +1,38 @@
+<div class="app-layout">
+    <!-- Header -->
+    <app-header></app-header>
+  
+    <!-- Main layout with sidebar + routed content -->
+    <div class="main-content">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="logo">
+          <img src="https://raw.githubusercontent.com/XiaoPongo/Bodhami-Internship-assets-dump/main/assets/signuplogo.jpg" alt="App Logo" />
+        </div>
+        <ul>
+          <li routerLink="/dashboard" routerLinkActive="active">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+          </li>
+          <li routerLink="/profile" routerLinkActive="active">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+          </li>
+          <li routerLink="/settings" routerLinkActive="active">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+          </li>
+          <li routerLink="/help" routerLinkActive="active">
+            <i class="fas fa-question-circle"></i>
+            <span>Help</span>
+          </li>
+        </ul>
+      </div>
+  
+      <!-- Routed content -->
+      <div class="router-outlet-container">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </div>
+  
