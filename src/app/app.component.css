@@ -2,29 +2,31 @@
 .app-layout {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  width: 100vw; /* Added to ensure full width coverage */
-  overflow: hidden;
+  height: 100vh; /* Full viewport height */
+  width: 100vw; /* Full viewport width */
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrollbars from container constraints */
 }
 
 /* Main content holds sidebar + routed content */
 .main-content {
   display: flex;
-  flex: 1;
+  flex: 1; /* Allow main content to take remaining space */
   overflow: hidden;
 }
 
 /* Sidebar */
 .sidebar {
   width: 220px;
-  height: 100vh;
+  min-height: 100vh; /* Ensure sidebar spans full height */
   background: #1e1e2f;
   color: white;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 30px 0;
-  position: fixed;
+  position: fixed; /* Keep sidebar fixed */
   z-index: 1000;
 }
 
@@ -41,7 +43,6 @@
   justify-content: center;
 }
 
-/* Logo image */
 .logo img {
   width: 100%;
   height: 100%;
@@ -88,8 +89,20 @@ span {
 /* Routed content shifts beside sidebar */
 .router-outlet-container {
   flex: 1;
-  margin-left: 220px;
+  margin-left: 220px; /* Match sidebar width */
   padding: 20px;
+  min-height: calc(100vh - 60px); /* Adjust for header/footer height (assuming 60px each) */
   overflow-y: auto;
   background: #f4f5f7;
+}
+
+/* Assuming a footer height of 60px */
+app-footer {
+  height: 60px;
+  background-color: #1a1a2e;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
