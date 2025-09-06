@@ -2,31 +2,32 @@
 .app-layout {
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Full viewport height */
-  width: 100vw; /* Full viewport width */
+  min-height: 100vh; /* Minimum height to cover viewport */
+  width: 100vw; /* Full width */
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Prevent scrollbars from container constraints */
+  overflow: hidden; /* Prevent unwanted scrolling from container */
 }
 
 /* Main content holds sidebar + routed content */
 .main-content {
   display: flex;
-  flex: 1; /* Allow main content to take remaining space */
+  flex: 1 1 auto; /* Grow and shrink as needed */
   overflow: hidden;
+  min-height: 0; /* Allow flex children to shrink */
 }
 
 /* Sidebar */
 .sidebar {
   width: 220px;
-  min-height: 100vh; /* Ensure sidebar spans full height */
+  min-height: 100vh; /* Full height of viewport */
   background: #1e1e2f;
   color: white;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 30px 0;
-  position: fixed; /* Keep sidebar fixed */
+  position: fixed; /* Fixed sidebar */
   z-index: 1000;
 }
 
@@ -88,17 +89,18 @@ span {
 
 /* Routed content shifts beside sidebar */
 .router-outlet-container {
-  flex: 1;
+  flex: 1; /* Take remaining space */
   margin-left: 220px; /* Match sidebar width */
   padding: 20px;
-  min-height: calc(100vh - 60px); /* Adjust for header/footer height (assuming 60px each) */
-  overflow-y: auto;
+  min-height: calc(100vh - 120px); /* Adjust for header (60px) + footer (60px) */
+  overflow-y: auto; /* Allow scrolling if content overflows */
   background: #f4f5f7;
+  width: calc(100vw - 220px); /* Ensure full width minus sidebar */
 }
 
-/* Assuming a footer height of 60px */
+/* Footer styling */
 app-footer {
-  height: 60px;
+  height: 60px; /* Fixed footer height */
   background-color: #1a1a2e;
   color: white;
   display: flex;

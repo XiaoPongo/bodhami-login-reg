@@ -1,7 +1,18 @@
-<div class="app-layout">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Bodhami Login Reg</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> <!-- For Material Icons -->
+</head>
+<body>
+  <div class="app-layout">
     <!-- Header -->
     <app-header></app-header>
-  
+
     <!-- Main layout with sidebar + routed content -->
     <div class="main-content">
       <!-- Sidebar -->
@@ -28,11 +39,15 @@
           </li>
         </ul>
       </div>
-  
+
       <!-- Routed content -->
       <div class="router-outlet-container">
         <router-outlet></router-outlet>
       </div>
     </div>
+
+    <!-- Footer -->
+    <app-footer></app-footer>
   </div>
-  
+</body>
+</html>
