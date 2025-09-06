@@ -6,10 +6,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 90px 0 30px 0; /* Top padding (60px header + 30px) for visibility */
-  position: relative; /* Relative to parent layout */
+  padding: 120px 0 30px 0; /* Increased top padding (60px header + 60px extra for visibility) */
+  position: fixed; /* Fixed position like header */
   z-index: 900; /* Below header z-index (1000) */
+  top: 60px; /* Start below the header */
+  left: 0; /* Align to the left edge */
   box-sizing: border-box; /* Include padding in width/height */
+  overflow-y: auto; /* Allow sidebar to scroll if content overflows */
 }
 
 .logo {

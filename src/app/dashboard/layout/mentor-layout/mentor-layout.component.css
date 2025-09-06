@@ -43,8 +43,7 @@
   flex-direction: column;
   align-items: center;
   padding: 30px 0;
-  position: relative; /* Relative to layout, not fixed */
-  margin-top: 0; /* Ensure no overlap with header */
+  position: relative; /* Relative to layout, adjusted by sidebar CSS */
 }
 
 .layout__right-half {
@@ -61,4 +60,5 @@
   padding: 20px; /* Add padding for content */
   width: 100%; /* Ensure full width of right half */
   box-sizing: border-box; /* Include padding in width calculation */
+  margin-left: 288px; /* Offset for fixed sidebar */
 }
