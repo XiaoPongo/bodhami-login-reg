@@ -17,14 +17,20 @@
   }
   .layout__content {
     flex: 1 1 auto;
+    display: flex;   /* ✅ let children (dashboard-container) stretch */
+    width: 100%;
     overflow: auto;
-    padding: 20px; /* keep your page padding */
+    padding: 20px;
   }
 
   .dashboard-container {
-    width: 100%;          /* instead of max-width */
-    height: 100%;
-    margin: 0;            /* remove auto-centering */
-    padding: 20px;        /* keep spacing */
+    padding: 20px;
+    background: white;
+    min-height: calc(100vh - 100px);
+    width: 100%;            /* ✅ take full width */
+    margin: 0;              /* ✅ remove any auto-centering */
+    flex: 1;                /* ✅ expand to fill parent flex */
+    display: flex;          /* optional: if you want children to align horizontally */
+    flex-direction: column; /* ✅ keep vertical stacking */
     box-sizing: border-box;
   }  

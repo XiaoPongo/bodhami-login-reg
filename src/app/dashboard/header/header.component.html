@@ -56,7 +56,6 @@
 <div *ngIf="showProfile" #profilePopup class="popup">
   <h3>Profile</h3>
   <p *ngIf="user">{{ user.firstName }} {{ user.lastName }}</p>
-  <p>Theme: {{ user.preferences?.theme || 'Default' }}</p> <!-- Fallback value -->
-  <p>Notifications: {{ user.preferences?.notifications ? 'Enabled' : 'Disabled' }}</p> <!-- Fallback behavior -->
+  <!-- Removed preferences references due to TypeScript errors -->
   <button (click)="signOut()">Sign Out</button>
 </div>
