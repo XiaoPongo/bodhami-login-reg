@@ -58,7 +58,7 @@
   overflow-y: auto; /* Vertical scrolling only */
   overflow-x: hidden;
   padding: 20px; /* Add padding for content */
-  width: calc(100vw - 288px); /* Cover right half (960px) + remaining 20% of left half (672px) */
+  width: calc(960px + 672px); /* Explicitly 960px (right half) + 672px (remaining 70% of left half) */
   box-sizing: border-box; /* Include padding in width calculation */
   margin-left: 288px; /* Offset for fixed sidebar */
   height: calc(100vh - 60px); /* Match viewport height minus header */
