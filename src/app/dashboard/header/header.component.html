@@ -1,20 +1,24 @@
-<div class="header">
-  <div class="right">
-    <button #bellButton class="bell-button" (click)="toggleNotification()">
-      <i class="fas fa-bell"></i>
+<header class="header">
+  <div class="logo">
+    <img src="assets/bodhami-logo.png" alt="Bodhami Logo" />
+  </div>
+  <div class="header-right">
+    <span class="greeting">Hello, {{ user?.firstName || 'Guest' }}</span>
+    <button #bellButton class="icon-button" (click)="toggleNotification()">
+      <span class="material-icons">notifications</span>
     </button>
-    <button #calendarButton class="calendar-button" (click)="toggleCalendar()">
-      <i class="fas fa-calendar-alt"></i>
+    <button #calendarButton class="icon-button" (click)="toggleCalendar()">
+      <span class="material-icons">calendar_today</span>
     </button>
-    <button #profileButton class="profile-button" (click)="toggleProfile()">
-      <i class="fas fa-user-circle"></i>
+    <button #profileButton class="icon-button" (click)="toggleProfile()">
+      <span class="material-icons">person</span>
     </button>
     <div class="app-title">
       <span class="main-title">Elevana</span>
       <span class="sub-title">By Bodhami</span>
     </div>
   </div>
-</div>
+</header>
 
 <!-- Notifications -->
 <div *ngIf="showNotification" #notificationPopup class="popup">
@@ -51,8 +55,8 @@
 <!-- Profile -->
 <div *ngIf="showProfile" #profilePopup class="popup">
   <h3>Profile</h3>
-  <p>{{ user.firstName }} {{ user.lastName }}</p>
-  <p>Theme: {{ user.preferences?.theme }}</p>
-  <p>Notifications: {{ user.preferences?.notifications ? 'Enabled' : 'Disabled' }}</p>
+  <p *ngIf="user">{{ user.firstName }} {{ user.lastName }}</p>
+  <p>Theme: {{ user.preferences?.theme || 'Default' }}</p> <!-- Fallback value -->
+  <p>Notifications: {{ user.preferences?.notifications ? 'Enabled' : 'Disabled' }}</p> <!-- Fallback behavior -->
   <button (click)="signOut()">Sign Out</button>
 </div>

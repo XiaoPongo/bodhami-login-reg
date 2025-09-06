@@ -1,94 +1,109 @@
 .header {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: white;
-    border-bottom: 1px solid #eee;
-  }
-  
-  .right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
-  
-  button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 20px;
-    color: #666;
-  }
-  
-  .app-title {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .main-title {
-    font-size: 32px;
-    font-weight: bold;
-    color: #3f51b5;
-  }
-  
-  .sub-title {
-    font-size: 14px;
-    color: #666;
-  }
-  
-  .popup {
-    position: absolute;
-    top: 50px;
-    right: 20px;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    width: 200px;
-  }
-  
-  .popup ul {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .popup li {
-    margin-bottom: 10px;
-  }
-  
-  .popup button {
-    background: #3f51b5;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-  }
-  
-  .calendar-popup {
-    width: 400px;
-    max-height: 400px;
-    overflow-y: auto;
-  }
-  
-  .month {
-    margin-bottom: 20px;
-  }
-  
-  .month table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .month th, .month td {
-    text-align: center;
-    padding: 5px;
-    border: 1px solid #ddd;
-    font-size: 12px;
-  }
-  
-  .month .highlight {
-    background-color: yellow;
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ddd;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.logo img {
+  height: 40px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.greeting {
+  margin-right: 15px;
+  color: #666;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  color: #1a1a2e;
+}
+
+.app-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.main-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #1a1a2e;
+}
+
+.sub-title {
+  font-size: 12px;
+  color: #666;
+}
+
+.popup {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 200px;
+}
+
+.popup ul {
+  list-style: none;
+  padding: 0;
+}
+
+.popup li {
+  margin-bottom: 10px;
+}
+
+.popup button {
+  background: #3f51b5;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.calendar-popup {
+  width: 400px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.month {
+  margin-bottom: 20px;
+}
+
+.month table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.month th, .month td {
+  text-align: center;
+  padding: 5px;
+  border: 1px solid #ddd;
+  font-size: 12px;
+}
+
+.month .highlight {
+  background-color: yellow;
+}
