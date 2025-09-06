@@ -1,31 +1,63 @@
 .layout {
   display: flex;
-  height: 100vh;
-  width: 100%;
-  overflow: hidden; /* prevent double scrollbars */
+  flex-direction: column;
+  min-height: 100vh; /* Full viewport height */
+  width: 100vw; /* Full viewport width */
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent double scrollbars */
 }
 
-.layout__sidebar {
-  flex: 0 0 250px; /* fixed sidebar width */
-  height: 100vh;
+.layout__header {
+  flex: 0 0 60px; /* Fixed header height (adjust based on actual height) */
+  width: 100%;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ddd;
+  z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
 .layout__main {
   display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-  height: 100vh;
+  flex: 1; /* Take remaining space after header */
+  min-height: calc(100vh - 60px); /* Adjust for header height */
+  margin-top: 60px; /* Offset for fixed header */
+  overflow: hidden;
 }
 
-.layout__header {
-  flex: 0 0 auto;
+.layout__left-half {
+  flex: 1; /* Half of the page */
+  display: flex;
+  justify-content: flex-start;
+  background-color: #f0f0f0; /* Optional: for visual distinction */
+}
+
+.layout__sidebar {
+  flex: 0 0 288px; /* 30% of 960px (left half) */
+  min-height: 100%; /* Full height of left half */
+  background: #1e1e2f;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 0;
+  position: relative; /* Relative to layout, not fixed */
+}
+
+.layout__right-half {
+  flex: 1; /* Half of the page */
+  display: flex;
+  justify-content: center;
+  background-color: #f4f5f7; /* Optional: for visual distinction */
 }
 
 .layout__content {
-  flex: 1 1 auto;
-  overflow-y: auto;   /* ✅ main scrolling area */
+  flex: 1; /* Take full space of right half */
+  overflow-y: auto; /* Main scrolling area */
   overflow-x: hidden;
-  padding: 0;         /* ✅ let child handle padding */
-  display: flex;
+  padding: 20px; /* Add padding for content */
+  width: 100%; /* Ensure full width of right half */
+  box-sizing: border-box; /* Include padding in width calculation */
 }
