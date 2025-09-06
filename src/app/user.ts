@@ -14,6 +14,8 @@ export class UserService {
     return this.http.get<any[]>(this.apiUrl);
   }
 }
+
+// ✅ User interface with all expected fields
 export interface User {
   id?: string;
   email: string;
@@ -23,4 +25,5 @@ export interface User {
   postalCode?: string;
   phone?: string;
   role?: string;
+  preferences?: any; // optional to avoid TS errors
 }
