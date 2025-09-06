@@ -1,10 +1,15 @@
 .dashboard-container {
-    padding: 20px; /* Reduced padding to fit better */
-    background: white;
-    min-height: calc(100vh - 100px); /* Consistent with layout */
-    max-width: 100%; /* Ensure it doesn’t exceed container */
-    box-sizing: border-box; /* Include padding in width/height */
-  }
+  padding: 20px;
+  background: white;
+  min-height: calc(100vh - 100px);
+  width: 100% !important;       /* ✅ take full width of parent */
+  max-width: none !important;   /* ✅ remove Bootstrap/Material max-width */
+  margin: 0 !important;         /* ✅ stop horizontal centering */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
   
   .welcome {
     font-size: 36px;
