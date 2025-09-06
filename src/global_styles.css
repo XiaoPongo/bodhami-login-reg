@@ -1,8 +1,36 @@
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
-body {
+html, body {
   margin: 0;
-  font-family: 'Montserrat', sans-serif;
-  background-color: #f8f9fa;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* optional if you want to avoid scrollbars */
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+}
+
+mat-sidenav-container {
+  width: 100vw !important;
+  height: 100vh !important;
+}
+
+mat-sidenav-content {
+  width: 100%;
+  height: 100%;
+  padding: 0; /* remove any extra spacing */
+}
+
+.dashboard-container {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 20px; /* keep padding for spacing if you want */
+  box-sizing: border-box;
 }

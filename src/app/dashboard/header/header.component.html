@@ -1,34 +1,28 @@
-<div class="header">
+<header class="header">
+  <!-- Left: App title -->
   <div class="app-title">
     <span class="main-title">Elevana</span>
     <span class="sub-title">By Bodhami</span>
   </div>
-  
-  <div class="right">
-    <button #bellButton class="bell-button" (click)="toggleNotification()">
-      <i class="fas fa-bell"></i>
-    </button>
-    <button #calendarButton class="calendar-button" (click)="toggleCalendar()">
-      <i class="fas fa-calendar-alt"></i>
-    </button>
-    <button #profileButton class="profile-button" (click)="toggleProfile()">
-      <i class="fas fa-user-circle"></i>
-    </button>
-  </div>
-</div>
 
-<!-- Popups remain unchanged -->
-<div *ngIf="showNotification" #notificationPopup class="popup">
-  Notifications
+  <!-- Right: Buttons -->
+  <div class="right">
+    <button class="icon-btn" (click)="toggleNotification()" aria-label="Notifications">🔔</button>
+    <button class="icon-btn" (click)="toggleCalendar()" aria-label="Calendar">📅</button>
+    <button class="icon-btn" (click)="toggleProfile()" aria-label="Profile">👤</button>
+  </div>
+</header>
+
+<!-- Popups -->
+<div *ngIf="showNotification" class="popup">
+  <strong>Notifications</strong>
   <ul>
-    <li *ngFor="let notif of notifications | slice:0:3">
-      {{notif.date}}: {{notif.message}}
-    </li>
+    <li *ngFor="let notif of notifications | slice:0:3">{{notif.date}}: {{notif.message}}</li>
   </ul>
 </div>
 
-<div *ngIf="showCalendar" #calendarPopup class="popup calendar-popup">
-  Calendar for 2025
+<div *ngIf="showCalendar" class="popup calendar-popup">
+  <strong>Calendar for 2025</strong>
   <div *ngFor="let month of calendarMonths; let m = index" class="month">
     <h3>{{month.name}}</h3>
     <table>
@@ -39,8 +33,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let week of month.weeks">
-          <td *ngFor="let d of week"
-              [class.highlight]="d > 0 && isDeliverable(m + 1, d)">
+          <td *ngFor="let d of week" [class.highlight]="d > 0 && isDeliverable(m + 1, d)">
             {{d > 0 ? d : ''}}
           </td>
         </tr>
@@ -49,8 +42,8 @@
   </div>
 </div>
 
-<div *ngIf="showProfile" #profilePopup class="popup">
-  Profile
+<div *ngIf="showProfile" class="popup">
+  <strong>Profile</strong>
   <p>{{ user.firstName }} {{ user.lastName }}</p>
   <p>Theme: {{ user.preferences.theme }}</p>
   <p>Notifications: {{ user.preferences.notifications ? 'Enabled' : 'Disabled' }}</p>
