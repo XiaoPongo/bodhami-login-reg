@@ -1,93 +1,95 @@
 /* Layout container */
 .app-layout {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
-  }
-  
-  /* Main content holds sidebar + routed content */
-  .main-content {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-  }
-  
-  /* Sidebar */
-  .sidebar {
-    width: 220px;
-    height: 100vh;
-    background: #1e1e2f;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 30px 0;
-    position: fixed;
-    z-index: 1000;
-  }
-  
-  /* Logo section */
-  .logo {
-    width: 100px;
-    height: 100px;
-    border-radius: 20px;
-    overflow: hidden;
-    margin-bottom: 50px;
-    background: #4a90e2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  /* Sidebar menu */
-  ul {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-  }
-  
-  li {
-    margin-bottom: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 12px 20px;
-    border-radius: 8px;
-    transition: background 0.3s ease, transform 0.2s ease;
-  }
-  
-  li:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateX(5px);
-  }
-  
-  li.active {
-    background: #4a90e2;
-  }
-  
-  /* Icons & labels */
-  i {
-    font-size: 18px;
-  }
-  
-  span {
-    font-size: 16px;
-    font-weight: 500;
-  }
-  
-  /* Routed content shifts beside sidebar */
-  .router-outlet-container {
-    flex: 1;
-    margin-left: 220px;
-    padding: 20px;
-    overflow-y: auto;
-    background: #f4f5f7;
-  }
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw; /* Added to ensure full width coverage */
+  overflow: hidden;
+}
+
+/* Main content holds sidebar + routed content */
+.main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background: #1e1e2f;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 0;
+  position: fixed;
+  z-index: 1000;
+}
+
+/* Logo section */
+.logo {
+  width: 100px;
+  height: 100px;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 50px;
+  background: #4a90e2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Logo image */
+.logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Sidebar menu */
+ul {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+
+li {
+  margin-bottom: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+li:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(5px);
+}
+
+li.active {
+  background: #4a90e2;
+}
+
+/* Icons & labels */
+i {
+  font-size: 18px;
+}
+
+span {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Routed content shifts beside sidebar */
+.router-outlet-container {
+  flex: 1;
+  margin-left: 220px;
+  padding: 20px;
+  overflow-y: auto;
+  background: #f4f5f7;
+}
