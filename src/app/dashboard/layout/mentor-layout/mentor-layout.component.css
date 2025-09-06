@@ -9,7 +9,7 @@
 }
 
 .layout__header {
-  flex: 0 0 60px; /* Fixed header height (adjust if different) */
+  flex: 0 0 60px; /* Fixed header height */
   width: 100%;
   background-color: #ffffff;
   border-bottom: 1px solid #ddd;
@@ -43,7 +43,7 @@
   flex-direction: column;
   align-items: center;
   padding: 30px 0;
-  position: relative; /* Relative to layout, adjusted by sidebar CSS */
+  position: relative; /* Adjusted by sidebar CSS */
 }
 
 .layout__right-half {
@@ -55,10 +55,12 @@
 
 .layout__content {
   flex: 1; /* Take full space of right half */
-  overflow-y: auto; /* Main scrolling area */
+  overflow-y: auto; /* Vertical scrolling only */
   overflow-x: hidden;
   padding: 20px; /* Add padding for content */
   width: 100%; /* Ensure full width of right half */
   box-sizing: border-box; /* Include padding in width calculation */
   margin-left: 288px; /* Offset for fixed sidebar */
+  margin-top: 0; /* Ensure no overlap with header */
+  height: calc(100vh - 60px); /* Match viewport height minus header */
 }
