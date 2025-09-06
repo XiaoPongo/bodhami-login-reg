@@ -1,39 +1,10 @@
 .header {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* 🔥 title left, icons right */
   align-items: center;
   padding: 10px 20px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #ddd;
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-}
-
-.logo img {
-  height: 40px;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.greeting {
-  margin-right: 15px;
-  color: #666;
-  font-size: 14px;
-}
-
-.icon-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 24px;
-  color: #1a1a2e;
+  background-color: white;
+  border-bottom: 1px solid #eee;
 }
 
 .app-title {
@@ -43,19 +14,34 @@
 }
 
 .main-title {
-  font-size: 18px;
+  font-size: 32px;
   font-weight: bold;
-  color: #1a1a2e;
+  color: #3f51b5;
 }
 
 .sub-title {
-  font-size: 12px;
+  font-size: 14px;
   color: #666;
 }
 
+.right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #666;
+}
+
+/* Popup styles (unchanged) */
 .popup {
   position: absolute;
-  top: 60px;
+  top: 50px;
   right: 20px;
   background: white;
   border: 1px solid #ccc;
@@ -80,7 +66,6 @@
   color: white;
   padding: 5px 10px;
   border-radius: 4px;
-  width: 100%;
 }
 
 .calendar-popup {
