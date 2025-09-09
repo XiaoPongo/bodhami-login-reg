@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SupabaseService } from '../../services/supabase.service'; // Assuming you have this service
+import { SupabaseService } from '../../services/supabase.service'; // Adjust path if needed
+import { User } from '../../user'; // Adjust path if needed
 
 @Component({
   selector: 'app-student-dashboard',
@@ -10,38 +11,28 @@ import { SupabaseService } from '../../services/supabase.service'; // Assuming y
   styleUrls: ['./student-dashboard.component.css'],
 })
 export class StudentDashboardComponent implements OnInit {
-  user: any = null;
-  xp: number = 0; // Default value
-  level: number = 1; // Default value
+  user: User | null = null;
+  xp = 0;
+  level = 1;
+
+  // Define the direct URL to the raw image file
+  backgroundImageUrl = 'https://raw.githubusercontent.com/XiaoPongo/bodhami-login-reg/main/student-dashboard.png';
 
   constructor(private supabase: SupabaseService) {}
 
-  ngOnInit(): void {
-    this.fetchStudentData();
-  }
-
-  async fetchStudentData() {
-    // This is where you would fetch the user and their progress from Supabase
-    // For now, it just sets default values.
+  async ngOnInit() {
     const { data, error } = await this.supabase.getUser();
     if (data?.user) {
-      this.user = data.user;
-      // Replace with actual fetching of xp and level from your db
-      this.xp = data.user.user_metadata?.['xp'] || 0;
-      this.level = data.user.user_metadata?.['level'] || 1;
+      const metadata = data.user.user_metadata || {};
+      this.user = {
+        firstName: metadata['firstName'] || 'Student',
+        lastName: metadata['lastName'] || '',
+        email: data.user.email || '',
+      };
+      // In the future, you would fetch these values from Supabase
+      this.xp = metadata['xp'] || 0;
+      this.level = metadata['level'] || 1;
     }
-    if (error) {
-      console.error('Error fetching user data:', error);
-    }
-  }
-
-  startQuiz() {
-    console.log('Starting quiz...');
-    // Future: Navigate to the quiz page
-  }
-
-  viewAchievements() {
-    console.log('Viewing achievements...');
-    // Future: Navigate to the achievements page
   }
 }
+

@@ -1,96 +1,97 @@
 .dashboard-wrapper {
-  /* --- KEY CHANGES --- */
+  /* Core properties to make the container fill the layout space */
   width: 100%;
-  height: 100%; /* Fill the entire .layout-content area */
-  position: relative; /* This is the anchor for all absolutely positioned children */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  overflow: hidden; /* Hide anything that might spill out */
+  height: 100%;
+  position: relative; /* This is the anchor for all the positioned elements inside */
+  overflow: hidden; /* Prevents content from spilling out */
+
+  /* --- Key properties for the background image --- */
+  background-size: cover; /* Scales the image to cover the entire container */
+  background-position: center; /* Centers the image within the container */
+  background-repeat: no-repeat; /* Ensures the image does not tile */
 }
 
-/* Welcome message is positioned relative to the wrapper */
 .welcome-message {
   position: absolute;
   top: 40px;
   left: 50%;
   transform: translateX(-50%);
-  color: #333;
-  font-size: 2.5rem;
-  font-weight: bold;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+  color: #3f4d60;
+  font-size: 2.2rem;
+  font-weight: 600;
+  text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.4);
 }
 
-/* Stats bar is positioned absolutely */
 .stats-bar {
   position: absolute;
-  top: 13.5%; /* Fine-tuned position */
-  left: 50%;
+  top: 15%;
+  left: 50.5%;
   transform: translateX(-50%);
-  width: 400px; /* Give it a fixed width */
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(5px);
-  border-radius: 50px;
+  width: 320px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
   padding: 10px 20px;
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  justify-content: space-evenly;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .stat {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 500;
+  color: #3f4d60;
 }
 
 .stat i {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
 }
-.stat .fa-star { color: #ffc107; }
-.stat .fa-trophy { color: #ff9800; }
+.stat .fa-star { color: #f5b74b; }
+.stat .fa-trophy { color: #e8a03e; }
 
-/* Buttons are positioned absolutely */
 .quiz-button {
   position: absolute;
-  top: 51%;
-  left: 50%;
+  top: 52%;
+  left: 50.5%;
   transform: translate(-50%, -50%);
-  padding: 18px 80px;
-  font-size: 1.8rem;
-  background-color: #007bff;
+  padding: 16px 70px;
+  font-size: 1.5rem;
+  background-color: #4a90e2;
   color: white;
   border: none;
   border-radius: 12px;
   cursor: pointer;
   font-weight: bold;
-  box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
-  transition: all 0.2s ease-in-out;
+  box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+  transition: all 0.2s ease;
 }
 .quiz-button:hover {
   transform: translate(-50%, -52%);
-  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.5);
+  background-color: #357abd;
 }
 
 .achievements-button {
   position: absolute;
-  top: 25.5%;
+  top: 26.5%;
   left: 85.5%;
   transform: translate(-50%, -50%);
-  padding: 12px 25px;
-  font-size: 1rem;
-  background-color: #28a745;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  background-color: #5dbe81;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
-  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-  transition: all 0.2s ease-in-out;
+  box-shadow: 0 4px 12px rgba(93, 190, 129, 0.4);
+  transition: all 0.2s ease;
 }
 .achievements-button:hover {
   transform: translate(-50%, -52%);
-  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.5);
+  background-color: #4a9e6a;
 }
+
