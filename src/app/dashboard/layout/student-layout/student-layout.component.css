@@ -1,36 +1,27 @@
 .layout {
   display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  flex-direction: column; /* Stacks header on top of body */
+  height: 100vh;
+  overflow: hidden; /* Prevents scrollbars on the main page */
 }
 
 .layout-header {
-  flex: 0 0 60px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
+  flex: 0 0 60px; /* Fixed header height */
+  /* The header component is already fixed, this just allocates space for it */
 }
 
 .layout-body {
-  display: flex;
-  flex: 1;
-  margin-top: 60px;
+  display: flex; /* Key: Puts sidebar and content side-by-side */
+  flex: 1; /* Takes up all remaining vertical space */
+  /* No margin-top needed because the layout flows naturally */
 }
 
-/* The sidebar component is now controlled by its own CSS (position: fixed) */
 .layout-sidebar {
-  /* This selector is still here but the important styles are in the component's CSS */
-  flex: 0 0 288px;
+  flex: 0 0 288px; /* Fixed sidebar width of 288px */
 }
 
 .layout-content {
-  flex: 1;
-  overflow-y: auto;
-  /* --- KEY CHANGE --- */
-  /* Add margin to prevent the fixed sidebar from covering the content */
-  margin-left: 288px;
-  padding: 0; /* The dashboard itself will handle its padding */
-  height: calc(100vh - 60px); /* Ensure it fills the vertical space */
+  flex: 1; /* Takes all remaining horizontal space */
+  overflow-y: auto; /* IMPORTANT: Allows the dashboard content to scroll if needed */
+  height: calc(100vh - 60px); /* Fill the vertical space below the header */
 }
