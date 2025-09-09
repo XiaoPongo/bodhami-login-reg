@@ -2,6 +2,7 @@ body, html {
   margin: 0;
   padding: 0;
   height: 100%;
+  font-family: 'Inter', sans-serif;
 }
 
 /* Wrapper handles layout only */
@@ -13,19 +14,31 @@ body, html {
   width: 100%;
   padding: 0 5%;
   box-sizing: border-box;
-  background: transparent; /* wrapper itself transparent */
+  background-color: #f0f4f8;
   position: relative; /* ensure children can layer correctly */
   z-index: 1; /* above background */
+}
+
+/* Background image element */
+.bg-img {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0; /* stays behind everything */
+  opacity: 0.5;
 }
 
 /* Left side container (form) */
 .login-container {
   background: white;
-  padding: 2rem;
+  padding: 2.5rem;
   border-radius: 16px;
   width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  max-width: 420px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
   text-align: center;
   position: relative;
   z-index: 2; /* always above background */
@@ -42,8 +55,9 @@ body, html {
 }
 
 h2 {
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: 2rem;
+  color: #333;
 }
 
 mat-form-field.full-width {
@@ -53,40 +67,78 @@ mat-form-field.full-width {
 }
 
 .login-btn {
-  background-color: #0000ee !important;
+  background-color: #4a69e2 !important;
   color: white !important;
   font-weight: bold;
-  border-radius: 30px;
-  padding: 10px 0;
+  border-radius: 8px;
+  padding: 12px 0;
   width: 100%;
   margin-top: 1rem;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(74, 105, 226, 0.3);
   text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: background-color 0.3s;
+}
+
+.login-btn:hover {
+    background-color: #3a53c4 !important;
 }
 
 .forgot {
   display: block;
-  color: #6c7ac9;
+  color: #4a69e2;
   margin-top: 1rem;
   text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
-.no-account {
-  margin-top: 2rem;
-  font-size: 0.9rem;
-  color: #333;
+/* --- NEW & IMPROVED STYLES FOR REGISTRATION LINKS --- */
+.separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #aaa;
+  margin: 2rem 0 1rem 0;
+}
+
+.separator::before,
+.separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.separator:not(:empty)::before {
+  margin-right: .5em;
+}
+
+.separator:not(:empty)::after {
+  margin-left: .5em;
 }
 
 .signup-links {
   display: flex;
   justify-content: space-around;
-  margin-top: 0.5rem;
-  font-weight: bold;
+  gap: 1rem;
+  margin-top: 1.5rem;
 }
 
 .signup-links a {
   text-decoration: none;
-  color: #304ffe;
+  color: #333;
+  font-weight: 600;
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  flex: 1;
+  transition: all 0.2s ease-in-out;
+}
+
+.signup-links a:hover {
+  background-color: #f7f7f7;
+  border-color: #4a69e2;
+  color: #4a69e2;
 }
 
 /* Right side title */
@@ -94,18 +146,18 @@ mat-form-field.full-width {
   flex: 1;
   text-align: center;
   margin-right: 10%;
-  color: #000;
+  color: #1e1e2f;
   position: relative;
   z-index: 2; /* above background */
 }
 
 .title-container h1 {
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: bold;
 }
 
 .title-container span {
-  color: #0000ee;
+  color: #4a69e2;
 }
 
 /* Floating Error */
@@ -114,38 +166,25 @@ mat-form-field.full-width {
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #ff0000;
+  background-color: #ff3b30;
   color: white;
   padding: 10px 16px;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 14px;
+  font-weight: 500;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   animation: fadeSlide 5s ease-in-out forwards;
   z-index: 1000;
 }
 
-/* Floating animation */
 @keyframes fadeSlide {
-  0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
-  10% { opacity: 1; transform: translateX(-50%) translateY(0); }
-  90% { opacity: 1; transform: translateX(-50%) translateY(0); }
-  100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  0% { opacity: 0; transform: translate(-50%, -20px); }
+  10% { opacity: 1; transform: translate(-50%, 0); }
+  90% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -20px); }
 }
 
 mat-error {
-  min-height: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-/* Background image element */
-.bg-img {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0; /* stays behind everything */
+  min-height: 20px; /* Reduced height */
+  font-size: 0.75rem;
 }
