@@ -1,34 +1,36 @@
-/* This CSS is now structured exactly like the mentor-layout for consistency.
-*/
-
 .layout {
   display: flex;
-  flex-direction: column; /* Stacks the header on top of the layout-body */
+  flex-direction: column;
   min-height: 100vh;
 }
 
 .layout-header {
-  flex: 0 0 60px; /* Does not grow or shrink, has a fixed height of 60px */
+  flex: 0 0 60px;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 1000;
-  background-color: #ffffff; /* Ensures header has a solid background */
 }
 
 .layout-body {
-  display: flex; /* This is the key: it arranges the sidebar and content side-by-side */
-  flex: 1; /* Takes up all available vertical space below the header */
-  margin-top: 60px; /* Pushes the entire body down to prevent overlap with the fixed header */
+  display: flex;
+  flex: 1;
+  margin-top: 60px;
 }
 
+/* The sidebar component is now controlled by its own CSS (position: fixed) */
 .layout-sidebar {
-  flex: 0 0 288px; /* Fixed width of 288px */
+  /* This selector is still here but the important styles are in the component's CSS */
+  flex: 0 0 288px;
 }
 
 .layout-content {
-  flex: 1; /* Takes up all remaining horizontal space */
-  overflow-y: auto; /* Allows the content area to scroll if needed */
-  /* The student-dashboard's own CSS will handle its padding and background */
+  flex: 1;
+  overflow-y: auto;
+  /* --- KEY CHANGE --- */
+  /* Add margin to prevent the fixed sidebar from covering the content */
+  margin-left: 288px;
+  padding: 0; /* The dashboard itself will handle its padding */
+  height: calc(100vh - 60px); /* Ensure it fills the vertical space */
 }
