@@ -2,12 +2,14 @@
   <!-- Header remains fixed at the top -->
   <app-header class="layout-header"></app-header>
 
-  <!-- Main body for sidebar and content -->
+  <!-- Main body for sidebar and content, arranged side-by-side -->
   <div class="layout-body">
+    <!-- Sidebar with a fixed width -->
     <app-sidebar class="layout-sidebar"></app-sidebar>
+
+    <!-- Main content area that takes the remaining space -->
     <main class="layout-content">
       <router-outlet></router-outlet>
     </main>
   </div>
 </div>
-

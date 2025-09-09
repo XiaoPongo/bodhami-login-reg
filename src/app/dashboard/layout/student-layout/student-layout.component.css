@@ -1,100 +1,34 @@
-.dashboard-wrapper {
-    padding: 2rem;
-    height: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .welcome-title {
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 1.5rem;
-    color: #333;
-  }
-  
-  .dashboard-container {
-    flex: 1; /* Grow to fill the wrapper */
-    position: relative; /* Crucial for positioning child elements */
-    background-image: url('https://raw.githubusercontent.com/XiaoPongo/bodhami-login-reg/main/student-dashboard.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    border-radius: 16px;
-    min-height: 500px; /* Ensure it has a minimum height to display the image */
-  }
-  
-  /* Positioning for the top stats bar (XP and Level) */
-  .stats-bar {
-    position: absolute;
-    top: 7.5%; /* Adjust percentage to align perfectly with the plaque */
-    left: 21%;
-    width: 32%; /* Adjust width to fit the plaque area */
-    background-color: rgba(255, 255, 255, 0.85);
-    border-radius: 20px;
-    padding: 10px 20px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(5px);
-  }
-  
-  .stat-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #444;
-  }
-  
-  .stat-item i {
-    font-size: 1.5rem;
-  }
-  
-  .stat-item.xp i {
-    color: #ffc107; /* Gold color for star */
-  }
-  
-  .stat-item.level i {
-    color: #fca311; /* Gold color for trophy */
-  }
-  
-  /* Base styles for the interactive buttons */
-  .interactive-btn {
-    position: absolute;
-    border: none;
-    border-radius: 12px;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    transition: all 0.2s ease-in-out;
-    padding: 15px 30px;
-  }
-  
-  .interactive-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-  }
-  
-  /* Specific positioning for the Quiz button on the laptop */
-  .quiz-btn {
-    top: 51%;
-    left: 50%;
-    transform: translateX(-50%); /* Center it horizontally */
-    width: 25%;
-    background: linear-gradient(45deg, #007bff, #0056b3);
-  }
-  
-  /* Specific positioning for the Achievements button on the wall plaque */
-  .achievement-btn {
-    top: 19%;
-    right: 17%;
-    background: linear-gradient(45deg, #28a745, #218838);
-    padding: 8px 16px;
-    font-size: 1rem;
-  }
-  
+/* This CSS is now structured exactly like the mentor-layout for consistency.
+*/
+
+.layout {
+  display: flex;
+  flex-direction: column; /* Stacks the header on top of the layout-body */
+  min-height: 100vh;
+}
+
+.layout-header {
+  flex: 0 0 60px; /* Does not grow or shrink, has a fixed height of 60px */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: #ffffff; /* Ensures header has a solid background */
+}
+
+.layout-body {
+  display: flex; /* This is the key: it arranges the sidebar and content side-by-side */
+  flex: 1; /* Takes up all available vertical space below the header */
+  margin-top: 60px; /* Pushes the entire body down to prevent overlap with the fixed header */
+}
+
+.layout-sidebar {
+  flex: 0 0 288px; /* Fixed width of 288px */
+}
+
+.layout-content {
+  flex: 1; /* Takes up all remaining horizontal space */
+  overflow-y: auto; /* Allows the content area to scroll if needed */
+  /* The student-dashboard's own CSS will handle its padding and background */
+}
