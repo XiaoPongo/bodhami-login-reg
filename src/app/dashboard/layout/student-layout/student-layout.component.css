@@ -1,27 +1,53 @@
-.layout {
-  display: flex;
-  flex-direction: column; /* Stacks header on top of body */
+:host {
+  display: block;
+  width: 100vw;
   height: 100vh;
-  overflow: hidden; /* Prevents scrollbars on the main page */
+  overflow: hidden; /* Prevent the whole page from scrolling */
 }
 
+.layout-container {
+  display: flex;
+  flex-direction: column; /* Stack header on top of the body */
+  height: 100%;
+  width: 100%;
+}
+
+/* --- Header --- */
+/* The header component itself is now responsible for its fixed position */
 .layout-header {
-  flex: 0 0 60px; /* Fixed header height */
-  /* The header component is already fixed, this just allocates space for it */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px; /* Standard header height */
+  z-index: 1000;
 }
 
+/* --- Main Body --- */
+/* This is the container for everything BELOW the header */
 .layout-body {
-  display: flex; /* Key: Puts sidebar and content side-by-side */
-  flex: 1; /* Takes up all remaining vertical space */
-  /* No margin-top needed because the layout flows naturally */
+  display: flex; /* This is the key: places sidebar and content side-by-side */
+  flex: 1; /* Allows this container to fill the space below the header */
+  margin-top: 60px; /* IMPORTANT: Pushes the body down so it's not hidden by the fixed header */
+  overflow: hidden; /* Prevents layout issues */
 }
 
+/* --- Sidebar --- */
 .layout-sidebar {
-  flex: 0 0 288px; /* Fixed sidebar width of 288px */
+  /* Do not grow, do not shrink, and have a fixed width of 288px */
+  flex: 0 0 288px;
+  background-color: #1e1e2f; /* Dark background from your original code */
+  height: 100%; /* Make the sidebar full height of the body */
+  overflow-y: auto; /* Allow sidebar to scroll if its content is long */
 }
 
+/* --- Content Area --- */
+/* This is where your dashboard and other pages will appear */
 .layout-content {
-  flex: 1; /* Takes all remaining horizontal space */
-  overflow-y: auto; /* IMPORTANT: Allows the dashboard content to scroll if needed */
-  height: calc(100vh - 60px); /* Fill the vertical space below the header */
+  flex: 1; /* Grow to fill all remaining horizontal space */
+  height: 100%;
+  overflow-y: auto; /* IMPORTANT: Allows the CONTENT to scroll, not the whole page */
+  padding: 24px; /* Add some comfortable spacing around the content */
+  background-color: #f4f5f7; /* A light background for the content area */
+  box-sizing: border-box;
 }
