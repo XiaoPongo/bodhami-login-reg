@@ -1,33 +1,44 @@
 :host {
   display: block;
+  width: 100vw;
   height: 100vh;
-  overflow: hidden;
+  overflow: hidden; /* Prevent the whole page from scrolling */
 }
 
 .layout-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* Stack header on top of the body */
   height: 100%;
 }
 
+/* --- Header --- */
 .layout-header {
-  /* This space is managed by the fixed header component */
+  /* This space is reserved for the fixed header component */
   flex: 0 0 60px;
 }
 
+/* --- Main Body --- */
+/* This container holds the sidebar and the main content area */
 .layout-body {
   display: flex; /* Arranges sidebar and content side-by-side */
-  flex: 1; /* Fills remaining vertical space */
-  height: calc(100vh - 60px); /* Crucial for full height */
+  flex: 1; /* Fills all available vertical space */
+  height: calc(100vh - 60px); /* Ensures it touches the bottom of the viewport */
 }
 
+/* --- Sidebar --- */
 .layout-sidebar {
-  flex: 0 0 288px; /* Fixed width */
+  /* Do not grow, do not shrink, and have a fixed width of 288px */
+  flex: 0 0 288px;
 }
 
+/* --- Content Area (Tailored for Student Dashboard) --- */
+/* This is where your dashboard page will appear */
 .layout-content {
-  flex: 1; /* Fills remaining horizontal space */
-  overflow-y: auto; /* Allows content to scroll if it overflows */
-  background-color: #f4f5f7;
-  /* NO PADDING HERE - The dashboard component will handle its own space */
+  flex: 1; /* Grow to fill all remaining horizontal space */
+  height: 100%;
+  overflow-y: auto; /* Allows the content itself to scroll if needed */
+  
+  /* --- KEY CHANGES --- */
+  /* NO PADDING: The student dashboard manages its own internal spacing */
+  /* NO BACKGROUND COLOR: This allows the dashboard's background image to be visible */
 }
