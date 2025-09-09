@@ -1,19 +1,16 @@
-<div class="layout">
-  <!-- Header at the top -->
-  <app-header class="layout__header"></app-header>
+<!-- The main container for the entire page view -->
+<div class="layout-container">
+  <!-- Header remains fixed at the top -->
+  <app-header class="layout-header"></app-header>
 
-  <!-- Main layout divided into two halves -->
-  <div class="layout__main">
-    <!-- Left half with sidebar -->
-    <div class="layout__left-half">
-      <app-sidebar class="layout__sidebar"></app-sidebar>
-    </div>
+  <!-- This container holds the sidebar and the main content side-by-side -->
+  <div class="layout-body">
+    <!-- The sidebar has a fixed width -->
+    <app-sidebar class="layout-sidebar"></app-sidebar>
 
-    <!-- Right half with content -->
-    <div class="layout__right-half">
-      <div class="layout__content">
-        <router-outlet></router-outlet>
-      </div>
-    </div>
+    <!-- The main content area will take up all remaining space -->
+    <main class="layout-content">
+      <router-outlet></router-outlet>
+    </main>
   </div>
 </div>

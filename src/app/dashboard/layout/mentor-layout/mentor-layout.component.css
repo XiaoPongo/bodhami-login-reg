@@ -1,66 +1,53 @@
-.layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh; /* Full viewport height */
-  width: 100vw; /* Full viewport width */
-  margin: 0;
-  padding: 0;
-  overflow: hidden; /* Prevent double scrollbars */
+:host {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden; /* Prevent the whole page from scrolling */
 }
 
-.layout__header {
-  flex: 0 0 60px; /* Fixed header height */
+.layout-container {
+  display: flex;
+  flex-direction: column; /* Stack header on top of the body */
+  height: 100%;
   width: 100%;
-  background-color: #ffffff;
-  border-bottom: 1px solid #ddd;
-  z-index: 1000;
+}
+
+/* --- Header --- */
+/* The header component itself is now responsible for its fixed position */
+.layout-header {
   position: fixed;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 60px; /* Standard header height */
+  z-index: 1000;
 }
 
-.layout__main {
-  display: flex;
-  flex: 1; /* Take remaining space after header */
-  min-height: calc(100vh - 60px); /* Adjust for header height */
-  margin-top: 60px; /* Offset for fixed header */
-  overflow: hidden;
+/* --- Main Body --- */
+/* This is the container for everything BELOW the header */
+.layout-body {
+  display: flex; /* This is the key: places sidebar and content side-by-side */
+  flex: 1; /* Allows this container to fill the space below the header */
+  margin-top: 60px; /* IMPORTANT: Pushes the body down so it's not hidden by the fixed header */
+  overflow: hidden; /* Prevents layout issues */
 }
 
-.layout__left-half {
-  flex: 1; /* Half of the page */
-  display: flex;
-  justify-content: flex-start;
-  background-color: #f0f0f0; /* Optional: for visual distinction */
+/* --- Sidebar --- */
+.layout-sidebar {
+  /* Do not grow, do not shrink, and have a fixed width of 288px */
+  flex: 0 0 288px;
+  background-color: #1e1e2f; /* Dark background from your original code */
+  height: 100%; /* Make the sidebar full height of the body */
+  overflow-y: auto; /* Allow sidebar to scroll if its content is long */
 }
 
-.layout__sidebar {
-  flex: 0 0 288px; /* 30% of 960px (left half) */
-  min-height: 100%; /* Full height of left half */
-  background: #1e1e2f;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 30px 0;
-  position: relative; /* Adjusted by sidebar CSS */
-}
-
-.layout__right-half {
-  flex: 1; /* Half of the page */
-  display: flex;
-  justify-content: center;
-  background-color: #f4f5f7; /* Optional: for visual distinction */
-}
-
-.layout__content {
-  flex: 1; /* Take full space of right half */
-  overflow-y: auto; /* Vertical scrolling only */
-  overflow-x: hidden;
-  padding: 20px; /* Add padding for content */
-  width: 100%; /* Ensure full width of right half */
-  box-sizing: border-box; /* Include padding in width calculation */
-  margin-left: 288px; /* Offset for fixed sidebar */
-  margin-top: 0; /* Ensure no overlap with header */
-  height: calc(100vh - 60px); /* Match viewport height minus header */
+/* --- Content Area --- */
+/* This is where your dashboard and other pages will appear */
+.layout-content {
+  flex: 1; /* Grow to fill all remaining horizontal space */
+  height: 100%;
+  overflow-y: auto; /* IMPORTANT: Allows the CONTENT to scroll, not the whole page */
+  padding: 24px; /* Add some comfortable spacing around the content */
+  background-color: #f4f5f7; /* A light background for the content area */
+  box-sizing: border-box;
 }
