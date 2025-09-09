@@ -1,51 +1,49 @@
 <div class="sidebar">
   <!-- Top section with logo and navigation -->
   <div class="sidebar-top">
-    <!-- Logo -->
+    <!-- Centered Logo -->
     <div class="logo-container">
       <img src="https://raw.githubusercontent.com/XiaoPongo/Bodhami-Internship-assets-dump/main/assets/signuplogo.jpg" alt="Elevana Logo" />
-      <span>Elevana</span>
     </div>
 
     <!-- Navigation Links -->
     <ul class="nav-list">
       <li class="active">
-        <i class="fas fa-th-large"></i> 
+        <i class="fas fa-th-large"></i>
         <span>Dashboard</span>
       </li>
       <li>
-        <i class="fas fa-book-open"></i> 
+        <i class="fas fa-book-open"></i>
         <span>Classes</span>
       </li>
       <li>
-        <i class="fas fa-users"></i> 
+        <i class="fas fa-users"></i>
         <span>Students</span>
       </li>
       <li>
-        <i class="fas fa-file-alt"></i> 
+        <i class="fas fa-file-alt"></i>
         <span>Study Material</span>
+      </li>
+      <!-- Settings moved into the main navigation group -->
+      <li>
+        <i class="fas fa-cog"></i>
+        <span>Settings</span>
       </li>
     </ul>
   </div>
 
-  <!-- Bottom section with settings and user profile -->
+  <!-- Bottom section with user profile -->
   <div class="sidebar-bottom">
-    <ul class="nav-list">
-      <li>
-        <i class="fas fa-cog"></i> 
-        <span>Settings</span>
-      </li>
-    </ul>
     <div class="user-profile">
       <div class="avatar">
-        <!-- Placeholder for user avatar -->
         <i class="fas fa-user"></i>
       </div>
       <div class="user-details">
         <span class="user-name">Amay</span>
         <span class="user-role">Mentor</span>
       </div>
-      <i class="fas fa-sign-out-alt logout-icon"></i>
+      <!-- Added the (click) event to call the logout method -->
+      <i class="fas fa-sign-out-alt logout-icon" (click)="logout()" title="Sign Out"></i>
     </div>
   </div>
 </div>
