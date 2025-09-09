@@ -1,53 +1,33 @@
 :host {
   display: block;
-  width: 100vw;
   height: 100vh;
-  overflow: hidden; /* Prevent the whole page from scrolling */
+  overflow: hidden;
 }
 
 .layout-container {
   display: flex;
-  flex-direction: column; /* Stack header on top of the body */
+  flex-direction: column;
   height: 100%;
-  width: 100%;
 }
 
-/* --- Header --- */
-/* The header component itself is now responsible for its fixed position */
 .layout-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 60px; /* Standard header height */
-  z-index: 1000;
+  /* This space is managed by the fixed header component */
+  flex: 0 0 60px;
 }
 
-/* --- Main Body --- */
-/* This is the container for everything BELOW the header */
 .layout-body {
-  display: flex; /* This is the key: places sidebar and content side-by-side */
-  flex: 1; /* Allows this container to fill the space below the header */
-  margin-top: 60px; /* IMPORTANT: Pushes the body down so it's not hidden by the fixed header */
-  overflow: hidden; /* Prevents layout issues */
+  display: flex; /* Arranges sidebar and content side-by-side */
+  flex: 1; /* Fills remaining vertical space */
+  height: calc(100vh - 60px); /* Crucial for full height */
 }
 
-/* --- Sidebar --- */
 .layout-sidebar {
-  /* Do not grow, do not shrink, and have a fixed width of 288px */
-  flex: 0 0 288px;
-  background-color: #1e1e2f; /* Dark background from your original code */
-  height: 100%; /* Make the sidebar full height of the body */
-  overflow-y: auto; /* Allow sidebar to scroll if its content is long */
+  flex: 0 0 288px; /* Fixed width */
 }
 
-/* --- Content Area --- */
-/* This is where your dashboard and other pages will appear */
 .layout-content {
-  flex: 1; /* Grow to fill all remaining horizontal space */
-  height: 100%;
-  overflow-y: auto; /* IMPORTANT: Allows the CONTENT to scroll, not the whole page */
-  padding: 24px; /* Add some comfortable spacing around the content */
-  background-color: #f4f5f7; /* A light background for the content area */
-  box-sizing: border-box;
+  flex: 1; /* Fills remaining horizontal space */
+  overflow-y: auto; /* Allows content to scroll if it overflows */
+  background-color: #f4f5f7;
+  /* NO PADDING HERE - The dashboard component will handle its own space */
 }
