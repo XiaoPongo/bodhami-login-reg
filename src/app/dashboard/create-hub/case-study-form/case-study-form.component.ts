@@ -3,9 +3,18 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
+type QuestionType = 'qa' | 'mcq' | 'fib';
+
+interface MCQOption {
+  text: string;
+}
+
 interface Problem {
+  type: QuestionType;
   scenario: string;
-  question: string;
+  options: MCQOption[];
+  answers: string[];
+  correctMcqIndex?: number;
 }
 
 interface CaseStudy {
@@ -42,13 +51,43 @@ export class CaseStudyFormComponent implements OnInit {
   ngOnInit(): void { }
 
   getInitialCaseStudyState(): CaseStudy {
-    return { title: '', passage: '', problems: [{ scenario: '', question: '' }], summaryFeedback: '', tags: [], classIds: [] };
+    return {
+      title: '',
+      passage: '',
+      problems: [{ type: 'qa', scenario: '', options: [], answers: [''], correctMcqIndex: undefined }],
+      summaryFeedback: '',
+      tags: [],
+      classIds: []
+    };
   }
   
   trackByFn(index: number, item: any): number { return index; }
 
-  addProblem() { this.caseStudy.problems.push({ scenario: '', question: '' }); }
+  addProblem() {
+    this.caseStudy.problems.push({ type: 'qa', scenario: '', options: [], answers: [''], correctMcqIndex: undefined });
+  }
   removeProblem(index: number) { this.caseStudy.problems.splice(index, 1); }
+  
+  onQuestionTypeChange(problemIndex: number, newType: QuestionType) {
+    const problem = this.caseStudy.problems[problemIndex];
+    problem.options = [];
+    problem.answers = [''];
+    problem.correctMcqIndex = undefined;
+    if (newType === 'mcq') {
+      problem.options = [{ text: '' }, { text: '' }];
+      problem.answers = [];
+    }
+  }
+
+  addMcqOption(problemIndex: number) { this.caseStudy.problems[problemIndex].options.push({ text: '' }); }
+  removeMcqOption(problemIndex: number, optionIndex: number) {
+    this.caseStudy.problems[problemIndex].options.splice(optionIndex, 1);
+  }
+
+  addAnswer(problemIndex: number) { this.caseStudy.problems[problemIndex].answers.push(''); }
+  removeAnswer(problemIndex: number, answerIndex: number) {
+    this.caseStudy.problems[problemIndex].answers.splice(answerIndex, 1);
+  }
 
   addTag(event: Event) {
     event.preventDefault();
@@ -95,13 +134,15 @@ export class CaseStudyFormComponent implements OnInit {
 
   private parseCaseStudyCsv(csvText: string): void {
     const newCs = this.getInitialCaseStudyState();
-    const lines = csvText.split('\n').filter(line => line.trim() !== '');
     newCs.problems = []; newCs.tags = []; newCs.classIds = [];
+    const lines = csvText.split('\n').filter(line => line.trim() !== '');
 
     for (const line of lines.slice(1)) {
       const [key, value] = line.split(/,(.+)/).map(s => s.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
       const keyParts = key.split('_'); 
       
+      const index = parseInt(keyParts[1], 10) - 1;
+
       switch (keyParts[0]) {
         case 'title': newCs.title = value; break;
         case 'passage': newCs.passage = value; break;
@@ -109,10 +150,18 @@ export class CaseStudyFormComponent implements OnInit {
         case 'tag': newCs.tags.push(value); break;
         case 'classId': newCs.classIds.push(value); break;
         case 'problem':
-          const index = parseInt(keyParts[2], 10) - 1;
-          if (!newCs.problems[index]) newCs.problems[index] = { scenario: '', question: '' };
-          if (keyParts[1] === 'scenario') newCs.problems[index].scenario = value;
-          if (keyParts[1] === 'question') newCs.problems[index].question = value;
+          const problemIndex = parseInt(keyParts[1], 10) - 1;
+          const problemField = keyParts[2];
+          const answerOrOptionIndex = parseInt(keyParts[3], 10) - 1;
+
+          while(newCs.problems.length <= problemIndex) newCs.problems.push({ type: 'qa', scenario: '', options: [], answers: [] });
+          const problem = newCs.problems[problemIndex];
+
+          if (problemField === 'type') problem.type = value as QuestionType;
+          if (problemField === 'scenario') problem.scenario = value;
+          if (problemField === 'answer') problem.answers[answerOrOptionIndex] = value;
+          if (problemField === 'option') problem.options[answerOrOptionIndex] = { text: value };
+          if (problemField === 'correctOptionIndex') problem.correctMcqIndex = parseInt(value, 10);
           break;
       }
     }
@@ -127,11 +176,20 @@ export class CaseStudyFormComponent implements OnInit {
     rows.push(['title', escape(cs.title)]);
     rows.push(['passage', escape(cs.passage)]);
     cs.problems.forEach((p, i) => {
-      rows.push([`problem_scenario_${i + 1}`, escape(p.scenario)]);
-      rows.push([`problem_question_${i + 1}`, escape(p.question)]);
+      rows.push([`problem_${i + 1}_type`, p.type]);
+      rows.push([`problem_${i + 1}_scenario`, escape(p.scenario)]);
+      if (p.type === 'qa' || p.type === 'fib') {
+        p.answers.forEach((a, j) => rows.push([`problem_${i + 1}_answer_${j + 1}`, escape(a)]));
+      }
+      if (p.type === 'mcq') {
+        p.options.forEach((o, j) => rows.push([`problem_${i + 1}_option_${j + 1}`, escape(o.text)]));
+        if (p.correctMcqIndex !== undefined) {
+          rows.push([`problem_${i + 1}_correctOptionIndex`, p.correctMcqIndex.toString()]);
+        }
+      }
     });
     rows.push(['summaryFeedback', escape(cs.summaryFeedback)]);
-    cs.tags.forEach(t => rows.push(['tag', escape(t)]));
+    cs.tags.forEach((t, i) => rows.push([`tag_${i + 1}`, escape(t)]));
     cs.classIds.forEach(id => rows.push(['classId', escape(id)]));
 
     const csvContent = rows.map(e => e.join(",")).join("\n");
@@ -143,4 +201,3 @@ export class CaseStudyFormComponent implements OnInit {
     URL.revokeObjectURL(link.href);
   }
 }
-

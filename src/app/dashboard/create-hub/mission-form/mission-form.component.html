@@ -28,14 +28,17 @@
         </div>
         <div class="preview-section" *ngIf="mission.passages.length > 0 && mission.passages[0]">
           <h4>Passages</h4>
-          <div *ngFor="let passage of mission.passages" class="preview-item">{{ passage }}</div>
+          <div *ngFor="let passage of mission.passages; let i = index" class="preview-item"><strong>Passage {{i + 1}}:</strong> {{ passage }}</div>
         </div>
         <div class="preview-section">
-          <h4>Scenarios & Answers</h4>
-          <div *ngFor="let scenario of mission.scenarios" class="preview-item">
-            <strong>Scenario:</strong> {{ scenario.description }}
-            <ul>
-              <li *ngFor="let answer of scenario.answers">Answer: {{ answer }}</li>
+          <h4>Scenarios</h4>
+          <div *ngFor="let scenario of mission.scenarios; let i = index" class="preview-item">
+            <strong>Scenario {{i + 1}}:</strong> {{ scenario.question }}
+            <ul class="preview-answer-list">
+              <li *ngIf="scenario.type === 'qa' || scenario.type === 'fib'"><strong>Answers:</strong> {{ scenario.answers.join(', ') }}</li>
+              <li *ngIf="scenario.type === 'mcq'" *ngFor="let option of scenario.options; let j = index">
+                {{ j === scenario.correctMcqIndex ? '✔️' : '⚪' }} {{ option.text }}
+              </li>
             </ul>
           </div>
         </div>
@@ -51,7 +54,7 @@
           <i class="fas fa-info-circle"></i>
           <div>
             <strong>Quick Guide:</strong>
-            <p>Start with a title and description, build your content with passages and scenarios, then assign it to classes.</p>
+            <p>Start with a title, build content with passages and scenarios (choosing a question type for each), then assign to classes.</p>
           </div>
         </div>
   
@@ -81,21 +84,57 @@
           <div class="form-group">
             <label>Passages</label>
             <div *ngFor="let passage of mission.passages; let i = index; trackBy: trackByFn" class="dynamic-input">
-              <input type="text" [name]="'passage' + i" [(ngModel)]="mission.passages[i]">
+              <textarea [name]="'passage' + i" [(ngModel)]="mission.passages[i]" placeholder="Passage {{i + 1}}" rows="2"></textarea>
               <button type="button" class="btn-remove" (click)="removePassage(i)" title="Remove Passage">&times;</button>
             </div>
             <button type="button" class="btn-add" (click)="addPassage()"><i class="fas fa-plus"></i> Add Passage</button>
           </div>
+          
           <div class="form-group">
             <label>Scenarios</label>
             <div *ngFor="let scenario of mission.scenarios; let i = index; trackBy: trackByFn" class="dynamic-group">
-              <textarea [name]="'scenarioDesc' + i" [(ngModel)]="scenario.description" placeholder="Scenario Description"></textarea>
-              <div *ngFor="let answer of scenario.answers; let j = index; trackBy: trackByFn" class="dynamic-input indented">
-                <input type="text" [name]="'answer' + i + '-' + j" [(ngModel)]="scenario.answers[j]" placeholder="Answer {{j + 1}}">
-                <button type="button" class="btn-remove" (click)="removeAnswer(i, j)" title="Remove Answer">&times;</button>
+              <div class="question-type-selector">
+                <label [for]="'type' + i">Question Type</label>
+                <select [name]="'type' + i" [(ngModel)]="scenario.type" (change)="onQuestionTypeChange(i, $any($event.target).value)">
+                  <option value="qa">Question & Answer</option>
+                  <option value="mcq">Multiple Choice</option>
+                  <option value="fib">Fill in the Blanks</option>
+                </select>
               </div>
-              <div class="dynamic-controls">
+              <div class="form-group">
+                <label [for]="'question' + i">Question / Sentence *</label>
+                <textarea [name]="'question' + i" [(ngModel)]="scenario.question" placeholder="For FIB, use '___' for the blank(s)" required rows="2"></textarea>
+              </div>
+  
+              <div *ngIf="scenario.type === 'qa'" class="answer-section">
+                <label>Correct Answers</label>
+                <div *ngFor="let answer of scenario.answers; let j = index; trackBy: trackByFn" class="dynamic-input">
+                  <input type="text" [name]="'answer' + i + '-' + j" [(ngModel)]="scenario.answers[j]" placeholder="Answer {{j + 1}}">
+                  <button type="button" class="btn-remove" (click)="removeAnswer(i, j)">&times;</button>
+                </div>
                 <button type="button" class="btn-add" (click)="addAnswer(i)"><i class="fas fa-plus"></i> Add Answer</button>
+              </div>
+              
+              <div *ngIf="scenario.type === 'fib'" class="answer-section">
+                <label>Word(s) for the Blank(s)</label>
+                <div *ngFor="let answer of scenario.answers; let j = index; trackBy: trackByFn" class="dynamic-input">
+                  <input type="text" [name]="'fib-answer' + i + '-' + j" [(ngModel)]="scenario.answers[j]" placeholder="Correct word {{j + 1}}">
+                  <button type="button" class="btn-remove" (click)="removeAnswer(i, j)">&times;</button>
+                </div>
+                <button type="button" class="btn-add" (click)="addAnswer(i)"><i class="fas fa-plus"></i> Add Word</button>
+              </div>
+  
+              <div *ngIf="scenario.type === 'mcq'" class="answer-section">
+                <label>Options (select the correct one)</label>
+                <div *ngFor="let option of scenario.options; let j = index; trackBy: trackByFn" class="dynamic-input mcq-option">
+                  <input type="radio" [name]="'correctMcq' + i" [value]="j" [(ngModel)]="scenario.correctMcqIndex">
+                  <input type="text" [name]="'mcqOption' + i + '-' + j" [(ngModel)]="option.text" placeholder="Option {{j + 1}}">
+                  <button type="button" class="btn-remove" (click)="removeMcqOption(i, j)">&times;</button>
+                </div>
+                <button type="button" class="btn-add" (click)="addMcqOption(i)"><i class="fas fa-plus"></i> Add Option</button>
+              </div>
+              
+              <div class="dynamic-controls">
                 <button type="button" class="btn-remove-group" (click)="removeScenario(i)"><i class="fas fa-trash-alt"></i> Remove Scenario</button>
               </div>
             </div>
@@ -120,6 +159,4 @@
         </div>
       </form>
     </div>
-  </div>
-  
-  
+  </div>  

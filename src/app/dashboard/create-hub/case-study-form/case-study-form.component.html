@@ -26,13 +26,18 @@
         </div>
         <div class="preview-section">
           <h4>Passage</h4>
-          <p>{{ caseStudy.passage || 'No passage provided.' }}</p>
+          <p [innerHTML]="caseStudy.passage || 'No passage provided.'"></p>
         </div>
         <div class="preview-section">
           <h4>Problem Scenarios</h4>
           <div *ngFor="let problem of caseStudy.problems; let i = index" class="preview-item">
             <strong>Problem {{i + 1}}:</strong> {{ problem.scenario }}
-            <p class="preview-question"><strong>Question:</strong> {{ problem.question }}</p>
+            <ul class="preview-answer-list">
+              <li *ngIf="problem.type === 'qa' || problem.type === 'fib'"><strong>Answers:</strong> {{ problem.answers.join(', ') }}</li>
+              <li *ngIf="problem.type === 'mcq'" *ngFor="let option of problem.options; let j = index">
+                {{ j === problem.correctMcqIndex ? '✔️' : '⚪' }} {{ option.text }}
+              </li>
+            </ul>
           </div>
         </div>
         <div class="preview-section">
@@ -51,12 +56,12 @@
           <i class="fas fa-info-circle"></i>
           <div>
             <strong>Quick Guide:</strong>
-            <p>Build a rich scenario with a passage, add one or more problems, and provide feedback guidelines.</p>
+            <p>Build a rich scenario with a passage, add one or more problems with different question types, and provide feedback guidelines.</p>
           </div>
         </div>
         <div class="upload-section">
-          <label for="csvUpload" class="btn btn-upload"><i class="fas fa-file-csv"></i> Have a CSV? Upload here to auto-fill</label>
-          <input type="file" id="csvUpload" (change)="onFileSelected($event)" accept=".csv" hidden>
+          <label for="csvUpload-cs" class="btn btn-upload"><i class="fas fa-file-csv"></i> Have a CSV? Upload here to auto-fill</label>
+          <input type="file" id="csvUpload-cs" (change)="onFileSelected($event)" accept=".csv" hidden>
         </div>
   
         <div class="form-section">
@@ -78,13 +83,47 @@
               <h4>Problem {{i + 1}}</h4>
               <button type="button" class="btn-remove-problem" (click)="removeProblem(i)" title="Remove Problem"><i class="fas fa-trash-alt"></i></button>
             </div>
+            
+            <div class="question-type-selector">
+              <label [for]="'cs-type' + i">Question Type</label>
+              <select [name]="'cs-type' + i" [(ngModel)]="problem.type" (change)="onQuestionTypeChange(i, $any($event.target).value)">
+                <option value="qa">Critical Thinking Question</option>
+                <option value="mcq">Multiple Choice</option>
+                <option value="fib">Fill in the Blanks</option>
+              </select>
+            </div>
+  
             <div class="form-group">
-              <label [for]="'scenario' + i">Scenario *</label>
+              <label [for]="'scenario' + i">Scenario / Question *</label>
               <textarea [id]="'scenario' + i" [name]="'scenario' + i" rows="4" [(ngModel)]="problem.scenario" required></textarea>
             </div>
-            <div class="form-group">
-              <label [for]="'question' + i">Critical Thinking Question *</label>
-              <input type="text" [id]="'question' + i" [name]="'question' + i" [(ngModel)]="problem.question" required>
+  
+            <div *ngIf="problem.type === 'qa'" class="answer-section">
+              <label>Model Answer(s)</label>
+              <div *ngFor="let answer of problem.answers; let j = index; trackBy: trackByFn" class="dynamic-input">
+                <input type="text" [name]="'cs-answer' + i + '-' + j" [(ngModel)]="problem.answers[j]" placeholder="Answer {{j + 1}}">
+                <button type="button" class="btn-remove" (click)="removeAnswer(i, j)">&times;</button>
+              </div>
+              <button type="button" class="btn-add" (click)="addAnswer(i)"><i class="fas fa-plus"></i> Add Answer</button>
+            </div>
+  
+            <div *ngIf="problem.type === 'fib'" class="answer-section">
+              <label>Word(s) for the Blank(s)</label>
+              <div *ngFor="let answer of problem.answers; let j = index; trackBy: trackByFn" class="dynamic-input">
+                <input type="text" [name]="'cs-fib-answer' + i + '-' + j" [(ngModel)]="problem.answers[j]" placeholder="Correct word {{j + 1}}">
+                <button type="button" class="btn-remove" (click)="removeAnswer(i, j)">&times;</button>
+              </div>
+              <button type="button" class="btn-add" (click)="addAnswer(i)"><i class="fas fa-plus"></i> Add Word</button>
+            </div>
+  
+            <div *ngIf="problem.type === 'mcq'" class="answer-section">
+              <label>Options (select the correct one)</label>
+              <div *ngFor="let option of problem.options; let j = index; trackBy: trackByFn" class="dynamic-input mcq-option">
+                <input type="radio" [name]="'cs-correctMcq' + i" [value]="j" [(ngModel)]="problem.correctMcqIndex">
+                <input type="text" [name]="'cs-mcqOption' + i + '-' + j" [(ngModel)]="option.text" placeholder="Option {{j + 1}}">
+                <button type="button" class="btn-remove" (click)="removeMcqOption(i, j)">&times;</button>
+              </div>
+              <button type="button" class="btn-add" (click)="addMcqOption(i)"><i class="fas fa-plus"></i> Add Option</button>
             </div>
           </div>
           <button type="button" class="btn-add" (click)="addProblem()"><i class="fas fa-plus"></i> Add Another Problem</button>
@@ -129,6 +168,3 @@
       </form>
     </div>
   </div>
-  
-  
-  

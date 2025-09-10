@@ -3,12 +3,26 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
+type QuestionType = 'qa' | 'mcq' | 'fib';
+
+interface MCQOption {
+  text: string;
+}
+
+interface Scenario {
+  type: QuestionType;
+  question: string;
+  options: MCQOption[];
+  answers: string[];
+  correctMcqIndex?: number;
+}
+
 interface Mission {
   title: string;
   description: string;
   xp: number;
   passages: string[];
-  scenarios: { description: string; answers: string[] }[];
+  scenarios: Scenario[];
   classIds: string[];
 }
 
@@ -36,17 +50,46 @@ export class MissionFormComponent implements OnInit {
   ngOnInit(): void {}
 
   getInitialMissionState(): Mission {
-    return { title: '', description: '', xp: 100, passages: [''], scenarios: [{ description: '', answers: [''] }], classIds: [] };
+    return {
+      title: '',
+      description: '',
+      xp: 100,
+      passages: [''],
+      scenarios: [{ type: 'qa', question: '', options: [], answers: [''], correctMcqIndex: undefined }],
+      classIds: []
+    };
   }
 
   addPassage() { this.mission.passages.push(''); }
   removePassage(index: number) { this.mission.passages.splice(index, 1); }
 
-  addScenario() { this.mission.scenarios.push({ description: '', answers: [''] }); }
-  removeScenario(scenarioIndex: number) { this.mission.scenarios.splice(scenarioIndex, 1); }
+  addScenario() {
+    this.mission.scenarios.push({ type: 'qa', question: '', options: [], answers: [''], correctMcqIndex: undefined });
+  }
+  removeScenario(scenarioIndex: number) {
+    this.mission.scenarios.splice(scenarioIndex, 1);
+  }
+
+  onQuestionTypeChange(scenarioIndex: number, newType: QuestionType) {
+    const scenario = this.mission.scenarios[scenarioIndex];
+    scenario.options = [];
+    scenario.answers = [''];
+    scenario.correctMcqIndex = undefined;
+    if (newType === 'mcq') {
+      scenario.options = [{ text: '' }, { text: '' }];
+      scenario.answers = []; // MCQ answer is stored in correctMcqIndex
+    }
+  }
+
+  addMcqOption(scenarioIndex: number) { this.mission.scenarios[scenarioIndex].options.push({ text: '' }); }
+  removeMcqOption(scenarioIndex: number, optionIndex: number) {
+    this.mission.scenarios[scenarioIndex].options.splice(optionIndex, 1);
+  }
 
   addAnswer(scenarioIndex: number) { this.mission.scenarios[scenarioIndex].answers.push(''); }
-  removeAnswer(scenarioIndex: number, answerIndex: number) { this.mission.scenarios[scenarioIndex].answers.splice(answerIndex, 1); }
+  removeAnswer(scenarioIndex: number, answerIndex: number) {
+    this.mission.scenarios[scenarioIndex].answers.splice(answerIndex, 1);
+  }
 
   trackByFn(index: number, item: any): number { return index; }
 
@@ -79,40 +122,45 @@ export class MissionFormComponent implements OnInit {
     if (input.files && input.files[0]) {
       const file = input.files[0];
       const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = reader.result as string;
-        this.parseMissionCsv(text);
-      };
+      reader.onload = (e) => this.parseMissionCsv(reader.result as string);
       reader.readAsText(file);
     }
   }
 
   private parseMissionCsv(csvText: string): void {
     const newMission = this.getInitialMissionState();
+    newMission.passages = []; newMission.scenarios = []; newMission.classIds = [];
     const lines = csvText.split('\n').filter(line => line.trim() !== '');
 
-    newMission.passages = [];
-    newMission.scenarios = [];
-    newMission.classIds = [];
-
-    let currentScenarioIndex = -1;
-
-    for (const line of lines.slice(1)) { 
+    for (const line of lines.slice(1)) {
       const [key, value] = line.split(/,(.+)/).map(s => s.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-
-      switch (key) {
+      const keyParts = key.split('_');
+      
+      const index = parseInt(keyParts[1], 10) - 1;
+      
+      switch (keyParts[0]) {
         case 'title': newMission.title = value; break;
         case 'description': newMission.description = value; break;
         case 'xp': newMission.xp = parseInt(value, 10) || 100; break;
-        case 'passage': newMission.passages.push(value); break;
-        case 'scenario':
-          newMission.scenarios.push({ description: value, answers: [] });
-          currentScenarioIndex++;
-          break;
-        case 'answer':
-          if (currentScenarioIndex !== -1) newMission.scenarios[currentScenarioIndex].answers.push(value);
+        case 'passage':
+          // Ensure array is large enough
+          while(newMission.passages.length <= index) newMission.passages.push('');
+          newMission.passages[index] = value; 
           break;
         case 'classId': newMission.classIds.push(value); break;
+        case 'scenario':
+          const scenarioField = keyParts[2];
+          const answerOrOptionIndex = parseInt(keyParts[3], 10) - 1;
+
+          while(newMission.scenarios.length <= index) newMission.scenarios.push({ type: 'qa', question: '', options: [], answers: [] });
+          const scenario = newMission.scenarios[index];
+
+          if (scenarioField === 'type') scenario.type = value as QuestionType;
+          if (scenarioField === 'question') scenario.question = value;
+          if (scenarioField === 'answer') scenario.answers[answerOrOptionIndex] = value;
+          if (scenarioField === 'option') scenario.options[answerOrOptionIndex] = { text: value };
+          if (scenarioField === 'correctOptionIndex') scenario.correctMcqIndex = parseInt(value, 10);
+          break;
       }
     }
     this.mission = newMission;
@@ -126,10 +174,19 @@ export class MissionFormComponent implements OnInit {
     rows.push(['title', escape(mission.title)]);
     rows.push(['description', escape(mission.description)]);
     rows.push(['xp', mission.xp.toString()]);
-    mission.passages.forEach(p => rows.push(['passage', escape(p)]));
-    mission.scenarios.forEach(s => {
-      rows.push(['scenario', escape(s.description)]);
-      s.answers.forEach(a => rows.push(['answer', escape(a)]));
+    mission.passages.forEach((p, i) => rows.push([`passage_${i + 1}`, escape(p)]));
+    mission.scenarios.forEach((s, i) => {
+      rows.push([`scenario_${i + 1}_type`, s.type]);
+      rows.push([`scenario_${i + 1}_question`, escape(s.question)]);
+      if (s.type === 'qa' || s.type === 'fib') {
+        s.answers.forEach((a, j) => rows.push([`scenario_${i + 1}_answer_${j + 1}`, escape(a)]));
+      }
+      if (s.type === 'mcq') {
+        s.options.forEach((o, j) => rows.push([`scenario_${i + 1}_option_${j + 1}`, escape(o.text)]));
+        if (s.correctMcqIndex !== undefined) {
+          rows.push([`scenario_${i + 1}_correctOptionIndex`, s.correctMcqIndex.toString()]);
+        }
+      }
     });
     mission.classIds.forEach(id => rows.push(['classId', escape(id)]));
 
@@ -144,4 +201,5 @@ export class MissionFormComponent implements OnInit {
     URL.revokeObjectURL(url);
   }
 }
+
 
