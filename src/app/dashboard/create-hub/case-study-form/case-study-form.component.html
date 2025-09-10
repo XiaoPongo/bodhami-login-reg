@@ -34,9 +34,12 @@
             <strong>Problem {{i + 1}}:</strong> {{ problem.scenario }}
             <ul class="preview-answer-list">
               <li *ngIf="problem.type === 'qa' || problem.type === 'fib'"><strong>Answers:</strong> {{ problem.answers.join(', ') }}</li>
-              <li *ngIf="problem.type === 'mcq'" *ngFor="let option of problem.options; let j = index">
-                {{ j === problem.correctMcqIndex ? '✔️' : '⚪' }} {{ option.text }}
-              </li>
+              <!-- FIX: Separated *ngIf and *ngFor -->
+              <ng-container *ngIf="problem.type === 'mcq'">
+                <li *ngFor="let option of problem.options; let j = index">
+                  {{ j === problem.correctMcqIndex ? '✔️' : '⚪' }} {{ option.text }}
+                </li>
+              </ng-container>
             </ul>
           </div>
         </div>
@@ -49,7 +52,7 @@
         </div>
       </div>
   
-      <!-- EDIT MODE -->
+      <!-- EDIT MODE (Rest of the file is unchanged) -->
       <form *ngIf="!isPreviewing" #caseStudyForm="ngForm" (ngSubmit)="onSubmit()">
         
         <div class="guidelines-box">
@@ -168,3 +171,5 @@
       </form>
     </div>
   </div>
+  
+  
