@@ -1,14 +1,14 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './login/login.component';
+// Corrected paths for layout components to point inside the 'dashboard' folder
 import { MentorLayoutComponent } from './dashboard/layout/mentor-layout/mentor-layout.component';
+import { StudentLayoutComponent } from './dashboard/layout/student-layout/student-layout.component';
 import { MentorDashboardComponent } from './dashboard/mentor-dashboard/mentor-dashboard.component';
 import { StudentRegComponent } from './student-reg/student-reg.component';
 import { MentorRegComponent } from './mentor-reg/mentor-reg.component';
 import { AuthGuard } from './auth.guard';
-
-// --- ADD THESE IMPORTS ---
-import { StudentLayoutComponent } from './dashboard/layout/student-layout/student-layout.component';
 import { StudentDashboardComponent } from './dashboard/student-dashboard/student-dashboard.component';
+import { CreateHubComponent } from './dashboard/create-hub/create-hub.component';
 
 
 export const routes: Routes = [
@@ -17,25 +17,24 @@ export const routes: Routes = [
   { path: 'student-reg', component: StudentRegComponent },
   { path: 'mentor-reg', component: MentorRegComponent },
 
-  // Existing Mentor Route
+  // Updated Mentor Route
   {
     path: 'mentor',
     component: MentorLayoutComponent,
     canActivate: [AuthGuard],
     children: [
       { path: 'dashboard', component: MentorDashboardComponent },
-      // ... other mentor routes can go here
+      { path: 'create', component: CreateHubComponent },
     ],
   },
 
-  // --- ADD THIS NEW STUDENT ROUTE ---
+  // Existing Student Route
   {
     path: 'student',
     component: StudentLayoutComponent,
-    canActivate: [AuthGuard], // Protect the student dashboard as well
+    canActivate: [AuthGuard], 
     children: [
       { path: 'dashboard', component: StudentDashboardComponent },
-      // ... other student routes can go here
     ],
   },
 
