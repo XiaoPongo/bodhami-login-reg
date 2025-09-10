@@ -1,25 +1,52 @@
-<!-- The background image is now applied using style binding -->
-<div
-  class="dashboard-wrapper"
-  [style.backgroundImage]="'url(' + backgroundImageUrl + ')'"
->
-  <h1 class="welcome-message">
-    Welcome, {{ user?.firstName || 'Student' }}!
-  </h1>
-
-  <div class="stats-bar">
-    <div class="stat">
-      <i class="fas fa-star"></i>
-      <span>{{ xp }} XP</span>
+<div class="dashboard-wrapper" [style.backgroundImage]="'url(' + dashboardImageUrl + ')'">
+  <div class="content-overlay">
+    
+    <!-- Header Welcome -->
+    <div class="welcome-header">
+      <h1>Welcome, {{ welcomeName }}!</h1>
     </div>
-    <div class="stat">
-      <i class="fas fa-trophy"></i>
-      <span>Level {{ level }}</span>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <i class="fas fa-star"></i>
+        <span>{{ xp }} XP</span>
+      </div>
+      <div class="stat-item">
+        <i class="fas fa-trophy"></i>
+        <span>Level {{ level }}</span>
+      </div>
+    </div>
+
+    <!-- Interactive Buttons -->
+    <div class="interactive-elements">
+      <button class="btn-quiz">Start Quiz</button>
+      <button class="btn-achievements" (click)="toggleAchievements()">Achievements</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Achievements Modal -->
+<div class="modal-overlay" *ngIf="showAchievements" (click)="toggleAchievements()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2><i class="fas fa-medal"></i> Your Achievements</h2>
+      <button class="btn-close" (click)="toggleAchievements()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="achievements-list">
+        <div class="achievement-item" *ngFor="let ach of achievements" [class.locked]="!ach.unlocked">
+          <div class="achievement-icon">
+            <i [class]="ach.icon"></i>
+          </div>
+          <div class="achievement-details">
+            <h3>{{ ach.title }}</h3>
+            <p>{{ ach.description }}</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-
-  <!-- Interactive Buttons -->
-  <button class="quiz-button">Start Quiz</button>
-  <button class="achievements-button">Achievements</button>
 </div>
 

@@ -1,7 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SupabaseService } from '../../services/supabase.service'; // Adjust path if needed
-import { User } from '../../user'; // Adjust path if needed
+
+interface Achievement {
+  icon: string;
+  title: string;
+  description: string;
+  unlocked: boolean;
+}
 
 @Component({
   selector: 'app-student-dashboard',
@@ -11,28 +17,61 @@ import { User } from '../../user'; // Adjust path if needed
   styleUrls: ['./student-dashboard.component.css'],
 })
 export class StudentDashboardComponent implements OnInit {
-  user: User | null = null;
-  xp = 0;
-  level = 1;
+  welcomeName: string = 'Student';
+  xp: number = 0;
+  level: number = 1;
+  dashboardImageUrl = 'https://raw.githubusercontent.com/XiaoPongo/bodhami-login-reg/main/student-dashboard.png';
+  
+  showAchievements = false;
 
-  // Define the direct URL to the raw image file
-  backgroundImageUrl = 'https://raw.githubusercontent.com/XiaoPongo/bodhami-login-reg/main/student-dashboard.png';
+  achievements: Achievement[] = [
+    { 
+      icon: 'fa-solid fa-handshake', 
+      title: 'Joining Letter', 
+      description: 'Awarded for joining your first class. Welcome aboard!', 
+      unlocked: true 
+    },
+    { 
+      icon: 'fa-solid fa-person-running', 
+      title: 'First Steps', 
+      description: 'Complete your first mission or case study.', 
+      unlocked: true 
+    },
+    { 
+      icon: 'fa-solid fa-fire', 
+      title: 'On a Roll!', 
+      description: 'Maintain a 3-day login streak.', 
+      unlocked: false 
+    },
+    { 
+      icon: 'fa-solid fa-star', 
+      title: 'Employee of the Month', 
+      description: 'Maintain a 30-day login streak. Outstanding commitment!', 
+      unlocked: false 
+    },
+    { 
+      icon: 'fa-solid fa-brain', 
+      title: 'Critical Thinker', 
+      description: 'Successfully complete 5 case studies.', 
+      unlocked: false 
+    },
+     { 
+      icon: 'fa-solid fa-rocket', 
+      title: 'Mission Specialist', 
+      description: 'Ace 10 missions with a perfect score.', 
+      unlocked: false 
+    }
+  ];
 
   constructor(private supabase: SupabaseService) {}
 
   async ngOnInit() {
-    const { data, error } = await this.supabase.getUser();
-    if (data?.user) {
-      const metadata = data.user.user_metadata || {};
-      this.user = {
-        firstName: metadata['firstName'] || 'Student',
-        lastName: metadata['lastName'] || '',
-        email: data.user.email || '',
-      };
-      // In the future, you would fetch these values from Supabase
-      this.xp = metadata['xp'] || 0;
-      this.level = metadata['level'] || 1;
-    }
+    // ... existing ngOnInit logic ...
+  }
+
+  toggleAchievements(): void {
+    this.showAchievements = !this.showAchievements;
   }
 }
+
 

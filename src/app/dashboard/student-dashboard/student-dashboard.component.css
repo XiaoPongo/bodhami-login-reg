@@ -1,97 +1,225 @@
-.dashboard-wrapper {
-  /* Core properties to make the container fill the layout space */
-  width: 100%;
+:host {
+  display: block;
   height: 100%;
-  position: relative; /* This is the anchor for all the positioned elements inside */
-  overflow: hidden; /* Prevents content from spilling out */
-
-  /* --- Key properties for the background image --- */
-  background-size: cover; /* Scales the image to cover the entire container */
-  background-position: center; /* Centers the image within the container */
-  background-repeat: no-repeat; /* Ensures the image does not tile */
+  width: 100%;
 }
 
-.welcome-message {
+.dashboard-wrapper {
+  height: 100%;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.content-overlay {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 1200px; /* Control max width of content */
+}
+
+/* Welcome Header */
+.welcome-header {
   position: absolute;
   top: 40px;
   left: 50%;
   transform: translateX(-50%);
-  color: #3f4d60;
-  font-size: 2.2rem;
-  font-weight: 600;
-  text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.4);
+  color: #334155;
+  text-align: center;
+  font-size: 1.5rem;
 }
 
+/* Stats Bar */
 .stats-bar {
   position: absolute;
-  top: 15%;
-  left: 50.5%;
-  transform: translateX(-50%);
-  width: 320px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
-  border-radius: 12px;
-  padding: 10px 20px;
+  top: 13%;
+  left: 31.5%;
+  width: 32%;
   display: flex;
+  justify-content: space-around;
   align-items: center;
-  justify-content: space-evenly;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 12px 20px;
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
 }
-
-.stat {
+.stat-item {
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 1.1rem;
-  font-weight: 500;
-  color: #3f4d60;
+  font-weight: 600;
+  color: #475569;
+}
+.stat-item i {
+  color: #f59e0b;
 }
 
-.stat i {
-  font-size: 1.6rem;
-}
-.stat .fa-star { color: #f5b74b; }
-.stat .fa-trophy { color: #e8a03e; }
-
-.quiz-button {
+/* Interactive Buttons */
+.interactive-elements {
   position: absolute;
-  top: 52%;
-  left: 50.5%;
-  transform: translate(-50%, -50%);
-  padding: 16px 70px;
-  font-size: 1.5rem;
-  background-color: #4a90e2;
+}
+.btn-quiz {
+  position: absolute;
+  top: 260px;
+  left: 450px;
+  background-color: #3b82f6;
   color: white;
-  border: none;
+  padding: 18px 60px;
   border-radius: 12px;
-  cursor: pointer;
+  font-size: 1.5rem;
   font-weight: bold;
-  box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
-  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+  transition: all 0.2s ease-in-out;
 }
-.quiz-button:hover {
-  transform: translate(-50%, -52%);
-  background-color: #357abd;
+.btn-quiz:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+}
+.btn-achievements {
+  position: absolute;
+  top: 160px;
+  left: 890px;
+  background-color: #10b981;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+  transition: all 0.2s ease-in-out;
+}
+.btn-achievements:hover {
+  background-color: #059669;
+  transform: translateY(-2px);
 }
 
-.achievements-button {
-  position: absolute;
-  top: 26.5%;
-  left: 85.5%;
-  transform: translate(-50%, -50%);
-  padding: 10px 20px;
-  font-size: 0.9rem;
-  background-color: #5dbe81;
-  color: white;
+
+/* Achievements Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(17, 24, 39, 0.6);
+  display: grid;
+  place-items: center;
+  z-index: 3000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background-color: #f8fafc;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.modal-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.modal-header h2 i {
+  color: #f59e0b;
+}
+.btn-close {
+  background: none;
   border: none;
-  border-radius: 8px;
+  font-size: 1.5rem;
   cursor: pointer;
-  font-weight: bold;
-  box-shadow: 0 4px 12px rgba(93, 190, 129, 0.4);
+  color: #94a3b8;
+  transition: color 0.2s ease;
+}
+.btn-close:hover {
+  color: #1e293b;
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.achievements-list {
+  display: grid;
+  gap: 16px;
+}
+
+.achievement-item {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background-color: white;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
   transition: all 0.2s ease;
 }
-.achievements-button:hover {
-  transform: translate(-50%, -52%);
-  background-color: #4a9e6a;
+.achievement-item:not(.locked) {
+  border-left: 5px solid #10b981;
+}
+
+.achievement-item.locked {
+  filter: grayscale(100%);
+  opacity: 0.6;
+  border-left: 5px solid #94a3b8;
+}
+
+.achievement-icon {
+  font-size: 2rem;
+  color: #3b82f6;
+  width: 50px;
+  text-align: center;
+}
+.achievement-item:not(.locked) .achievement-icon {
+  color: #10b981;
+}
+
+.achievement-details h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: #1e293b;
+}
+.achievement-details p {
+  margin: 0;
+  color: #64748b;
 }
 
