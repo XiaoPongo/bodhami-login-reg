@@ -1,21 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
-// --- Data Interfaces ---
-interface Scenario {
-  description: string;
-  answers: string[];
-}
+// Define the structure of your Mission object
 interface Mission {
   title: string;
   description: string;
-  xp: number | null;
+  xp: number;
   passages: string[];
-  phrases: string[];
-  scenarios: Scenario[];
-  timerPerQuestion: number | null;
-  chapter: string | null;
+  scenarios: { description: string; answers: string[] }[];
+  chapter: string;
   classIds: string[];
 }
 
@@ -27,112 +21,79 @@ interface Mission {
   styleUrls: ['./mission-form.component.css']
 })
 export class MissionFormComponent implements OnInit {
-  mission: Mission = this.createDefaultMission();
-  isSubmitted = false;
-  showPreview = false;
+  mission: Mission = {
+    title: '',
+    description: '',
+    xp: 100,
+    passages: [''],
+    scenarios: [{ description: '', answers: [''] }],
+    chapter: '',
+    classIds: []
+  };
 
-  // Mock data for class selection
+  // MOCK DATA: In a real app, this would come from a service
   availableClasses = [
-    { id: 'class_101', name: 'Grade 5 Math - 2025' },
-    { id: 'class_102', name: 'Grade 6 Science - 2025' },
-    { id: 'class_103', name: 'History 101' }
+    { id: 'c1', name: 'Grade 5 Math - 2025' },
+    { id: 'c2', name: 'Grade 6 Science - 2025' },
+    { id: 'c3', name: 'History 101' }
   ];
-  availableChapters = ['Algebra', 'Biology', 'Ancient Civilizations'];
+
+  // ====== THIS IS THE FIX ======
+  // Add the 'chapters' property that the template needs
+  chapters: string[] = [
+    'Chapter 1: Introduction to Algebra',
+    'Chapter 2: The Solar System',
+    'Chapter 3: Ancient Civilizations',
+    'Chapter 4: The Scientific Method'
+  ];
+
+  constructor() { }
 
   ngOnInit(): void {
-    // Load draft from local storage on component initialization
-    const draft = localStorage.getItem('missionDraft');
-    if (draft) {
-      this.mission = JSON.parse(draft);
-    }
+    // Auto-save logic can go here
   }
 
-  createDefaultMission(): Mission {
-    return {
-      title: '',
-      description: '',
-      xp: null,
-      passages: [''],
-      phrases: [''],
-      scenarios: [{ description: '', answers: [''] }],
-      timerPerQuestion: null,
-      chapter: null,
-      classIds: []
-    };
+  // --- Passage Methods ---
+  addPassage() {
+    this.mission.passages.push('');
+  }
+  removePassage(index: number) {
+    this.mission.passages.splice(index, 1);
   }
 
-  // --- Dynamic Array Methods ---
-  addPassage() { this.mission.passages.push(''); this.saveDraft(); }
-  removePassage(index: number) { this.mission.passages.splice(index, 1); this.saveDraft(); }
+  // --- Scenario & Answer Methods ---
+  addScenario() {
+    this.mission.scenarios.push({ description: '', answers: [''] });
+  }
+  removeScenario(scenarioIndex: number) {
+    this.mission.scenarios.splice(scenarioIndex, 1);
+  }
+  addAnswer(scenarioIndex: number) {
+    this.mission.scenarios[scenarioIndex].answers.push('');
+  }
+  removeAnswer(scenarioIndex: number, answerIndex: number) {
+    this.mission.scenarios[scenarioIndex].answers.splice(answerIndex, 1);
+  }
 
-  addPhrase() { this.mission.phrases.push(''); this.saveDraft(); }
-  removePhrase(index: number) { this.mission.phrases.splice(index, 1); this.saveDraft(); }
-
-  addScenario() { this.mission.scenarios.push({ description: '', answers: [''] }); this.saveDraft(); }
-  removeScenario(index: number) { this.mission.scenarios.splice(index, 1); this.saveDraft(); }
-
-  addAnswer(scenarioIndex: number) { this.mission.scenarios[scenarioIndex].answers.push(''); this.saveDraft(); }
-  removeAnswer(scenarioIndex: number, answerIndex: number) { this.mission.scenarios[scenarioIndex].answers.splice(answerIndex, 1); this.saveDraft(); }
-
-  // --- Checkbox Helper ---
-  toggleClassSelection(classId: string) {
-    const index = this.mission.classIds.indexOf(classId);
-    if (index > -1) {
-      this.mission.classIds.splice(index, 1);
-    } else {
+  // --- Class Assignment ---
+  onClassChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const classId = input.value;
+    if (input.checked) {
       this.mission.classIds.push(classId);
+    } else {
+      const index = this.mission.classIds.indexOf(classId);
+      if (index > -1) {
+        this.mission.classIds.splice(index, 1);
+      }
     }
-    this.saveDraft();
   }
 
-  // --- Form Actions ---
-  saveDraft() {
-    localStorage.setItem('missionDraft', JSON.stringify(this.mission));
-  }
 
+  // --- Form Submission ---
   onSubmit() {
     console.log('Form Submitted!', this.mission);
-    // Here you would typically send the data to a backend service.
-    // For now, we'll just show the success screen.
-    this.isSubmitted = true;
-    localStorage.removeItem('missionDraft'); // Clear draft on successful submission
-  }
-
-  createNew() {
-    this.mission = this.createDefaultMission();
-    this.isSubmitted = false;
-  }
-
-  // --- Export Functionality ---
-  exportData(format: 'json' | 'csv') {
-    const dataStr = format === 'json'
-      ? JSON.stringify(this.mission, null, 2)
-      : this.convertToCSV(this.mission);
-
-    const blob = new Blob([dataStr], { type: format === 'json' ? 'application/json' : 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Mission-${Date.now()}.${format}`;
-    a.click();
-    window.URL.revokeObjectURL(url);
-  }
-
-  private convertToCSV(data: Mission): string {
-    let csv = `Title,Description,XP,Chapter\n`;
-    csv += `"${data.title}","${data.description}",${data.xp},"${data.chapter}"\n\n`;
-    csv += `Passages\n"${data.passages.join('","')}"\n\n`;
-    csv += `Phrases\n"${data.phrases.join('","')}"\n\n`;
-    csv += `Scenarios\n`;
-    data.scenarios.forEach(s => {
-      csv += `"${s.description}","${s.answers.join('|')}"\n`;
-    });
-    return csv;
-  }
-
-  // Helper for ngFor with primitives
-  trackByIndex(index: number, obj: any): any {
-    return index;
+    // Logic to save data to Supabase or generate a file will go here
   }
 }
 
