@@ -134,4 +134,39 @@
   }
   .scenario-preview {
     margin-bottom: 16px;
-  }  
+  }
+
+  /* ... all existing styles ... */
+
+/* ====== PREVIEW & SUCCESS STYLES ====== */
+.success-view {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .success-view i {
+    font-size: 64px;
+    color: #48bb78;
+  }
+  .success-view h2 {
+    font-size: 28px;
+    margin-top: 24px;
+  }
+  .success-view p {
+    font-size: 16px;
+    color: #718096;
+    max-width: 450px;
+    margin: 12px auto 32px; /* Increased bottom margin */
+  }
+  
+  /* --- NEW: Success Actions Container --- */
+  .success-actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap; /* Allows buttons to wrap on smaller screens */
+  }
+  
+  /* ... all existing preview styles ... */
+  
+  

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router'; // Import the Router
 
 interface Mission {
   title: string;
@@ -33,7 +34,7 @@ export class MissionFormComponent implements OnInit {
     { id: 'c4', name: 'Introduction to Physics' }
   ];
 
-  constructor() { }
+  constructor(private router: Router) { } // Inject the Router
 
   ngOnInit(): void {
     // Future: Load draft from localStorage
@@ -61,8 +62,7 @@ export class MissionFormComponent implements OnInit {
   addAnswer(scenarioIndex: number) { this.mission.scenarios[scenarioIndex].answers.push(''); }
   removeAnswer(scenarioIndex: number, answerIndex: number) { this.mission.scenarios[scenarioIndex].answers.splice(answerIndex, 1); }
 
-  // --- FIX: trackBy Functions ---
-  // These prevent Angular from re-rendering the whole list on every keystroke, which fixes the focus loss bug.
+  // --- trackBy Functions ---
   trackByFn(index: number, item: any): number {
     return index;
   }
@@ -99,5 +99,63 @@ export class MissionFormComponent implements OnInit {
     this.mission = this.getInitialMissionState();
     this.isSubmitted = false;
   }
-}
+  
+  // ====== ADDED: Navigation Method ======
+  navigateToDashboard() {
+    this.router.navigate(['/mentor/dashboard']);
+  }
 
+  // ====== ADDED: CSV Export Method ======
+  exportToCsv() {
+    const mission = this.mission;
+    const headers = ['type', 'key', 'value'];
+    const rows = [];
+
+    const escapeCsv = (val: any) => {
+      if (typeof val === 'string') {
+        return `"${val.replace(/"/g, '""')}"`;
+      }
+      return val;
+    };
+
+    // Add mission metadata
+    rows.push(['metadata', 'title', escapeCsv(mission.title)]);
+    rows.push(['metadata', 'description', escapeCsv(mission.description)]);
+    rows.push(['metadata', 'xp', mission.xp]);
+
+    // Add passages
+    mission.passages.forEach((passage, index) => {
+      rows.push(['passage', index + 1, escapeCsv(passage)]);
+    });
+
+    // Add scenarios and their answers
+    mission.scenarios.forEach((scenario, sIndex) => {
+      rows.push(['scenario', sIndex + 1, escapeCsv(scenario.description)]);
+      scenario.answers.forEach((answer, aIndex) => {
+        rows.push(['answer', `${sIndex + 1}.${aIndex + 1}`, escapeCsv(answer)]);
+      });
+    });
+
+    // Add assigned class IDs
+    mission.classIds.forEach(classId => {
+      rows.push(['class', 'id', escapeCsv(classId)]);
+    });
+
+    // Combine headers and rows into CSV string
+    let csvContent = headers.join(',') + '\n';
+    rows.forEach(rowArray => {
+      csvContent += rowArray.join(',') + '\n';
+    });
+
+    // Create and trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+    link.setAttribute("download", `mission_${timestamp}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}
