@@ -1,30 +1,42 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../auth.service';
+import { ClassService, Classroom } from '../../services/class.service'; // Import the service
 
 @Component({
   selector: 'app-mentor-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink], // Add RouterLink
   templateUrl: './mentor-dashboard.component.html',
   styleUrls: ['./mentor-dashboard.component.css'],
 })
-export class MentorDashboardComponent implements OnInit {
+export class MentorDashboardComponent implements OnInit, OnDestroy {
   user: any = null;
+  classes: Classroom[] = [];
+  private classSubscription!: Subscription;
 
-  // Updated placeholder data to match the new design
-  classes = [
-    { name: 'Grade 6 Science - 2025', students: 28, missions: 5 },
-    { name: 'History 101', students: 32, missions: 3 },
-    { name: 'Introduction to Physics', students: 22, missions: 8 },
-  ];
-
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService, 
+    private router: Router,
+    private classService: ClassService // Inject the new service
+  ) {}
 
   ngOnInit(): void {
-    // In a real app, you'd fetch this from your service
     this.user = this.authService.getCurrentUser();
+    
+    // Subscribe to the class data from the service
+    this.classSubscription = this.classService.getClasses().subscribe(classes => {
+      this.classes = classes;
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Unsubscribe to prevent memory leaks
+    if (this.classSubscription) {
+      this.classSubscription.unsubscribe();
+    }
   }
 
   navigateToCreate(): void {

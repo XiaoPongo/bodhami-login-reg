@@ -28,13 +28,8 @@
       <i class="fas fa-chalkboard-teacher card-icon"></i>
       <h3 class="card-title">Manage Classes</h3>
       <p class="card-description">View student progress, edit class details, and manage enrollments.</p>
-      <a href="#" class="card-link">Go to Classes <i class="fas fa-arrow-right"></i></a>
-    </div>
-    <div class="card view-students">
-      <i class="fas fa-users card-icon"></i>
-      <h3 class="card-title">View Top Students</h3>
-      <p class="card-description">Recognize top performers and see leaderboards.</p>
-      <a href="#" class="card-link">See Leaderboard <i class="fas fa-arrow-right"></i></a>
+      <!-- This now links to your new page -->
+      <a routerLink="/mentor/classes" class="card-link">Go to Classes <i class="fas fa-arrow-right"></i></a>
     </div>
   </div>
 
@@ -44,23 +39,21 @@
     <div class="active-classes-container">
       <h3 class="section-title"><i class="fas fa-list-ul"></i> Active Classes</h3>
       <div class="class-list">
+        <div *ngIf="classes.length === 0" class="class-item placeholder">
+           <p>No classes created yet. Go to "Manage Classes" to start.</p>
+        </div>
         <div class="class-item" *ngFor="let cls of classes">
           <div class="class-icon-wrapper">
             <i class="fas fa-layer-group"></i>
           </div>
           <div class="class-details">
             <span class="class-name">{{ cls.name }}</span>
-            <span class="class-info">{{ cls.students }} Students • {{ cls.missions }} Missions</span>
+            <span class="class-info">{{ cls.students.length }} Students • 0 Missions</span>
           </div>
           <div class="class-actions">
             <button class="btn-icon" title="Edit Class"><i class="fas fa-pencil-alt"></i></button>
             <button class="btn-icon" title="View Progress"><i class="fas fa-chart-line"></i></button>
           </div>
-        </div>
-        <div class="class-item placeholder">
-          <a href="#" class="add-class-link">
-            <i class="fas fa-plus-circle"></i> Add a new class
-          </a>
         </div>
       </div>
     </div>
@@ -98,5 +91,3 @@
     </div>
   </div>
 </div>
-
-
