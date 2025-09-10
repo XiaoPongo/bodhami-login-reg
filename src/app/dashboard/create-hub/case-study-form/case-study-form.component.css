@@ -1,154 +1,210 @@
-/* Using :host to apply styles within the component's view encapsulation */
+/* Using a distinct color palette for Case Studies */
 :host {
-    display: block;
-    font-family: 'Inter', sans-serif; /* A clean, modern font */
+    --primary-color: #a52a2a; /* Maroon */
+    --primary-hover: #8b0000; /* Darker Red */
+    --secondary-color: #6c757d;
+    --secondary-hover: #5a6268;
+    --bg-color: #f8f9fa;
+    --border-color: #dee2e6;
+    --header-bg: #f1eaea; /* Light maroon tint */
+    --text-color: #212529;
+    --label-color: #495057;
+    --tag-bg: #e9ecef;
+    --tag-text: #495057;
   }
   
+  /* Base Container */
   .form-container {
-    padding: 24px;
     background-color: #ffffff;
+    padding: 24px 32px;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     max-width: 900px;
     margin: 0 auto;
   }
   
-  h2 {
-    font-size: 24px;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 24px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 12px;
-  }
-  
-  /* --- Form Sections (e.g., Basic Info, Content Builder) --- */
+  /* Form Sections */
   .form-section {
-    margin-bottom: 32px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+    background-color: #fff;
   }
   
   .section-header {
-    font-size: 18px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+  }
+  .section-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
     font-weight: 600;
-    color: #444;
-    margin-bottom: 16px;
+    color: var(--primary-color);
   }
   
-  /* --- Individual Form Fields --- */
+  /* Form Groups and Inputs */
   .form-group {
     margin-bottom: 20px;
   }
-  
   label {
     display: block;
-    font-weight: 500;
+    font-weight: 600;
     margin-bottom: 8px;
-    color: #555;
+    color: var(--label-color);
+    font-size: 0.9rem;
   }
-  
   input[type="text"],
-  input[type="number"],
-  textarea,
-  select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 16px;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  input:focus,
-  textarea:focus,
-  select:focus {
-    outline: none;
-    border-color: #1a73e8;
-    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15);
-  }
-  
   textarea {
-    min-height: 120px;
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+  }
+  textarea {
     resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+  }
+  input[type="text"]:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(165, 42, 42, 0.15);
   }
   
-  /* --- Dynamic "Add More" Sections --- */
-  .dynamic-list-item {
+  /* Tag Input System */
+  .tag-input-container {
+    display: flex;
+    gap: 8px;
+  }
+  .tag-input-container input {
+    flex-grow: 1;
+  }
+  .btn-add-tag {
+    flex-shrink: 0;
+    padding: 0 16px;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  .btn-add-tag:hover {
+    background-color: var(--secondary-hover);
+  }
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .tag-chip {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
+    background-color: var(--tag-bg);
+    color: var(--tag-text);
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
   }
-  
-  .dynamic-list-item input {
-    flex-grow: 1; /* Input takes up available space */
-  }
-  
-  /* --- Button Styling --- */
-  .btn {
-    padding: 10px 18px;
-    font-size: 15px;
-    font-weight: 600;
-    border-radius: 6px;
+  .btn-remove-tag {
+    background: none;
     border: none;
+    color: #888;
+    font-size: 1.2rem;
+    margin-left: 6px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    padding: 0;
+    line-height: 1;
+  }
+  .btn-remove-tag:hover {
+    color: #333;
   }
   
-  .btn-add {
-    background-color: #e8f0fe;
-    color: #1a73e8;
+  /* Class Assignment (re-using mission styles) */
+  .class-selection-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-color);
   }
-  .btn-add:hover {
-    background-color: #d2e3fc;
+  .class-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .class-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-color);
+  }
+  .class-item label {
+    font-weight: 500;
+    margin-bottom: 0;
   }
   
-  .btn-remove {
-    background-color: #fce8e6;
-    color: #d93025;
-  }
-  .btn-remove:hover {
-    background-color: #f9d2ce;
-  }
-  
-  /* --- Main Form Action Buttons --- */
+  /* Form Actions */
   .form-actions {
     display: flex;
     justify-content: flex-end;
     gap: 12px;
-    margin-top: 32px;
+    margin-top: 24px;
     padding-top: 24px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--border-color);
   }
-  
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
   .btn-primary {
-    background-color: #1a73e8;
+    background-color: var(--primary-color);
     color: white;
   }
-  .btn-primary:hover {
-    background-color: #185abc;
-  }
-  
+  .btn-primary:hover { background-color: var(--primary-hover); }
   .btn-secondary {
-    background-color: transparent;
-    color: #1a73e8;
-    border: 1px solid #1a73e8;
+    background-color: var(--bg-color);
+    color: var(--label-color);
+    border: 1px solid var(--border-color);
   }
-  .btn-secondary:hover {
-    background-color: #e8f0fe;
-  }
-  
-  .btn-tertiary {
-    background-color: #f1f3f4;
-    color: #5f6368;
-  }
-  .btn-tertiary:hover {
-    background-color: #e8eaed;
+  .btn-secondary:hover { background-color: #e9ecef; }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
   }
   
-  /* --- Checkbox Styling for Class Assignment --- */
-  .checkbox-group label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 400;
-  }  
+  /* Preview & Success Styles */
+  .success-view { text-align: center; padding: 60px 20px; }
+  .success-view i { font-size: 64px; color: var(--primary-color); }
+  .success-view h2 { font-size: 28px; margin-top: 24px; }
+  .success-view p { font-size: 16px; color: #718096; max-width: 450px; margin: 12px auto 32px; }
+  .success-actions { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+  
+  .preview-container { padding: 24px; border: 1px solid var(--border-color); border-radius: 8px; background-color: #fff; }
+  .preview-section { margin-bottom: 24px; }
+  .preview-section h3 { font-size: 1.8rem; margin-bottom: 8px; }
+  .preview-section h4 { font-size: 1.1rem; color: var(--primary-color); border-bottom: 2px solid var(--header-bg); padding-bottom: 8px; margin-bottom: 12px; }
+  .preview-section p { white-space: pre-wrap; line-height: 1.6; }
+  .tag-list-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }  

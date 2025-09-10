@@ -1,10 +1,131 @@
 <div class="form-container">
-    <div class="form-header">
-      <h2>Create New Case Study</h2>
+  
+    <!-- ====== SUCCESS VIEW ====== -->
+    <div *ngIf="isSubmitted" class="success-view">
+      <i class="fas fa-check-circle"></i>
+      <h2>Case Study Created!</h2>
+      <p>Your new case study has been saved. You can now create another, export the data, or return to the dashboard.</p>
+      <div class="success-actions">
+        <button type="button" class="btn btn-primary" (click)="resetForm()">
+          <i class="fas fa-plus"></i> Create Another
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="exportToCsv()">
+          <i class="fas fa-download"></i> Export to CSV
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="navigateToDashboard()">
+          <i class="fas fa-tachometer-alt"></i> Return to Dashboard
+        </button>
+      </div>
     </div>
-    <div class="placeholder-content">
-      <h3>Coming Soon!</h3>
-      <p>The form for creating detailed case studies will be available here.</p>
+  
+    <!-- ====== FORM & PREVIEW CONTAINER ====== -->
+    <div *ngIf="!isSubmitted">
+      <h2>{{ isPreviewing ? 'Case Study Preview' : 'Create Case Study' }}</h2>
+  
+      <!-- ====== PREVIEW MODE ====== -->
+      <div *ngIf="isPreviewing" class="preview-container">
+        <div class="preview-section">
+          <h3>{{ caseStudy.title || 'Untitled Case Study' }}</h3>
+          <div class="tag-list-preview">
+            <span *ngFor="let tag of caseStudy.tags" class="tag-chip">{{ tag }}</span>
+          </div>
+        </div>
+        <div class="preview-section">
+          <h4>Passage</h4>
+          <p [innerHTML]="caseStudy.passage || 'No passage provided.'"></p>
+        </div>
+        <div class="preview-section">
+          <h4>Scenario</h4>
+          <p>{{ caseStudy.scenario || 'No scenario provided.' }}</p>
+        </div>
+        <div class="preview-section">
+          <h4>Critical Thinking Question</h4>
+          <p>{{ caseStudy.question || 'No question provided.' }}</p>
+        </div>
+        <div class="preview-section">
+          <h4>Mentor's Feedback / Model Response</h4>
+          <p>{{ caseStudy.summaryFeedback || 'No feedback guidelines provided.' }}</p>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="togglePreview()">
+            <i class="fas fa-edit"></i> Back to Edit
+          </button>
+        </div>
+      </div>
+  
+      <!-- ====== EDIT MODE ====== -->
+      <form *ngIf="!isPreviewing" #caseStudyForm="ngForm" (ngSubmit)="onSubmit()">
+        
+        <!-- Basic Info Section -->
+        <div class="form-section">
+          <div class="section-header"><h3>Core Information</h3></div>
+          <div class="form-group">
+            <label for="caseTitle">Case Title *</label>
+            <input type="text" id="caseTitle" name="caseTitle" [(ngModel)]="caseStudy.title" required>
+          </div>
+          <div class="form-group">
+            <label for="passage">Passage / Context</label>
+            <textarea id="passage" name="passage" rows="6" [(ngModel)]="caseStudy.passage" placeholder="Provide the background narrative or reading material..."></textarea>
+          </div>
+        </div>
+        
+        <!-- Problem Section -->
+        <div class="form-section">
+          <div class="section-header"><h3>The Problem</h3></div>
+          <div class="form-group">
+            <label for="scenario">Scenario *</label>
+            <textarea id="scenario" name="scenario" rows="4" [(ngModel)]="caseStudy.scenario" required placeholder="Frame the real-life problem or dilemma..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="question">Critical Thinking Question *</label>
+            <input type="text" id="question" name="question" [(ngModel)]="caseStudy.question" required placeholder="Ask the core thought-provoking question...">
+          </div>
+        </div>
+  
+        <!-- Guidance & Categorization Section -->
+        <div class="form-section">
+          <div class="section-header"><h3>Guidance & Categorization</h3></div>
+          <div class="form-group">
+            <label for="summaryFeedback">Expected Answer Guidelines (Mentor's Feedback)</label>
+            <textarea id="summaryFeedback" name="summaryFeedback" rows="4" [(ngModel)]="caseStudy.summaryFeedback" placeholder="Provide a 'model thought process' or feedback outline..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Tags / Skills Tested</label>
+            <div class="tag-input-container">
+              <input type="text" placeholder="Type a tag and press Enter" [(ngModel)]="tagInput" (keydown.enter)="addTag($event)" name="tagInput">
+              <button type="button" class="btn-add-tag" (click)="addTag($event)">Add</button>
+            </div>
+            <div class="tag-list">
+              <span *ngFor="let tag of caseStudy.tags; let i = index" class="tag-chip">
+                {{ tag }}
+                <button type="button" class="btn-remove-tag" (click)="removeTag(i)">&times;</button>
+              </span>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Class Assignment Section -->
+        <div class="form-section">
+          <div class="section-header"><h3>Class Assignment</h3></div>
+          <label>Assign to Classes *</label>
+          <div class="class-selection-container">
+            <div *ngFor="let class of availableClasses" class="class-item">
+              <input type="checkbox" [id]="'class-' + class.id" [value]="class.id" (change)="onClassChange($event)">
+              <label [for]="'class-' + class.id">{{ class.name }}</label>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="togglePreview()">
+            <i class="fas fa-eye"></i> Preview
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="caseStudyForm.invalid || caseStudy.classIds.length === 0">
+            <i class="fas fa-paper-plane"></i> Submit Case Study
+          </button>
+        </div>
+      </form>
     </div>
   </div>
   
