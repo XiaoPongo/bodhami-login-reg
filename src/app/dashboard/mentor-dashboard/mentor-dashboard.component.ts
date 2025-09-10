@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../../auth.service';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router'; // <-- IMPORT THE ROUTER
+import { Router } from '@angular/router';
+import { AuthService } from '../../auth.service';
 
 @Component({
   selector: 'app-mentor-dashboard',
@@ -12,25 +12,21 @@ import { Router } from '@angular/router'; // <-- IMPORT THE ROUTER
 })
 export class MentorDashboardComponent implements OnInit {
   user: any = null;
+
+  // Updated placeholder data to match the new design
   classes = [
-    { name: 'Math Class' },
-    { name: 'Science Class' },
-    { name: 'History Class' },
-  ];
-  topStudents = [
-    { name: 'Alice', xp: 1200, progress: 80 },
-    { name: 'Bob', xp: 950, progress: 60 },
-    { name: 'Charlie', xp: 870, progress: 55 },
+    { name: 'Grade 6 Science - 2025', students: 28, missions: 5 },
+    { name: 'History 101', students: 32, missions: 3 },
+    { name: 'Introduction to Physics', students: 22, missions: 8 },
   ];
 
-  // INJECT THE ROUTER IN THE CONSTRUCTOR
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
+    // In a real app, you'd fetch this from your service
     this.user = this.authService.getCurrentUser();
   }
 
-  // IMPLEMENT THE NAVIGATION LOGIC
   navigateToCreate(): void {
     this.router.navigate(['/mentor/create']);
   }
