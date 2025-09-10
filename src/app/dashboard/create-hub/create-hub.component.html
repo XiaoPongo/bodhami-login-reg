@@ -1,0 +1,50 @@
+<div class="create-hub-container">
+    <!-- Tab Navigation -->
+    <div class="hub-tabs">
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'mission'"
+        (click)="selectTab('mission')">
+        <i class="fas fa-rocket"></i> Mission
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'case-study'"
+        (click)="selectTab('case-study')">
+        <i class="fas fa-file-alt"></i> Case Study
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'minigame'"
+        (click)="selectTab('minigame')">
+        <i class="fas fa-gamepad"></i> Minigame
+      </button>
+      <button
+        class="tab-button"
+        disabled>
+        <i class="fas fa-lock"></i> Coming Soon
+      </button>
+    </div>
+  
+    <!-- Content Area -->
+    <div class="hub-content">
+      <div [hidden]="activeTab !== 'mission'">
+        <app-mission-form></app-mission-form>
+      </div>
+      <div [hidden]="activeTab !== 'case-study'">
+        <app-case-study-form></app-case-study-form>
+      </div>
+      <div [hidden]="activeTab !== 'minigame'">
+        <div class="placeholder-content">
+          <h2>Minigame Creation is on the Horizon!</h2>
+          <p>This feature is currently in development. We'd love to hear your ideas!</p>
+          <textarea placeholder="Tell us what kind of minigames you'd like to create..."></textarea>
+        </div>
+      </div>
+       <div [hidden]="activeTab !== 'coming-soon'">
+        <!-- This will never be shown because the button is disabled, but is here for completeness -->
+      </div>
+    </div>
+  </div>
+  
+  

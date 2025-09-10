@@ -1,0 +1,168 @@
+/* Container for the entire form or success message */
+.form-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    padding: 30px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  /* Header with title and main action buttons */
+  .form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 20px;
+  }
+  .form-header h2 {
+    margin: 0;
+    color: #333;
+  }
+  .header-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  /* General button styling */
+  .btn {
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+  .btn-primary {
+    background-color: #4a90e2;
+    color: white;
+  }
+  .btn-primary:hover {
+    background-color: #357abd;
+  }
+  .btn-primary:disabled {
+    background-color: #a0c3e8;
+    cursor: not-allowed;
+  }
+  .btn-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+  }
+  .btn-secondary:hover {
+    background-color: #e0e0e0;
+  }
+  
+  /* Form sections for grouping fields */
+  .form-section {
+    margin-bottom: 30px;
+  }
+  .form-section h3 {
+    color: #4a90e2;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  /* Grid for side-by-side fields */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  
+  /* Individual form fields */
+  .form-field {
+    display: flex;
+    flex-direction: column;
+  }
+  .form-field label {
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+  }
+  .form-field input[type="text"],
+  .form-field input[type="number"],
+  .form-field textarea,
+  .form-field select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    box-sizing: border-box;
+  }
+  
+  /* Fields for dynamically adding/removing items */
+  .dynamic-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .dynamic-field input {
+    flex: 1;
+  }
+  
+  .btn-remove {
+    background: #fce8e6;
+    color: #c53929;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-add {
+    margin-top: 10px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: none;
+  }
+  
+  /* Checkbox group styling */
+  .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: normal;
+  }
+  
+  /* Preview and Success message styling */
+  .preview-panel {
+    border: 1px dashed #4a90e2;
+    background: #f0f7ff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+  }
+  .success-container {
+    text-align: center;
+    padding: 40px;
+  }
+  .success-container h2 {
+    color: #2e7d32;
+  }
+  .action-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  

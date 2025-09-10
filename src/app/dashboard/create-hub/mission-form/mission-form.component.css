@@ -1,0 +1,22 @@
+/* Using a shared CSS approach, but keeping styles here for modularity */
+@import '../shared-form-styles.css';
+
+.scenario-block {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background: #fdfdfd;
+}
+
+.answer-field {
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+.btn-add-small {
+  padding: 5px 10px;
+  font-size: 12px;
+  margin-left: 20px;
+}
+
