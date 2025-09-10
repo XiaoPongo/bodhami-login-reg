@@ -1,111 +1,130 @@
 <div class="form-container">
-    <h2>Create Mission</h2>
-  
-    <!-- ====== NEW: Guidelines Section ====== -->
-    <div class="guidelines-box">
-      <i class="fas fa-info-circle"></i>
-      <div>
-        <strong>Quick Guide:</strong>
-        <p>Start with a title and description, then build your content. You can add multiple passages, scenarios, and questions. Finally, assign the mission to one or more classes.</p>
-      </div>
+
+    <!-- ====== SUCCESS VIEW ====== -->
+    <div *ngIf="isSubmitted" class="success-view">
+      <i class="fas fa-check-circle"></i>
+      <h2>Mission Created Successfully!</h2>
+      <p>Your new mission has been saved. You can now assign it to more classes or create a new one.</p>
+      <button type="button" class="btn btn-primary" (click)="resetForm()">
+        <i class="fas fa-plus"></i> Create Another Mission
+      </button>
     </div>
   
-    <form #missionForm="ngForm" (ngSubmit)="onSubmit()">
-      <!-- Basic Info Section -->
-      <div class="form-section">
-        <div class="section-header">
-          <i class="fas fa-clipboard-list"></i>
-          <h3>Basic Info</h3>
+    <!-- ====== FORM & PREVIEW CONTAINER ====== -->
+    <div *ngIf="!isSubmitted">
+      <h2>{{ isPreviewing ? 'Mission Preview' : 'Create Mission' }}</h2>
+  
+      <!-- ====== PREVIEW MODE ====== -->
+      <div *ngIf="isPreviewing" class="preview-container">
+        <div class="preview-section">
+          <h3>{{ mission.title || 'Untitled Mission' }}</h3>
+          <p class="xp-badge">{{ mission.xp }} XP</p>
         </div>
-        <div class="form-group">
-          <label for="missionTitle">Mission Title *</label>
-          <input type="text" id="missionTitle" name="missionTitle" [(ngModel)]="mission.title" required placeholder="e.g., The Amazon Rainforest Expedition">
+        <div class="preview-section">
+          <h4>Description</h4>
+          <p>{{ mission.description || 'No description provided.' }}</p>
         </div>
-        <div class="form-group">
-          <label for="missionDescription">Mission Description</label>
-          <textarea id="missionDescription" name="missionDescription" [(ngModel)]="mission.description" placeholder="Provide a brief overview of the mission..."></textarea>
+        <div class="preview-section">
+          <h4>Passages</h4>
+          <ul *ngIf="mission.passages.length > 0 && mission.passages[0]">
+            <li *ngFor="let passage of mission.passages">{{ passage }}</li>
+          </ul>
+          <p *ngIf="!mission.passages[0]">- None -</p>
         </div>
-        <div class="form-group">
-          <label for="xpAllotment">XP Allotment</label>
-          <input type="number" id="xpAllotment" name="xpAllotment" [(ngModel)]="mission.xp" placeholder="e.g., 100">
+         <div class="preview-section">
+          <h4>Scenarios & Questions</h4>
+          <div *ngFor="let scenario of mission.scenarios" class="scenario-preview">
+            <strong>Scenario:</strong><p>{{ scenario.description || 'No description.' }}</p>
+            <strong>Answers:</strong>
+            <ul>
+              <li *ngFor="let answer of scenario.answers">{{ answer || 'Empty answer' }}</li>
+            </ul>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="togglePreview()">
+            <i class="fas fa-edit"></i> Back to Edit
+          </button>
         </div>
       </div>
   
-      <!-- Content Builder Section -->
-      <div class="form-section">
-        <div class="section-header">
-          <i class="fas fa-cubes"></i>
-          <h3>Content Builder</h3>
+  
+      <!-- ====== EDIT MODE (THE FORM) ====== -->
+      <form *ngIf="!isPreviewing" #missionForm="ngForm" (ngSubmit)="onSubmit()">
+        <!-- Guidelines Section -->
+        <div class="guidelines-box">
+          <i class="fas fa-info-circle"></i>
+          <div>
+            <strong>Quick Guide:</strong>
+            <p>Start with a title and description, build your content, and assign it to classes.</p>
+          </div>
         </div>
   
-        <!-- Passages -->
-        <div class="form-group">
+        <!-- Basic Info -->
+        <div class="form-section">
+          <div class="section-header"><h3>Basic Info</h3></div>
+          <div class="form-group">
+            <label for="missionTitle">Mission Title *</label>
+            <input type="text" id="missionTitle" name="missionTitle" [(ngModel)]="mission.title" required>
+          </div>
+          <div class="form-group">
+            <label for="missionDescription">Mission Description</label>
+            <textarea id="missionDescription" name="missionDescription" [(ngModel)]="mission.description"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="xpAllotment">XP Allotment</label>
+            <input type="number" id="xpAllotment" name="xpAllotment" [(ngModel)]="mission.xp">
+          </div>
+        </div>
+  
+        <!-- Content Builder -->
+        <div class="form-section">
+          <div class="section-header"><h3>Content Builder</h3></div>
           <label>Passages</label>
-          <div *ngFor="let passage of mission.passages; let i = index" class="dynamic-list-item">
-            <input type="text" [(ngModel)]="mission.passages[i]" [name]="'passage' + i" placeholder="Enter passage text...">
-            <button type="button" class="btn btn-remove" (click)="removePassage(i)" title="Remove Passage">
-              <i class="fas fa-trash-alt"></i>
-            </button>
+          <div *ngFor="let passage of mission.passages; let i = index; trackBy: trackByFn" class="dynamic-list-item">
+            <input type="text" [(ngModel)]="mission.passages[i]" [name]="'passage' + i">
+            <button type="button" class="btn btn-remove" (click)="removePassage(i)"><i class="fas fa-trash-alt"></i></button>
           </div>
           <button type="button" class="btn btn-add" (click)="addPassage()"><i class="fas fa-plus"></i> Add Passage</button>
-        </div>
   
-        <!-- Scenarios -->
-        <div class="form-group">
-          <label>Scenarios</label>
-          <div *ngFor="let scenario of mission.scenarios; let i = index" class="scenario-block">
-            <textarea [(ngModel)]="scenario.description" [name]="'scenarioDesc' + i" placeholder="Describe the scenario..."></textarea>
-            <div *ngFor="let answer of scenario.answers; let j = index" class="dynamic-list-item">
-              <input type="text" [(ngModel)]="scenario.answers[j]" [name]="'answer' + i + j" [placeholder]="'Answer ' + (j + 1)">
-              <button type="button" class="btn btn-remove" (click)="removeAnswer(i, j)" title="Remove Answer">
-                <i class="fas fa-trash-alt"></i>
-              </button>
+          <label style="margin-top: 24px;">Scenarios</label>
+          <div *ngFor="let scenario of mission.scenarios; let i = index; trackBy: trackByFn" class="scenario-block">
+            <textarea [(ngModel)]="scenario.description" [name]="'scenarioDesc' + i"></textarea>
+            <div *ngFor="let answer of scenario.answers; let j = index; trackBy: trackByFn" class="dynamic-list-item">
+              <input type="text" [(ngModel)]="scenario.answers[j]" [name]="'answer' + i + j">
+              <button type="button" class="btn btn-remove" (click)="removeAnswer(i, j)"><i class="fas fa-trash-alt"></i></button>
             </div>
             <div class="scenario-actions">
-               <button type="button" class="btn btn-add-answer" (click)="addAnswer(i)"><i class="fas fa-plus"></i> Add Answer</button>
-               <button type="button" class="btn btn-remove-scenario" (click)="removeScenario(i)" title="Remove Scenario">
-                  <i class="fas fa-trash-alt"></i> Remove Scenario
-               </button>
+              <button type="button" class="btn btn-add-answer" (click)="addAnswer(i)"><i class="fas fa-plus"></i> Add Answer</button>
+              <button type="button" class="btn btn-remove-scenario" (click)="removeScenario(i)"><i class="fas fa-trash-alt"></i> Remove Scenario</button>
             </div>
           </div>
           <button type="button" class="btn btn-add" (click)="addScenario()"><i class="fas fa-plus"></i> Add Scenario</button>
         </div>
-      </div>
   
-      <!-- Class Assignment Section -->
-      <div class="form-section">
-         <div class="section-header">
-          <i class="fas fa-chalkboard-teacher"></i>
-          <h3>Class Assignment</h3>
-        </div>
-        <div class="form-group">
-          <label for="chapterSelect">Select Chapter</label>
-          <select id="chapterSelect" name="chapter" [(ngModel)]="mission.chapter">
-            <option value="" disabled>-- Select a Chapter --</option>
-            <option *ngFor="let chapter of chapters" [value]="chapter">{{ chapter }}</option>
-          </select>
-        </div>
-        <div class="form-group">
+        <!-- Class Assignment -->
+        <div class="form-section">
+          <div class="section-header"><h3>Class Assignment</h3></div>
           <label>Assign to Classes *</label>
           <div class="class-selection-container">
             <div *ngFor="let class of availableClasses" class="class-item">
-               <input type="checkbox" [id]="'class-' + class.id" [value]="class.id" (change)="onClassChange($event)">
-               <label [for]="'class-' + class.id">{{ class.name }}</label>
+              <input type="checkbox" [id]="'class-' + class.id" [value]="class.id" (change)="onClassChange($event)">
+              <label [for]="'class-' + class.id">{{ class.name }}</label>
             </div>
           </div>
         </div>
-      </div>
   
-      <!-- ====== MOVED: Main Form Actions to the end ====== -->
-      <div class="form-actions">
-        <button type="button" class="btn btn-secondary">
-          <i class="fas fa-eye"></i> Preview
-        </button>
-        <button type="submit" class="btn btn-primary" [disabled]="missionForm.invalid">
-          <i class="fas fa-paper-plane"></i> Submit Mission
-        </button>
-      </div>
-    </form>
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="togglePreview()">
+            <i class="fas fa-eye"></i> Preview
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="missionForm.invalid || mission.classIds.length === 0">
+            <i class="fas fa-paper-plane"></i> Submit Mission
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
   
   

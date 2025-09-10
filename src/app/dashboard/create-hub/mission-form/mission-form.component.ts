@@ -2,14 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
-// Define the structure of your Mission object
 interface Mission {
   title: string;
   description: string;
   xp: number;
   passages: string[];
   scenarios: { description: string; answers: string[] }[];
-  chapter: string;
   classIds: string[];
 }
 
@@ -21,58 +19,52 @@ interface Mission {
   styleUrls: ['./mission-form.component.css']
 })
 export class MissionFormComponent implements OnInit {
-  mission: Mission = {
-    title: '',
-    description: '',
-    xp: 100,
-    passages: [''],
-    scenarios: [{ description: '', answers: [''] }],
-    chapter: '',
-    classIds: []
-  };
+  // --- State Management ---
+  isSubmitted = false;
+  isPreviewing = false;
 
-  // MOCK DATA: In a real app, this would come from a service
+  mission: Mission = this.getInitialMissionState();
+
+  // MOCK DATA
   availableClasses = [
     { id: 'c1', name: 'Grade 5 Math - 2025' },
     { id: 'c2', name: 'Grade 6 Science - 2025' },
-    { id: 'c3', name: 'History 101' }
-  ];
-
-  // ====== THIS IS THE FIX ======
-  // Add the 'chapters' property that the template needs
-  chapters: string[] = [
-    'Chapter 1: Introduction to Algebra',
-    'Chapter 2: The Solar System',
-    'Chapter 3: Ancient Civilizations',
-    'Chapter 4: The Scientific Method'
+    { id: 'c3', name: 'History 101' },
+    { id: 'c4', name: 'Introduction to Physics' }
   ];
 
   constructor() { }
 
   ngOnInit(): void {
-    // Auto-save logic can go here
+    // Future: Load draft from localStorage
   }
 
-  // --- Passage Methods ---
-  addPassage() {
-    this.mission.passages.push('');
-  }
-  removePassage(index: number) {
-    this.mission.passages.splice(index, 1);
+  // --- Initial State Helper ---
+  getInitialMissionState(): Mission {
+    return {
+      title: '',
+      description: '',
+      xp: 100,
+      passages: [''],
+      scenarios: [{ description: '', answers: [''] }],
+      classIds: []
+    };
   }
 
-  // --- Scenario & Answer Methods ---
-  addScenario() {
-    this.mission.scenarios.push({ description: '', answers: [''] });
-  }
-  removeScenario(scenarioIndex: number) {
-    this.mission.scenarios.splice(scenarioIndex, 1);
-  }
-  addAnswer(scenarioIndex: number) {
-    this.mission.scenarios[scenarioIndex].answers.push('');
-  }
-  removeAnswer(scenarioIndex: number, answerIndex: number) {
-    this.mission.scenarios[scenarioIndex].answers.splice(answerIndex, 1);
+  // --- Dynamic List Methods ---
+  addPassage() { this.mission.passages.push(''); }
+  removePassage(index: number) { this.mission.passages.splice(index, 1); }
+
+  addScenario() { this.mission.scenarios.push({ description: '', answers: [''] }); }
+  removeScenario(scenarioIndex: number) { this.mission.scenarios.splice(scenarioIndex, 1); }
+
+  addAnswer(scenarioIndex: number) { this.mission.scenarios[scenarioIndex].answers.push(''); }
+  removeAnswer(scenarioIndex: number, answerIndex: number) { this.mission.scenarios[scenarioIndex].answers.splice(answerIndex, 1); }
+
+  // --- FIX: trackBy Functions ---
+  // These prevent Angular from re-rendering the whole list on every keystroke, which fixes the focus loss bug.
+  trackByFn(index: number, item: any): number {
+    return index;
   }
 
   // --- Class Assignment ---
@@ -80,7 +72,9 @@ export class MissionFormComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const classId = input.value;
     if (input.checked) {
-      this.mission.classIds.push(classId);
+      if (!this.mission.classIds.includes(classId)) {
+        this.mission.classIds.push(classId);
+      }
     } else {
       const index = this.mission.classIds.indexOf(classId);
       if (index > -1) {
@@ -89,11 +83,21 @@ export class MissionFormComponent implements OnInit {
     }
   }
 
+  // --- Form Actions ---
+  togglePreview() {
+    this.isPreviewing = !this.isPreviewing;
+  }
 
-  // --- Form Submission ---
   onSubmit() {
     console.log('Form Submitted!', this.mission);
-    // Logic to save data to Supabase or generate a file will go here
+    this.isSubmitted = true;
+    this.isPreviewing = false;
+    // Future: Save data to Supabase here
+  }
+
+  resetForm() {
+    this.mission = this.getInitialMissionState();
+    this.isSubmitted = false;
   }
 }
 
