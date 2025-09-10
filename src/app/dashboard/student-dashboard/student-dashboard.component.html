@@ -35,15 +35,14 @@
       <button class="btn-close" (click)="toggleAchievements()"><i class="fas fa-times"></i></button>
     </div>
     <div class="modal-body">
-      <div class="achievements-list">
-        <div class="achievement-item" *ngFor="let ach of achievements" [class.locked]="!ach.unlocked">
-          <div class="achievement-icon">
+      <div class="achievements-grid">
+        <!-- Badges are generated here -->
+        <div class="badge" *ngFor="let ach of achievements" [class.locked]="!ach.unlocked">
+          <div class="badge-icon">
             <i [class]="ach.icon"></i>
           </div>
-          <div class="achievement-details">
-            <h3>{{ ach.title }}</h3>
-            <p>{{ ach.description }}</p>
-          </div>
+          <h3 class="badge-title">{{ ach.title }}</h3>
+          <p class="badge-description">{{ ach.description }}</p>
         </div>
       </div>
     </div>
