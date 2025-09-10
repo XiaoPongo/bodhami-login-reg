@@ -1,23 +1,23 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './login/login.component';
-// Corrected paths for layout components to point inside the 'dashboard' folder
-import { MentorLayoutComponent } from './dashboard/layout/mentor-layout/mentor-layout.component';
-import { StudentLayoutComponent } from './dashboard/layout/student-layout/student-layout.component';
-import { MentorDashboardComponent } from './dashboard/mentor-dashboard/mentor-dashboard.component';
 import { StudentRegComponent } from './student-reg/student-reg.component';
 import { MentorRegComponent } from './mentor-reg/mentor-reg.component';
 import { AuthGuard } from './auth.guard';
+
+import { MentorLayoutComponent } from './dashboard/layout/mentor-layout/mentor-layout.component';
+import { StudentLayoutComponent } from './dashboard/layout/student-layout/student-layout.component';
+import { MentorDashboardComponent } from './dashboard/mentor-dashboard/mentor-dashboard.component';
 import { StudentDashboardComponent } from './dashboard/student-dashboard/student-dashboard.component';
 import { CreateHubComponent } from './dashboard/create-hub/create-hub.component';
-
+// --- IMPORT THE NEW COMPONENT ---
+import { ManageClassesComponent } from './dashboard/manage-classes/manage-classes.component'; 
 
 export const routes: Routes = [
-  // Existing Login & Registration Routes
   { path: 'login', component: LoginComponent },
   { path: 'student-reg', component: StudentRegComponent },
   { path: 'mentor-reg', component: MentorRegComponent },
 
-  // Updated Mentor Route
+  // Mentor Routes
   {
     path: 'mentor',
     component: MentorLayoutComponent,
@@ -25,22 +25,25 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: MentorDashboardComponent },
       { path: 'create', component: CreateHubComponent },
+      // --- ADD THE NEW ROUTE FOR MANAGING CLASSES ---
+      { path: 'classes', component: ManageClassesComponent }, 
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ],
   },
 
-  // Existing Student Route
+  // Student Routes
   {
     path: 'student',
     component: StudentLayoutComponent,
-    canActivate: [AuthGuard], 
+    canActivate: [AuthGuard],
     children: [
       { path: 'dashboard', component: StudentDashboardComponent },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ],
   },
 
-
-  // Default route
+  // Default & Wildcard
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  // Optional: A wildcard route for handling 404s
   { path: '**', redirectTo: '/login' }
 ];
+
