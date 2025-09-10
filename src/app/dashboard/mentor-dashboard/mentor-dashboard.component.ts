@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../auth.service';
-import { CommonModule } from '@angular/common'; // Added for *ngFor support
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router'; // <-- IMPORT THE ROUTER
 
 @Component({
   selector: 'app-mentor-dashboard',
   standalone: true,
-  imports: [CommonModule], // Added CommonModule
+  imports: [CommonModule],
   templateUrl: './mentor-dashboard.component.html',
   styleUrls: ['./mentor-dashboard.component.css'],
 })
@@ -22,13 +23,15 @@ export class MentorDashboardComponent implements OnInit {
     { name: 'Charlie', xp: 870, progress: 55 },
   ];
 
-  constructor(private authService: AuthService) {}
+  // INJECT THE ROUTER IN THE CONSTRUCTOR
+  constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
     this.user = this.authService.getCurrentUser();
   }
 
+  // IMPLEMENT THE NAVIGATION LOGIC
   navigateToCreate(): void {
-    // future: route to create-class
+    this.router.navigate(['/mentor/create']);
   }
 }
