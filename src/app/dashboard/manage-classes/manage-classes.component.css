@@ -71,13 +71,19 @@
   }
   
   /* Left Panel: Class List */
-  .class-list-panel, .class-details-panel {
+  .class-list-panel {
     background-color: white;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
-    display: flex; /* KEY: Make panels flex containers */
-    flex-direction: column; /* Stack header and list vertically */
-    overflow: hidden; /* Hide any overflow from the panel itself */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .class-details-panel {
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow-y: auto; /* KEY CHANGE: The entire right panel now scrolls */
   }
   .panel-header {
     padding: 20px;
@@ -133,7 +139,7 @@
   /* Right Panel: Class Details */
   .no-class-selected {
     text-align: center;
-    padding-top: 48px; /* Push content down from the top */
+    padding: 48px;
     color: #9ca3af;
   }
   
@@ -152,11 +158,6 @@
     font-weight: 600;
     color: #4b5563;
   }
-  .details-content {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
   .details-content .panel-header {
     display: flex;
     justify-content: space-between;
@@ -172,7 +173,6 @@
     align-items: center;
     gap: 16px;
     font-size: 1rem;
-    flex-shrink: 0;
   }
   .code-box {
     background-color: white;
@@ -189,10 +189,6 @@
   }
   .student-list-section {
     padding: 20px;
-    flex: 1; /* KEY: Make the student section fill remaining space */
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
   }
   .student-list-header {
     display: flex;
@@ -201,9 +197,7 @@
     margin-bottom: 16px;
   }
   .student-list-header h4 { font-size: 1.125rem; font-weight: 600; margin: 0; }
-  .student-list {
-    overflow-y: auto; /* KEY: Make the table itself scrollable */
-  }
+  
   .student-table { width: 100%; border-collapse: collapse; }
   .student-table th, .student-table td {
     padding: 12px 16px;
@@ -267,4 +261,5 @@
     border-top: 1px solid #e5e7eb;
     background-color: #f9fafb;
   }
+  
   
