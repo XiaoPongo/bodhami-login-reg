@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { ClassService } from '../../services/class.service';
-import { Classroom, Student } from '../../services/api.service'; // Corrected import
+import { Classroom, Student } from '../../services/api.service';
 
 @Component({
   selector: 'app-manage-classes',
@@ -16,22 +16,20 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
   classes: Classroom[] = [];
   selectedClass: Classroom | null = null;
   
-  // These properties now match the template
+  // --- ADDED MISSING PROPERTIES ---
   isCreateModalOpen = false;
   isAddStudentModalOpen = false;
-  
   newClassName = '';
   newClassDescription = '';
   newStudentEmail = '';
+  newStudentName = '';
 
   private classesSubscription: Subscription | undefined;
 
   constructor(private classService: ClassService) {}
 
   ngOnInit(): void {
-    // Correctly subscribe to the live stream of classes
     this.classesSubscription = this.classService.classes$.subscribe((classes: Classroom[]) => {
-      // Sort by ID descending to show newest first
       this.classes = classes.sort((a: Classroom, b: Classroom) => (b.id ?? 0) - (a.id ?? 0));
     });
   }
@@ -43,7 +41,7 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
   selectClass(classroom: Classroom): void {
     this.selectedClass = classroom;
   }
-  
+
   // --- ADDED MISSING METHODS ---
   unselectClass(): void {
     this.selectedClass = null;
@@ -56,7 +54,6 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
     });
   }
 
-  // --- RENAMED & CORRECTED METHODS ---
   handleCreateClass(): void {
     if (this.newClassName.trim()) {
       this.classService.createClass(this.newClassName, this.newClassDescription)
@@ -68,7 +65,6 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
     if (this.selectedClass?.id && this.newStudentEmail.trim()) {
       this.classService.addStudentToClass(this.selectedClass.id, this.newStudentEmail)
         .subscribe(() => {
-          console.log('Student added!');
           this.closeAddStudentModal();
         });
     }
@@ -82,23 +78,17 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
         }
     }
   }
-
-  // --- MODAL CONTROLS (Standardized) ---
+  
+  // --- MODAL CONTROLS ---
   openCreateModal(): void {
     this.isCreateModalOpen = true;
-    this.newClassName = '';
-    this.newClassDescription = '';
   }
-
   closeCreateModal(): void {
     this.isCreateModalOpen = false;
   }
-
   openAddStudentModal(): void {
     this.isAddStudentModalOpen = true;
-    this.newStudentEmail = '';
   }
-  
   closeAddStudentModal(): void {
     this.isAddStudentModalOpen = false;
   }

@@ -4,7 +4,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { AuthService } from '../auth.service';
 
-// --- NEW STUDENT INTERFACE ---
+// --- ADDED EXPORT ---
 export interface Student {
   id: string;
   name: string;
@@ -20,9 +20,9 @@ export interface Classroom {
   classCode?: string;
   mentorId?: string;
   allowNewStudents?: boolean;
-  materials?: any[];
+  materials?: any[]; 
   activities?: any[];
-  students?: Student[]; // Added missing property
+  students?: Student[]; // <-- ADDED THIS MISSING PROPERTY
 }
 
 @Injectable({
@@ -36,6 +36,7 @@ export class ApiService {
   private getAuthHeaders(): Observable<HttpHeaders> {
     const session = this.authService.getSession();
     const token = session?.access_token;
+
     if (!token) {
       return throwError(() => new Error('User not authenticated! Cannot make API call.'));
     }
@@ -46,7 +47,6 @@ export class ApiService {
   }
 
   // --- Classroom Endpoints ---
-
   getClassrooms(): Observable<Classroom[]> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.get<Classroom[]>(`${this.apiUrl}/classrooms`, { headers }))
