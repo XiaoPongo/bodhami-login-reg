@@ -1,9 +1,8 @@
 {
-    "rewrites": [
-      {
-        "source": "/(.*)",
-        "destination": "/index.html"
-      }
-    ]
-  }
-  
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "http://elevana-api-env-v1.eba-kqqge9q6.eu-north-1.elasticbeanstalk.com/api/:path*"
+    }
+  ]
+}
