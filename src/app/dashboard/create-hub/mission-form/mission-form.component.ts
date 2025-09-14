@@ -31,7 +31,10 @@ interface Mission {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './mission-form.component.html',
-  styleUrls: ['./mission-form.component.css']
+  styleUrls: [
+    './mission-form.component.css',
+    '../shared-form-styles.css'
+  ]
 })
 export class MissionFormComponent implements OnInit {
   isSubmitted = false;

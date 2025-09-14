@@ -31,7 +31,10 @@ interface CaseStudy {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './case-study-form.component.html',
-  styleUrls: ['./case-study-form.component.css']
+  styleUrls: [
+    './case-study-form.component.css',
+    '../shared-form-styles.css'
+  ]
 })
 export class CaseStudyFormComponent implements OnInit {
   isSubmitted = false;
