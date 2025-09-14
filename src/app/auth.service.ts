@@ -62,4 +62,9 @@ export class AuthService {
   getSession() {
     return this.session.value;
   }
+  
+  getToken(): string | null {
+    return this.session.value?.access_token ?? null; 
+    // Supabase sessions store JWT as access_token
+  }
 }
