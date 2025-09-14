@@ -1,93 +1,58 @@
 <div class="dashboard-container">
-  <!-- Header Section -->
-  <div class="dashboard-header">
+  <!-- Welcome Section -->
+  <div class="welcome-header">
     <div>
-      <h1 class="welcome-title">Welcome, {{ user?.user_metadata?.firstName || 'Mentor' }}!</h1>
-      <p class="welcome-subtitle">Here's a snapshot of your teaching activities today.</p>
+      <h1>Welcome, Mentor!</h1>
+      <p>Here's an overview of your teaching dashboard.</p>
     </div>
-    <button class="create-btn" (click)="navigateToCreate()" type="button">
+    <button class="create-btn" (click)="navigateToCreate()">
       <i class="fas fa-plus"></i> Create New Content
     </button>
   </div>
 
-  <!-- Quick Action Cards -->
-  <div class="cards-grid">
-    <div class="card create-mission">
-      <i class="fas fa-rocket card-icon"></i>
-      <h3 class="card-title">New Mission</h3>
-      <p class="card-description">Create an engaging, task-based mission for your students.</p>
-      <a (click)="navigateToCreate()" class="card-link">Start Building <i class="fas fa-arrow-right"></i></a>
-    </div>
-    <div class="card create-case-study">
-      <i class="fas fa-book-open card-icon"></i>
-      <h3 class="card-title">New Case Study</h3>
-      <p class="card-description">Design a critical thinking challenge with a real-world scenario.</p>
-      <a (click)="navigateToCreate()" class="card-link">Start Building <i class="fas fa-arrow-right"></i></a>
-    </div>
-    <div class="card manage-classes">
+  <!-- Primary Action Cards -->
+  <div class="card-grid">
+    <div class="action-card">
       <i class="fas fa-chalkboard-teacher card-icon"></i>
-      <h3 class="card-title">Manage Classes</h3>
-      <p class="card-description">View student progress, edit class details, and manage enrollments.</p>
-      <!-- This now links to your new page -->
-      <a routerLink="/mentor/classes" class="card-link">Go to Classes <i class="fas fa-arrow-right"></i></a>
+      <h3>Manage Classes</h3>
+      <p>Create, edit, and view your active classrooms.</p>
+      <button (click)="navigateToManageClasses()">Go to Classes</button>
+    </div>
+    <div class="action-card">
+      <i class="fas fa-book-open card-icon"></i>
+      <h3>Content Library</h3>
+      <p>Browse and manage all your missions & case studies.</p>
+      <button>View Library</button>
+    </div>
+    <div class="action-card">
+      <i class="fas fa-chart-line card-icon"></i>
+      <h3>Student Analytics</h3>
+      <p>Track progress and performance across your classes.</p>
+      <button>View Analytics</button>
     </div>
   </div>
 
-  <!-- Lower Section: Active Classes & Analytics -->
-  <div class="lower-section">
-    <!-- Active Classes List -->
-    <div class="active-classes-container">
-      <h3 class="section-title"><i class="fas fa-list-ul"></i> Active Classes</h3>
-      <div class="class-list">
-        <div *ngIf="classes.length === 0" class="class-item placeholder">
-           <p>No classes created yet. Go to "Manage Classes" to start.</p>
-        </div>
+  <!-- Active Classes List -->
+  <div class="classes-section">
+    <h2><i class="fas fa-users"></i> Your Active Classes</h2>
+    <div class="classes-list">
+      <!-- Use the async pipe to display live data -->
+      <ng-container *ngIf="(classes$ | async) as classes; else loading">
         <div class="class-item" *ngFor="let cls of classes">
-          <div class="class-icon-wrapper">
-            <i class="fas fa-layer-group"></i>
-          </div>
-          <div class="class-details">
+          <div class="class-info">
             <span class="class-name">{{ cls.name }}</span>
-            <span class="class-info">{{ cls.students.length }} Students • 0 Missions</span>
+            <span class="class-code">Code: {{ cls.classCode }}</span>
           </div>
-          <div class="class-actions">
-            <button class="btn-icon" title="Edit Class"><i class="fas fa-pencil-alt"></i></button>
-            <button class="btn-icon" title="View Progress"><i class="fas fa-chart-line"></i></button>
+          <div class="class-stats">
+            <span><strong>0</strong> Students</span>
+            <span><strong>0</strong> Activities</span>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Analytics Overview -->
-    <div class="analytics-container">
-       <h3 class="section-title"><i class="fas fa-chart-pie"></i> Analytics Overview</h3>
-       <div class="analytics-item">
-         <div class="analytics-icon-wrapper views">
-           <i class="fas fa-eye"></i>
-         </div>
-         <div class="analytics-details">
-           <span class="analytics-value">1,204</span>
-           <span class="analytics-label">Total Content Views</span>
-         </div>
-       </div>
-       <div class="analytics-item">
-         <div class="analytics-icon-wrapper completions">
-           <i class="fas fa-check-double"></i>
-         </div>
-         <div class="analytics-details">
-           <span class="analytics-value">85%</span>
-           <span class="analytics-label">Avg. Completion Rate</span>
-         </div>
-       </div>
-       <div class="analytics-item">
-         <div class="analytics-icon-wrapper engagement">
-           <i class="fas fa-star"></i>
-         </div>
-         <div class="analytics-details">
-           <span class="analytics-value">4.7 / 5</span>
-           <span class="analytics-label">Avg. Student Rating</span>
-         </div>
-       </div>
+        <p *ngIf="classes.length === 0" class="no-classes">You haven't created any classes yet.</p>
+      </ng-container>
+      <ng-template #loading>
+        <p>Loading classes...</p>
+      </ng-template>
     </div>
   </div>
 </div>

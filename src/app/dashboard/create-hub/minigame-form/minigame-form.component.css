@@ -1,0 +1,42 @@
+    /* Using shared styles for consistency, with a unique theme color */
+    @import '../shared-form-styles.css';
+    
+    :host {
+      --theme-color: #9b59b6; /* A distinct purple for minigames */
+      --theme-color-dark: #8e44ad;
+    }
+    
+    .minigame-theme .form-header {
+      border-left-color: var(--theme-color);
+    }
+    
+    .minigame-theme .section-title i {
+      color: var(--theme-color);
+    }
+    
+    .minigame-theme .btn-primary {
+      background-color: var(--theme-color);
+      border-color: var(--theme-color);
+    }
+    
+    .minigame-theme .btn-primary:hover {
+      background-color: var(--theme-color-dark);
+      border-color: var(--theme-color-dark);
+    }
+    
+    /* Specific styles for minigame content builder */
+    .dynamic-list {
+      background-color: #fdfdfd;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .dynamic-list h4 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: #333;
+      font-weight: 600;
+    }
+    
+

@@ -1,0 +1,81 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+// Assume ApiService exists for potential future use
+// import { ApiService } from '../../../services/api.service'; 
+
+interface WordPair {
+  mainWord: string;
+  associatedWords: string[];
+}
+
+interface Minigame {
+  title: string;
+  description: string;
+  xp: number;
+  wordPairs: WordPair[];
+  wordBank: string[];
+  assignedClasses: { [classId: string]: boolean };
+}
+
+@Component({
+  selector: 'app-minigame-form',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './minigame-form.component.html',
+  styleUrls: ['./minigame-form.component.css']
+})
+export class MinigameFormComponent implements OnInit {
+  minigame: Minigame = this.getNewMinigame();
+  
+  // Mock data - in a real app, this would come from a service
+  availableClasses = [
+    { id: 'class1', name: 'Grade 5 English - 2025' },
+    { id: 'class2', name: 'Vocabulary Builders' },
+  ];
+
+  constructor(private router: Router) {}
+
+  ngOnInit(): void {
+    // Future: Load draft from localStorage if needed
+  }
+
+  getNewMinigame(): Minigame {
+    return {
+      title: '',
+      description: '',
+      xp: 10,
+      wordPairs: [{ mainWord: '', associatedWords: [] }],
+      wordBank: [''],
+      assignedClasses: {}
+    };
+  }
+  
+  addWordPair(): void {
+    this.minigame.wordPairs.push({ mainWord: '', associatedWords: [] });
+  }
+
+  removeWordPair(index: number): void {
+    this.minigame.wordPairs.splice(index, 1);
+  }
+
+  addWordToBank(): void {
+    this.minigame.wordBank.push('');
+  }
+
+  removeWordFromBank(index: number): void {
+    this.minigame.wordBank.splice(index, 1);
+  }
+
+  // TrackBy functions to prevent focus loss on input
+  trackByFn(index: any, item: any) {
+    return index;
+  }
+
+  submitForm(): void {
+    console.log("Submitting Minigame:", JSON.stringify(this.minigame, null, 2));
+    alert('Minigame structure logged to console. CSV export can be added here.');
+    // Logic for CSV generation and submission to API would go here
+  }
+}

@@ -1,0 +1,73 @@
+<div class="form-container minigame-theme">
+    <div class="form-header">
+      <i class="fas fa-puzzle-piece"></i>
+      <h1>Create a New Minigame</h1>
+    </div>
+  
+    <!-- Guidelines Box -->
+    <div class="guidelines">
+      <h4><i class="fas fa-info-circle"></i> Minigame Guidelines</h4>
+      <p>Create a word association game. Provide main words in 'List A' and a 'Word Bank' of related terms. Students will drag words from the bank to the correct main word.</p>
+    </div>
+  
+    <form #minigameForm="ngForm" (ngSubmit)="submitForm()">
+      <!-- Basic Info Section -->
+      <div class="form-section">
+        <h3 class="section-title"><i class="fas fa-clipboard-list"></i> Basic Info</h3>
+        <div class="input-group">
+          <label for="title">Minigame Title *</label>
+          <input type="text" id="title" name="title" [(ngModel)]="minigame.title" required>
+        </div>
+        <div class="input-group">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" [(ngModel)]="minigame.description" rows="3"></textarea>
+        </div>
+         <div class="input-group">
+          <label for="xp">XP Allotment *</label>
+          <input type="number" id="xp" name="xp" [(ngModel)]="minigame.xp" required min="0">
+        </div>
+      </div>
+  
+      <!-- Content Builder Section -->
+      <div class="form-section">
+        <h3 class="section-title"><i class="fas fa-cogs"></i> Content Builder</h3>
+        
+        <!-- List A: Main Words -->
+        <div class="dynamic-list">
+          <h4>List A (Main Words)</h4>
+          <div class="list-item" *ngFor="let pair of minigame.wordPairs; let i = index; trackBy: trackByFn">
+            <input type="text" placeholder="Enter Main Word {{i + 1}}" [(ngModel)]="pair.mainWord" [name]="'mainWord' + i" required>
+            <button type="button" class="btn-remove" (click)="removeWordPair(i)" title="Remove Word Pair">&times;</button>
+          </div>
+          <button type="button" class="btn-add" (click)="addWordPair()">+ Add Main Word</button>
+        </div>
+  
+        <!-- Word Bank -->
+        <div class="dynamic-list">
+          <h4>Word Bank (Selectable Words)</h4>
+          <div class="list-item" *ngFor="let word of minigame.wordBank; let i = index; trackBy: trackByFn">
+            <input type="text" placeholder="Enter a word for the bank" [(ngModel)]="minigame.wordBank[i]" [name]="'bankWord' + i" required>
+            <button type="button" class="btn-remove" (click)="removeWordFromBank(i)" title="Remove Word">&times;</button>
+          </div>
+          <button type="button" class="btn-add" (click)="addWordToBank()">+ Add to Word Bank</button>
+        </div>
+      </div>
+  
+       <!-- Class Assignment Section -->
+      <div class="form-section">
+        <h3 class="section-title"><i class="fas fa-chalkboard-teacher"></i> Class Assignment</h3>
+        <div class="class-grid">
+          <label *ngFor="let class of availableClasses" class="class-label">
+            <input type="checkbox" [name]="class.id" [(ngModel)]="minigame.assignedClasses[class.id]">
+            {{ class.name }}
+          </label>
+        </div>
+      </div>
+  
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button type="button" class="btn btn-secondary">Preview</button>
+        <button type="submit" class="btn btn-primary" [disabled]="minigameForm.invalid">Submit Minigame</button>
+      </div>
+    </form>
+  </div>

@@ -1,45 +1,36 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { AuthService } from '../../auth.service';
-import { ClassService, Classroom } from '../../services/class.service'; // Import the service
+import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
+import { ClassService } from '../../services/class.service'; // Import ClassService
+import { Classroom } from '../../services/api.service'; // Import Classroom interface
 
 @Component({
   selector: 'app-mentor-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink], // Add RouterLink
+  imports: [CommonModule],
   templateUrl: './mentor-dashboard.component.html',
   styleUrls: ['./mentor-dashboard.component.css'],
 })
-export class MentorDashboardComponent implements OnInit, OnDestroy {
-  user: any = null;
-  classes: Classroom[] = [];
-  private classSubscription!: Subscription;
+export class MentorDashboardComponent implements OnInit {
+  // This property is now an Observable stream of classrooms
+  classes$: Observable<Classroom[]>;
+  user: any = null; // Assuming user info is still needed
 
-  constructor(
-    private authService: AuthService, 
-    private router: Router,
-    private classService: ClassService // Inject the new service
-  ) {}
-
-  ngOnInit(): void {
-    this.user = this.authService.getCurrentUser();
-    
-    // Subscribe to the class data from the service
-    this.classSubscription = this.classService.getClasses().subscribe(classes => {
-      this.classes = classes;
-    });
+  constructor(private router: Router, private classService: ClassService) {
+    // Get the live stream of classes from the service
+    this.classes$ = this.classService.classes$;
   }
 
-  ngOnDestroy(): void {
-    // Unsubscribe to prevent memory leaks
-    if (this.classSubscription) {
-      this.classSubscription.unsubscribe();
-    }
+  ngOnInit(): void {
+    // You might get user info from your AuthService here if needed
   }
 
   navigateToCreate(): void {
     this.router.navigate(['/mentor/create']);
+  }
+  
+  navigateToManageClasses(): void {
+    this.router.navigate(['/mentor/manage-classes']);
   }
 }
