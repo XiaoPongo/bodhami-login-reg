@@ -2,107 +2,106 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { ClassService, Classroom, Student } from '../../services/class.service';
+import { ClassService } from '../../services/class.service';
+// Correctly import data models from the single source of truth: api.service
+import { Classroom, Student } from '../../services/api.service';
 
 @Component({
   selector: 'app-manage-classes',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './manage-classes.component.html',
-  styleUrls: ['./manage-classes.component.css']
+  styleUrls: ['./manage-classes.component.css'],
 })
 export class ManageClassesComponent implements OnInit, OnDestroy {
-  // Component State
   classes: Classroom[] = [];
   selectedClass: Classroom | null = null;
-  isCreateModalOpen = false;
-  isAddStudentModalOpen = false;
-
-  // Form Models
+  students: Student[] = [];
+  
+  showCreateModal = false;
+  showManageModal = false;
   newClassName = '';
   newClassDescription = '';
-  newStudentName = '';
   newStudentEmail = '';
+  newStudentName = ''; // Assuming you might want to add name as well
 
-  private classSubscription!: Subscription;
+  private classesSubscription: Subscription | undefined;
 
   constructor(private classService: ClassService) {}
 
   ngOnInit(): void {
-    this.classSubscription = this.classService.getClasses().subscribe(classes => {
-      this.classes = classes.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    // Correctly subscribe to the live stream of classes
+    this.classesSubscription = this.classService.classes$.subscribe(classes => {
+      // The sort logic was missing type info, which is now fixed.
+      // Also assuming a 'createdAt' property will exist on the model. If not, sort by 'id' or 'name'.
+      this.classes = classes.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
     });
   }
 
   ngOnDestroy(): void {
-    if (this.classSubscription) {
-      this.classSubscription.unsubscribe();
+    // Clean up the subscription to prevent memory leaks
+    this.classesSubscription?.unsubscribe();
+  }
+
+  selectClass(classroom: Classroom): void {
+    this.selectedClass = classroom;
+    // Mock student loading for now
+    this.students = [
+        { id: 'student1', name: 'Alice Johnson', email: 'alice@example.com', xp: 1200 },
+        { id: 'student2', name: 'Bob Williams', email: 'bob@example.com', xp: 950 }
+    ];
+  }
+
+  // --- Form submission methods ---
+  handleCreateClass(): void {
+    if (this.newClassName.trim()) {
+      this.classService.createClass(this.newClassName, this.newClassDescription)
+        .subscribe(() => {
+          this.closeCreateModal();
+        });
     }
   }
 
-  // --- Class Management ---
-  handleCreateClass() {
-    if (!this.newClassName.trim()) return;
-    this.classService.createClass(this.newClassName, this.newClassDescription).subscribe({
-      next: (newClass) => {
-        console.log('Class created:', newClass);
-        this.closeCreateModal();
-        this.selectClass(newClass); // Automatically select the new class
-      },
-      error: (err) => console.error('Failed to create class', err)
-    });
-  }
-
-  selectClass(classToSelect: Classroom) {
-    this.selectedClass = classToSelect;
-  }
-  
-  unselectClass() {
-    this.selectedClass = null;
-  }
-
-  // --- Student Management ---
-  handleAddStudent() {
-    if (!this.newStudentEmail.trim() || !this.newStudentName.trim() || !this.selectedClass) return;
-
-    this.classService.addStudentToClass(this.selectedClass.id, this.newStudentEmail, this.newStudentName).subscribe(success => {
-      if (success) {
-        console.log('Student added');
-        // The BehaviorSubject in the service will automatically update the view
-        this.closeAddStudentModal();
-      } else {
-        alert('Failed to add student. They may already be in the class.');
-      }
-    });
-  }
-  
-  handleRemoveStudent(studentId: string) {
-    if (!this.selectedClass) return;
-    if (confirm('Are you sure you want to remove this student?')) {
-      this.classService.removeStudentFromClass(this.selectedClass.id, studentId).subscribe();
+  handleAddStudent(): void {
+    if (this.selectedClass?.id && this.newStudentEmail.trim() && this.newStudentName.trim()) {
+      this.classService.addStudentToClass(this.selectedClass.id, this.newStudentEmail, this.newStudentName)
+        .subscribe(() => {
+          // Add logic to refresh student list
+          this.newStudentEmail = '';
+          this.newStudentName = '';
+        });
     }
   }
-  
-  // --- UI & Modal Controls ---
-  openCreateModal() { this.isCreateModalOpen = true; }
-  closeCreateModal() {
-    this.isCreateModalOpen = false;
+
+  removeStudent(studentId: string): void {
+    if (this.selectedClass?.id) {
+        if (confirm('Are you sure you want to remove this student?')) {
+            this.classService.removeStudentFromClass(this.selectedClass.id, studentId)
+              .subscribe(() => {
+                // Add logic to refresh student list
+              });
+        }
+    }
+  }
+
+  // --- Modal controls ---
+  openCreateModal(): void {
+    this.showCreateModal = true;
     this.newClassName = '';
     this.newClassDescription = '';
   }
 
-  openAddStudentModal() { this.isAddStudentModalOpen = true; }
-  closeAddStudentModal() {
-    this.isAddStudentModalOpen = false;
-    this.newStudentName = '';
-    this.newStudentEmail = '';
+  closeCreateModal(): void {
+    this.showCreateModal = false;
   }
 
-  copyCode(classCode: string) {
-    navigator.clipboard.writeText(classCode).then(() => {
-      alert(`Code "${classCode}" copied to clipboard!`);
-    }).catch(err => {
-      console.error('Failed to copy code: ', err);
-    });
+  openManageModal(): void {
+    if (this.selectedClass) {
+      this.showManageModal = true;
+    }
+  }
+  
+  closeManageModal(): void {
+    this.showManageModal = false;
   }
 }

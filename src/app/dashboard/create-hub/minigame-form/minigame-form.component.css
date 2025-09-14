@@ -1,10 +1,10 @@
     /* Using shared styles for consistency, with a unique theme color */
-    @import '../shared-form-styles.css';
-    
-    :host {
-      --theme-color: #9b59b6; /* A distinct purple for minigames */
-      --theme-color-dark: #8e44ad;
-    }
+    @import '../../shared-form-styles.css';
+
+:host {
+  --theme-color: #9b59b6; /* A distinct purple for minigames */
+  --theme-color-dark: #8e44ad;
+}
     
     .minigame-theme .form-header {
       border-left-color: var(--theme-color);
