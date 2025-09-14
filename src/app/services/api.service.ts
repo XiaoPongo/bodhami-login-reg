@@ -53,19 +53,19 @@ export class ApiService {
   
     return this.getAuthHeaders().pipe(
       switchMap(headers => {
+        console.log("🔑 Using headers:", headers);
         let url = `${this.apiUrl}/classrooms`;
-        
-        // If your API expects mentor filtering, add it here
+  
         if (mentorId) {
           url += `?mentorId=${mentorId}`;
         }
+        console.log("🌍 Fetching classrooms from:", url);
   
         return this.http.get<Classroom[]>(url, { headers });
       })
     );
   }
   
-
   createClassroom(classroomData: { name: string, description: string }): Observable<Classroom> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.post<Classroom>(`${this.apiUrl}/classrooms`, classroomData, { headers }))

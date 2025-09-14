@@ -26,10 +26,13 @@ export class ClassService {
 
   loadClasses(): void {
     this.apiService.getClassrooms().subscribe({
-      next: (classes) => this._classes.next(classes),
-      error: (err) => console.error("Failed to load classrooms", err)
+      next: (classes) => {
+        console.log("📦 API returned classes:", classes);
+        this._classes.next(classes);
+      },
+      error: (err) => console.error("❌ Failed to load classrooms", err)
     });
-  }
+  }  
 
   createClass(name: string, description: string): Observable<Classroom> {
     return this.apiService.createClassroom({ name, description }).pipe(
