@@ -15,22 +15,22 @@ import { Classroom } from '../../services/api.service';
 })
 export class MentorDashboardComponent implements OnInit {
   user: any = null;
-  // This is now a live stream of data from your API
   classes$: Observable<Classroom[]>;
 
   constructor(
     private authService: AuthService, 
     private router: Router,
-    private classService: ClassService // Inject the service
+    private classService: ClassService
   ) {
-    // Get the observable stream from the service
     this.classes$ = this.classService.classes$;
   }
 
   ngOnInit(): void {
-    this.authService.getSession().then(({ data }) => {
-      this.user = data.session?.user;
-    });
+    // THIS IS THE FIX:
+    // Get the session directly. It's not a Promise.
+    const session = this.authService.getSession();
+    // The user object is on the session, or it might be null.
+    this.user = session?.user ?? null;
   }
 
   navigateToCreate(): void {
