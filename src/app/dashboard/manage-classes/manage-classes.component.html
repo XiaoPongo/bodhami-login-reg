@@ -66,12 +66,12 @@
         </div>
         
         <!-- Empty state for students -->
-        <div *ngIf="selectedClass.students?.length === 0" class="empty-state small">
+        <div *ngIf="!(selectedClass.students && selectedClass.students.length > 0)" class="empty-state small">
           <p>No students have been enrolled in this class yet.</p>
         </div>
 
         <!-- Student Table -->
-        <table *ngIf="selectedClass.students?.length > 0" class="student-table">
+        <table *ngIf="selectedClass.students && selectedClass.students.length > 0" class="student-table">
           <thead>
             <tr>
               <th>Name</th>
@@ -81,7 +81,8 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let student of selectedClass.students">
+            <!-- FIX: Safely loop over students, providing an empty array as a fallback -->
+            <tr *ngFor="let student of selectedClass.students ?? []">
               <td>{{ student.name }}</td>
               <td>{{ student.email }}</td>
               <td>{{ student.xp }}xp</td>

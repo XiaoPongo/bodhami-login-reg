@@ -1,40 +1,80 @@
-/* Corrected path from ../../ to ../ */
-@import '../shared-form-styles.css';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
-:host {
-  --theme-color: #9b59b6; /* A distinct purple for minigames */
-  --theme-color-dark: #8e44ad;
+// ... (interfaces remain the same)
+interface WordPair {
+  mainWord: string;
+  associatedWords: string[];
+}
+interface Minigame {
+  title: string;
+  description: string;
+  xp: number;
+  wordPairs: WordPair[];
+  wordBank: string[];
+  assignedClasses: { [classId: string]: boolean };
 }
 
-/* ... rest of the CSS remains the same ... */
-.minigame-theme .form-header {
-  border-left-color: var(--theme-color);
-}
 
-.minigame-theme .section-title i {
-  color: var(--theme-color);
-}
+@Component({
+  selector: 'app-minigame-form',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './minigame-form.component.html',
+  // --- THIS IS THE DEFINITIVE FIX ---
+  // We now explicitly tell Angular to load both stylesheets.
+  styleUrls: [
+    './minigame-form.component.css',
+    '../shared-form-styles.css'
+  ]
+})
+export class MinigameFormComponent implements OnInit {
+  minigame: Minigame = this.getNewMinigame();
+  
+  availableClasses = [
+    { id: 'class1', name: 'Grade 5 English - 2025' },
+    { id: 'class2', name: 'Vocabulary Builders' },
+  ];
 
-.minigame-theme .btn-primary {
-  background-color: var(--theme-color);
-  border-color: var(--theme-color);
-}
+  constructor(private router: Router) {}
 
-.minigame-theme .btn-primary:hover {
-  background-color: var(--theme-color-dark);
-  border-color: var(--theme-color-dark);
-}
+  ngOnInit(): void {}
 
-.dynamic-list {
-  background-color: #fdfdfd;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-.dynamic-list h4 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  color: #333;
-  font-weight: 600;
+  getNewMinigame(): Minigame {
+    return {
+      title: '',
+      description: '',
+      xp: 10,
+      wordPairs: [{ mainWord: '', associatedWords: [] }],
+      wordBank: [''],
+      assignedClasses: {}
+    };
+  }
+  
+  addWordPair(): void {
+    this.minigame.wordPairs.push({ mainWord: '', associatedWords: [] });
+  }
+
+  removeWordPair(index: number): void {
+    this.minigame.wordPairs.splice(index, 1);
+  }
+
+  addWordToBank(): void {
+    this.minigame.wordBank.push('');
+  }
+
+  removeWordFromBank(index: number): void {
+    this.minigame.wordBank.splice(index, 1);
+  }
+
+  trackByFn(index: any, item: any) {
+    return index;
+  }
+
+  submitForm(): void {
+    console.log("Submitting Minigame:", JSON.stringify(this.minigame, null, 2));
+    alert('Minigame structure logged to console.');
+  }
 }
