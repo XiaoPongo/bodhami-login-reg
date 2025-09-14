@@ -1,47 +1,49 @@
-import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../../auth.service';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { ClassService } from '../../services/class.service';
+import { Router, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { AuthService } from '../../auth.service';
+import { ClassService } from '../../services/class.service'; // Import the service
 import { Classroom } from '../../services/api.service';
-
 @Component({
   selector: 'app-mentor-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink], // Add RouterLink
   templateUrl: './mentor-dashboard.component.html',
   styleUrls: ['./mentor-dashboard.component.css'],
 })
-export class MentorDashboardComponent implements OnInit {
+export class MentorDashboardComponent implements OnInit, OnDestroy {
   user: any = null;
-  // This is the live stream of data from your API
-  classes$: Observable<Classroom[]>;
+  classes: Classroom[] = [];
+  private classSubscription!: Subscription;
 
   constructor(
     private authService: AuthService, 
     private router: Router,
-    private classService: ClassService
-  ) {
-    // Get the observable stream from the service
-    this.classes$ = this.classService.classes$;
-  }
+    private classService: ClassService // Inject the new service
+  ) {}
 
   ngOnInit(): void {
-    const session = this.authService.getSession();
-    this.user = session?.user ?? null;
-
-    // FOR DEBUGGING: This will print the live classes from the API to your browser console.
-    this.classes$.subscribe(classes => {
-      console.log("Live classes received in dashboard component:", classes);
+    this.user = this.authService.getCurrentUser();
+  
+    // Subscribe to BehaviorSubject observable
+    this.classSubscription = this.classService.classes$.subscribe(classes => {
+      this.classes = classes;
     });
+  
+    // Trigger initial load if not already loaded
+    this.classService.loadClasses();
+  }
+  
+
+  ngOnDestroy(): void {
+    // Unsubscribe to prevent memory leaks
+    if (this.classSubscription) {
+      this.classSubscription.unsubscribe();
+    }
   }
 
   navigateToCreate(): void {
     this.router.navigate(['/mentor/create']);
-  }
-
-  navigateToManageClasses(): void {
-    this.router.navigate(['/mentor/manage-classes']);
   }
 }
