@@ -1,58 +1,55 @@
 <div class="dashboard-container">
-  <!-- Welcome Section -->
-  <div class="welcome-header">
-    <div>
-      <h1>Welcome, Mentor!</h1>
-      <p>Here's an overview of your teaching dashboard.</p>
-    </div>
-    <button class="create-btn" (click)="navigateToCreate()">
-      <i class="fas fa-plus"></i> Create New Content
-    </button>
-  </div>
+  <h1 class="welcome">
+    Welcome, {{ user?.user_metadata?.firstName || 'Mentor' }}
+  </h1>
+  <p class="subtitle">Create a new class or manage your existing content.</p>
+  <button class="create-btn" (click)="navigateToCreate()" type="button">
+    + Create Content
+  </button>
 
-  <!-- Primary Action Cards -->
-  <div class="card-grid">
-    <div class="action-card">
-      <i class="fas fa-chalkboard-teacher card-icon"></i>
-      <h3>Manage Classes</h3>
-      <p>Create, edit, and view your active classrooms.</p>
-      <button (click)="navigateToManageClasses()">Go to Classes</button>
+  <!-- Original three-box layout -->
+  <div class="boxes">
+    <div class="box study">
+      <i class="fas fa-upload"></i>
+      <div>Upload Study Material</div>
+      <p>Add documents and notes for your classes.</p>
     </div>
-    <div class="action-card">
-      <i class="fas fa-book-open card-icon"></i>
-      <h3>Content Library</h3>
-      <p>Browse and manage all your missions & case studies.</p>
-      <button>View Library</button>
+    <div class="box manage" (click)="navigateToManageClasses()">
+      <i class="fas fa-users"></i>
+      <div>Manage Classes</div>
+      <p>Enroll students and generate class codes.</p>
     </div>
-    <div class="action-card">
-      <i class="fas fa-chart-line card-icon"></i>
-      <h3>Student Analytics</h3>
-      <p>Track progress and performance across your classes.</p>
-      <button>View Analytics</button>
+    <div class="box top-students-header">
+      <i class="fas fa-trophy"></i>
+      <div>View Top Students</div>
+      <p>See who leads the pack in your classes.</p>
     </div>
   </div>
 
-  <!-- Active Classes List -->
-  <div class="classes-section">
-    <h2><i class="fas fa-users"></i> Your Active Classes</h2>
+  <!-- Lower section now only contains the live class list -->
+  <div class="lower-section">
     <div class="classes-list">
-      <!-- Use the async pipe to display live data -->
-      <ng-container *ngIf="(classes$ | async) as classes; else loading">
-        <div class="class-item" *ngFor="let cls of classes">
-          <div class="class-info">
-            <span class="class-name">{{ cls.name }}</span>
-            <span class="class-code">Code: {{ cls.classCode }}</span>
+      <h2>Your Active Classes</h2>
+      <div class="scroll-container">
+        <!-- This container now uses the live data stream from your API -->
+        <ng-container *ngIf="(classes$ | async) as classes; else loading">
+          <div *ngIf="classes.length > 0; else noClasses" class="class-grid">
+            <div class="class-box" *ngFor="let cls of classes">
+              <div class="class-box-header">
+                <span class="class-name">{{ cls.name }}</span>
+                <span class="class-code">CODE: {{ cls.classCode }}</span>
+              </div>
+              <p class="class-description">{{ cls.description }}</p>
+            </div>
           </div>
-          <div class="class-stats">
-            <span><strong>0</strong> Students</span>
-            <span><strong>0</strong> Activities</span>
-          </div>
-        </div>
-        <p *ngIf="classes.length === 0" class="no-classes">You haven't created any classes yet.</p>
-      </ng-container>
-      <ng-template #loading>
-        <p>Loading classes...</p>
-      </ng-template>
+          <ng-template #noClasses>
+            <div class="empty-state">You have no active classes. Click "Manage Classes" to create one.</div>
+          </ng-template>
+        </ng-container>
+        <ng-template #loading>
+          <div class="empty-state">Loading classes...</div>
+        </ng-template>
+      </div>
     </div>
   </div>
 </div>
