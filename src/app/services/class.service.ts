@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap, throwError, of } from 'rxjs';
-import { ApiService, Classroom, Student } from './api.service'; // Import Student from api.service
+// Correctly import all models from api.service
+import { ApiService, Classroom, Student } from './api.service'; 
 
 @Injectable({
   providedIn: 'root',
@@ -22,32 +23,25 @@ export class ClassService {
 
   createClass(name: string, description: string): Observable<Classroom> {
     return this.apiService.createClassroom({ name, description }).pipe(
-      tap(() => {
-        this.loadClasses(); 
-      })
+      tap(() => this.loadClasses())
     );
   }
 
   deleteClass(classId: number): Observable<any> {
     if (!classId) return throwError(() => new Error('Invalid Class ID'));
     return this.apiService.deleteClassroom(classId).pipe(
-      tap(() => {
-        this.loadClasses();
-      })
+      tap(() => this.loadClasses())
     );
   }
-
-  // --- ADDED MISSING METHODS ---
-  // These will be wired to the API later. For now, they fix the compile errors.
-  addStudentToClass(classId: number, studentEmail: string, studentName: string): Observable<any> {
-    console.log(`SERVICE: Adding student ${studentName} (${studentEmail}) to class ${classId}`);
-    // In the future, this will return this.apiService.addStudent(...)
+  
+  // --- ADDED MISSING METHODS (MOCKED FOR NOW) ---
+  addStudentToClass(classId: number, studentEmail: string): Observable<any> {
+    console.log(`SERVICE: Adding student ${studentEmail} to class ${classId}`);
     return of({ success: true }); 
   }
 
   removeStudentFromClass(classId: number, studentId: string): Observable<any> {
     console.log(`SERVICE: Removing student ${studentId} from class ${classId}`);
-    // In the future, this will return this.apiService.removeStudent(...)
     return of({ success: true });
   }
 }
