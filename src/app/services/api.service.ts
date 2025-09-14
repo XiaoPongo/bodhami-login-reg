@@ -48,10 +48,23 @@ export class ApiService {
 
   // --- Classroom Endpoints ---
   getClassrooms(): Observable<Classroom[]> {
+    const user = this.authService.getCurrentUser();
+    const mentorId = user?.id;
+  
     return this.getAuthHeaders().pipe(
-      switchMap(headers => this.http.get<Classroom[]>(`${this.apiUrl}/classrooms`, { headers }))
+      switchMap(headers => {
+        let url = `${this.apiUrl}/classrooms`;
+        
+        // If your API expects mentor filtering, add it here
+        if (mentorId) {
+          url += `?mentorId=${mentorId}`;
+        }
+  
+        return this.http.get<Classroom[]>(url, { headers });
+      })
     );
   }
+  
 
   createClassroom(classroomData: { name: string, description: string }): Observable<Classroom> {
     return this.getAuthHeaders().pipe(

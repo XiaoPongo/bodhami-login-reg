@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap, throwError, of } from 'rxjs';
 // Correctly import all models from api.service
 import { ApiService, Classroom, Student } from './api.service'; 
+import { AuthService } from '../auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -10,9 +11,18 @@ export class ClassService {
   private readonly _classes = new BehaviorSubject<Classroom[]>([]);
   public readonly classes$: Observable<Classroom[]> = this._classes.asObservable();
 
-  constructor(private apiService: ApiService) {
-    this.loadClasses();
+  constructor(
+    private apiService: ApiService,
+    private authService: AuthService
+  ) {
+    // Only load classes once we actually have a session
+    this.authService.getSession$().subscribe(session => {
+      if (session) {
+        this.loadClasses();
+      }
+    });
   }
+  
 
   loadClasses(): void {
     this.apiService.getClassrooms().subscribe({
