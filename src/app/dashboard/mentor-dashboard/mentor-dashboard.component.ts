@@ -15,22 +15,26 @@ import { Classroom } from '../../services/api.service';
 })
 export class MentorDashboardComponent implements OnInit {
   user: any = null;
-  // This is now a live stream of data from your API
+  // This is the live stream of data from your API
   classes$: Observable<Classroom[]>;
 
   constructor(
     private authService: AuthService, 
     private router: Router,
-    private classService: ClassService // Inject the service
+    private classService: ClassService
   ) {
     // Get the observable stream from the service
     this.classes$ = this.classService.classes$;
   }
 
   ngOnInit(): void {
-    // Get the user session synchronously
     const session = this.authService.getSession();
     this.user = session?.user ?? null;
+
+    // FOR DEBUGGING: This will print the live classes from the API to your browser console.
+    this.classes$.subscribe(classes => {
+      console.log("Live classes received in dashboard component:", classes);
+    });
   }
 
   navigateToCreate(): void {
