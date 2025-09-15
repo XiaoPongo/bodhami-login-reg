@@ -6,9 +6,7 @@ import { ApiService, Material } from './api.service';
   providedIn: 'root'
 })
 export class MaterialService {
-  // A private BehaviorSubject to hold the current list of materials
   private readonly _materials = new BehaviorSubject<Material[]>([]);
-  // A public Observable that components can subscribe to for live updates
   public readonly materials$: Observable<Material[]> = this._materials.asObservable();
 
   constructor(private apiService: ApiService) {

@@ -56,6 +56,7 @@ export class UploadMaterialComponent implements OnInit {
     this.classes$ = this.classService.classes$;
     this.materials$ = this.materialService.materials$;
 
+    // This creates the live, filtered stream of materials
     this.filteredMaterials$ = combineLatest([this.materials$, this.filter]).pipe(
       map(([materials, filterValue]: [Material[], string]) => {
         if (filterValue === 'all') return materials;
@@ -66,6 +67,7 @@ export class UploadMaterialComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Keep a local copy of classes for the helper function
     this.classes$.subscribe((classes: Classroom[]) => {
       this.allClasses = classes;
     });
@@ -96,7 +98,7 @@ export class UploadMaterialComponent implements OnInit {
 
   handleFiles(files: FileList) {
     const allowedExtensions = ['.docx', '.csv', '.xlsx'];
-    const maxSize = 5 * 1024 * 1024;
+    const maxSize = 5 * 1024 * 1024; // 5 MB
 
     Array.from(files).forEach(file => {
       let error = '';
@@ -123,7 +125,7 @@ export class UploadMaterialComponent implements OnInit {
           uploadable.progress = Math.round(100 * event.loaded / event.total);
         } else if (event.type === HttpEventType.Response) {
           uploadable.status = 'success';
-          this.materialService.loadMaterials();
+          this.materialService.loadMaterials(); // This refreshes the main list
           this.showNotificationBanner('success', `"${uploadable.file.name}" uploaded successfully!`);
           uploadable.subscription?.unsubscribe();
         }
