@@ -1,18 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, of } from 'rxjs';
+import { HttpEventType, HttpEvent } from '@angular/common/http';
 import { ApiService, Classroom, Material } from '../../services/api.service';
 import { ClassService } from '../../services/class.service';
-import { HttpEventType, HttpEvent } from '@angular/common/http';
+import { MaterialService } from '../../services/material.service';
 
 // Interface for tracking file uploads in the UI
 interface UploadableFile {
   file: File;
   status: 'pending' | 'uploading' | 'success' | 'error';
-  progress: number; 
+  progress: number;
   error?: string;
   subscription?: Subscription;
+}
+
+// --- NEW: Interface for the notification banner ---
+interface Notification {
+  type: 'success' | 'error';
+  message: string;
 }
 
 @Component({
@@ -27,32 +34,34 @@ export class UploadMaterialComponent implements OnInit {
   filesToUpload: UploadableFile[] = [];
   isDragging = false;
 
-  // --- MOCKED DATA LAYER for File Management ---
-  allMaterials: Material[] = [
-    { id: 1, displayName: 'Introduction-to-Physics.docx', s3Url: '#', fileType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', mentorId: 'mentor1', uploadedAt: new Date('2025-09-10'), classroom: { id: 2 } as Classroom },
-    { id: 2, displayName: 'Chemistry-Lab-Results.xlsx', s3Url: '#', fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', mentorId: 'mentor1', uploadedAt: new Date('2025-09-11'), classroom: { id: 4 } as Classroom },
-  ];
+  allMaterials: Material[] = [];
   filteredMaterials: Material[] = [];
   classes$: Observable<Classroom[]>;
-  private allClasses: Classroom[] = []; // <-- NEW: To store the class list for easy lookup
+  private allClasses: Classroom[] = [];
   selectedClassFilter: string = 'all';
 
   selectedFileIds = new Set<number>();
   showBulkToolbar = false;
   isBulkAssignModalOpen = false;
   bulkAssignClassId: string = 'unassign';
+  
+  // --- NEW: Properties for the notification system ---
+  notification: Notification | null = null;
+  private notificationTimeout: any;
 
   constructor(
     private apiService: ApiService, 
-    private classService: ClassService
+    private classService: ClassService,
+    private materialService: MaterialService
   ) {
     this.classes$ = this.classService.classes$;
   }
 
   ngOnInit(): void {
-    this.filterFiles(); // Initial filter for mock data
-
-    // --- NEW: Subscribe to the class list to have it available for the helper function ---
+    this.materialService.materials$.subscribe((materials: Material[]) => {
+      this.allMaterials = materials;
+      this.filterFiles();
+    });
     this.classes$.subscribe(classes => {
       this.allClasses = classes;
     });
@@ -80,14 +89,14 @@ export class UploadMaterialComponent implements OnInit {
 
   handleFiles(files: FileList) {
     const allowedExtensions = ['.docx', '.csv', '.xlsx'];
-    const maxSize = 5 * 1024 * 1024; // 5 MB
+    const maxSize = 5 * 1024 * 1024;
 
     Array.from(files).forEach(file => {
       let error = '';
       const extension = '.' + file.name.split('.').pop()?.toLowerCase();
       if (!allowedExtensions.includes(extension)) error = 'Invalid type. Only .docx, .csv, .xlsx.';
       else if (file.size > maxSize) error = 'File exceeds 5MB limit.';
-      
+
       this.filesToUpload.push({ file, status: error ? 'error' : 'pending', progress: 0, error });
     });
     this.startUploads();
@@ -95,25 +104,33 @@ export class UploadMaterialComponent implements OnInit {
   
   startUploads() {
     this.filesToUpload.forEach(uploadable => {
-      if (uploadable.status === 'pending') {
-        this.uploadFile(uploadable);
-      }
+      if (uploadable.status === 'pending') this.uploadFile(uploadable);
     });
   }
 
   uploadFile(uploadable: UploadableFile) {
     uploadable.status = 'uploading';
-    // MOCK UPLOAD
-    const interval = setInterval(() => {
-      uploadable.progress += 20;
-      if (uploadable.progress >= 100) {
-        clearInterval(interval);
-        uploadable.status = 'success';
+    uploadable.subscription = this.apiService.uploadMaterial(uploadable.file).subscribe({
+      next: (event: HttpEvent<any>) => {
+        if (event.type === HttpEventType.UploadProgress && event.total) {
+          uploadable.progress = Math.round(100 * event.loaded / event.total);
+        } else if (event.type === HttpEventType.Response) {
+          uploadable.status = 'success';
+          this.materialService.loadMaterials();
+          this.showNotificationBanner('success', `"${uploadable.file.name}" uploaded successfully!`);
+          uploadable.subscription?.unsubscribe();
+        }
+      },
+      error: (err) => {
+        uploadable.status = 'error';
+        uploadable.error = err.error?.error || 'Upload failed.';
+        uploadable.subscription?.unsubscribe();
       }
-    }, 250);
+    });
   }
 
   removeFileFromQueue(index: number) {
+    this.filesToUpload[index].subscription?.unsubscribe();
     this.filesToUpload.splice(index, 1);
   }
 
@@ -123,7 +140,8 @@ export class UploadMaterialComponent implements OnInit {
     else this.filteredMaterials = this.allMaterials.filter(m => m.classroom?.id === Number(this.selectedClassFilter));
   }
 
-  toggleFileSelection(fileId: number, event: Event) {
+  toggleFileSelection(fileId: number | undefined, event: Event) {
+    if (!fileId) return;
     const isChecked = (event.target as HTMLInputElement).checked;
     if (isChecked) this.selectedFileIds.add(fileId);
     else this.selectedFileIds.delete(fileId);
@@ -131,12 +149,38 @@ export class UploadMaterialComponent implements OnInit {
   }
 
   handleBulkDelete() {
-    alert('Mock Action: Bulk delete functionality requires API changes.');
+    if (confirm(`Are you sure you want to delete ${this.selectedFileIds.size} file(s)?`)) {
+      const idsToDelete = [...this.selectedFileIds];
+      this.materialService.deleteMaterials(idsToDelete).subscribe({
+        next: () => {
+          this.showNotificationBanner('success', `${idsToDelete.length} file(s) deleted successfully.`);
+          this.clearSelection();
+        },
+        error: (err) => this.showNotificationBanner('error', 'An error occurred during deletion.')
+      });
+    }
   }
 
   handleBulkAssign() {
-    alert('Mock Action: Bulk assign functionality requires API changes.');
+    const idsToAssign = [...this.selectedFileIds];
+    const classId = this.bulkAssignClassId === 'unassign' ? null : Number(this.bulkAssignClassId);
+    const className = classId ? this.getClassNameById(classId) : 'Unassigned';
+
+    this.materialService.assignMaterials(idsToAssign, classId).subscribe({
+      next: () => {
+        this.showNotificationBanner('success', `Files successfully assigned to "${className}".`);
+        this.clearSelection();
+      },
+      error: (err) => this.showNotificationBanner('error', 'An error occurred during assignment.')
+    });
+  }
+
+  clearSelection() {
+    this.selectedFileIds.clear();
+    this.showBulkToolbar = false;
     this.closeBulkAssignModal();
+    const checkboxes = document.querySelectorAll('.file-checkbox') as NodeListOf<HTMLInputElement>;
+    checkboxes.forEach(cb => cb.checked = false);
   }
   
   openBulkAssignModal() { this.isBulkAssignModalOpen = true; }
@@ -147,6 +191,13 @@ export class UploadMaterialComponent implements OnInit {
     if (fileName.endsWith('.csv')) return 'fas fa-file-csv';
     if (fileName.endsWith('.xlsx')) return 'fas fa-file-excel';
     return 'fas fa-file';
+  }
+
+  // --- NEW: Method to show and hide the notification banner ---
+  showNotificationBanner(type: 'success' | 'error', message: string) {
+    if (this.notificationTimeout) clearTimeout(this.notificationTimeout);
+    this.notification = { type, message };
+    this.notificationTimeout = setTimeout(() => this.notification = null, 5000);
   }
 }
 

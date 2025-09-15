@@ -1,4 +1,10 @@
 <div class="container">
+  <!-- NEW: Notification Banner -->
+  <div *ngIf="notification" class="notification-banner" [ngClass]="notification.type">
+    <i [class]="notification.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle'"></i>
+    <span>{{ notification.message }}</span>
+  </div>
+
   <!-- File Upload Section -->
   <div 
     class="upload-section"
@@ -28,7 +34,7 @@
           <span>{{ item.progress }}%</span>
         </div>
         <span class="status-text error" *ngIf="item.status === 'error'"><i class="fas fa-exclamation-circle"></i> {{ item.error }}</span>
-        <span class="status-text success" *ngIf="item.status === 'success'"><i class="fas fa-check-circle"></i> Upload Complete! Added to list below.</span>
+        <span class="status-text success" *ngIf="item.status === 'success'"><i class="fas fa-check-circle"></i> Upload Complete!</span>
       </div>
       <button class="btn-remove" (click)="removeFileFromQueue(i)" title="Remove from queue">&times;</button>
     </div>
@@ -45,7 +51,6 @@
       </select>
     </div>
     
-    <!-- Bulk Action Toolbar -->
     <div class="bulk-actions" *ngIf="showBulkToolbar">
         <span>{{ selectedFileIds.size }} file(s) selected</span>
         <div>
@@ -63,7 +68,6 @@
         <div class="file-card-details">
           <span class="file-name" title="{{ material.displayName }}">{{ material.displayName }}</span>
           <span class="file-meta">
-            <!-- THIS IS THE DEFINITIVE FIX -->
             {{ material.classroom ? 'Assigned to: ' + getClassNameById(material.classroom.id) : 'Unassigned' }}
           </span>
         </div>

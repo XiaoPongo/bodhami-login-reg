@@ -14,6 +14,24 @@
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+/* --- NEW: Notification Banner --- */
+.notification-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  font-weight: 500;
+  animation: slideInDown 0.5s ease-out;
+}
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.notification-banner.success { background-color: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.notification-banner.error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
 /* --- Buttons --- */
 .btn { font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: none; display: inline-flex; align-items: center; gap: 0.5rem; }
 .btn-primary { background-color: #4f46e5; color: white; padding: 0.75rem 1.5rem; }
@@ -54,25 +72,36 @@
 .management-header h2 { margin: 0; font-size: 1.5rem; }
 .management-header select { padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid #d1d5db; background-color: #f9fafb; }
 
-/* Bulk Actions Toolbar */
+/* --- Bulk Action Toolbar --- */
 .bulk-actions { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background-color: #eef2ff; border-radius: 8px; margin-bottom: 1.5rem; animation: fadeIn 0.3s; }
 .bulk-actions span { font-weight: 500; color: #4f46e5; }
 .bulk-actions div { display: flex; gap: 1rem; }
 
-/* File Grid */
+/* --- File Grid --- */
 .file-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
 .file-card { position: relative; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .file-checkbox { position: absolute; top: 10px; left: 10px; width: 18px; height: 18px; accent-color: #4f46e5;}
 .file-card-icon { font-size: 3rem; margin: 1rem 0; }
-.file-card-icon.docx { color: #2b579a; }
-.file-card-icon.csv { color: #1d6f42; }
-.file-card-icon.xlsx { color: #107c41; }
+.file-card-icon.fa-file-word { color: #2b579a; }
+.file-card-icon.fa-file-csv { color: #1d6f42; }
+.file-card-icon.fa-file-excel { color: #107c41; }
 .file-card-details { display: flex; flex-direction: column; }
 .file-name { font-weight: 600; color: #111827; word-break: break-all; }
 .file-meta { font-size: 0.8rem; color: #6b7280; margin-top: 4px; }
 .empty-grid-state { grid-column: 1 / -1; text-align: center; padding: 3rem; color: #9ca3af; }
 .empty-grid-state i { font-size: 3rem; margin-bottom: 1rem; }
 .empty-grid-state p { font-size: 1.1rem; }
+
+/* --- Modal Styles --- */
+.modal-overlay { position: fixed; inset: 0; background-color: rgba(17, 24, 39, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.3s; }
+.modal-content { background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.modal-header h3 { margin: 0; font-size: 1.25rem; color: #111827; }
+.btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #9ca3af; }
+.input-group { margin-bottom: 1rem; }
+.input-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+.input-group select { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; }
 
 /* Responsive Grid */
 @media (max-width: 1024px) { .file-grid { grid-template-columns: repeat(2, 1fr); } }
