@@ -42,6 +42,12 @@
     <p>Case studies present real-world scenarios. Use the passage for context and problems for critical thinking questions.</p>
   </div>
 
+  <div class="csv-upload">
+    <p>Have a pre-filled CSV? Upload it here to auto-fill the form.</p>
+    <label for="case-study-csv-upload" class="btn-secondary"><i class="fas fa-upload"></i> Upload CSV Template</label>
+    <input id="case-study-csv-upload" type="file" (change)="onFileSelected($event)" accept=".csv">
+  </div>
+
   <form #caseStudyForm="ngForm" (ngSubmit)="submitForm()">
     <!-- Basic Info -->
     <div class="form-section">
@@ -133,3 +139,4 @@
     </div>
   </form>
 </div>
+

@@ -102,8 +102,41 @@ export class MissionFormComponent implements OnInit {
       this.isSubmitting = false;
     }
   }
+  
+  // --- CSV Handling ---
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        this.parseCsvContent(text);
+      };
+      reader.readAsText(file);
+    }
+  }
 
-  // --- CSV Generation ---
+  parseCsvContent(csvText: string): void {
+    // Basic CSV parsing - can be made more robust
+    const lines = csvText.split('\n');
+    const newMission = this.getNewMission();
+    newMission.passages = [];
+    newMission.scenarios = [];
+
+    lines.forEach(line => {
+        const [key, ...values] = line.split(',');
+        const value = values.join(',').replace(/"/g, '').trim();
+
+        if (key.toLowerCase() === 'title') newMission.title = value;
+        if (key.toLowerCase() === 'xp') newMission.xp = parseInt(value, 10);
+        if (key.toLowerCase().startsWith('passage')) newMission.passages.push(value);
+        // ... more complex parsing for scenarios would be needed here
+    });
+
+    this.mission = newMission;
+    alert('Form auto-filled from CSV!');
+  }
+
   generateCsvContent(): string {
     let content = `Title,${this.mission.title}\nXP,${this.mission.xp}\n`;
     this.mission.passages.forEach((p, i) => content += `Passage ${i + 1},"${p.replace(/"/g, '""')}"\n`);
@@ -142,3 +175,4 @@ export class MissionFormComponent implements OnInit {
     this.isPreviewing = false;
   }
 }
+

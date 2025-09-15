@@ -110,6 +110,19 @@ export class CaseStudyFormComponent implements OnInit {
     return content;
   }
   
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => this.parseCsvContent(e.target?.result as string);
+      reader.readAsText(file);
+    }
+  }
+
+  parseCsvContent(csvText: string): void {
+    alert('CSV parsing for Case Studies is not yet implemented.');
+  }
+  
   togglePreview(): void { this.isPreviewing = !this.isPreviewing; }
   exportToCsv(): void {
     const csvContent = this.generateCsvContent();
@@ -127,3 +140,4 @@ export class CaseStudyFormComponent implements OnInit {
     this.isPreviewing = false;
   }
 }
+

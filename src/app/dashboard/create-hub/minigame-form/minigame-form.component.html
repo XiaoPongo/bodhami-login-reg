@@ -32,6 +32,12 @@
     <p>First, create a 'Word Bank' of all possible answers. Then, create 'Main Word' groups and select which words from the bank are the correct answers for each group.</p>
   </div>
   
+  <div class="csv-upload">
+    <p>Have a pre-filled CSV? Upload it here to auto-fill the form.</p>
+    <label for="minigame-csv-upload" class="btn-secondary"><i class="fas fa-upload"></i> Upload CSV Template</label>
+    <input id="minigame-csv-upload" type="file" (change)="onFileSelected($event)" accept=".csv">
+  </div>
+
   <form #minigameForm="ngForm" (ngSubmit)="submitForm()">
     <!-- Basic Info Section -->
     <div class="form-section">
@@ -104,3 +110,4 @@
     </div>
   </form>
 </div>
+

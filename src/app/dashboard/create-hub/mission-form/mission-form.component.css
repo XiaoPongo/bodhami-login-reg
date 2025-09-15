@@ -117,13 +117,12 @@ textarea {
 
 /* --- Dynamic Content Builder Sections --- */
 .dynamic-list {
-  background-color: #ffffff;
+  background-color: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   padding: 1.5rem;
 }
 .dynamic-list.nested {
-  background-color: #f9fafb;
   margin-bottom: 1rem;
 }
 .list-item {
@@ -250,13 +249,13 @@ textarea {
   background-color: #f3f4f6;
 }
 
-/* --- Guidelines Box (Styled like Mission Form) --- */
+/* --- Guidelines & CSV Upload Box --- */
 .guidelines {
   background-color: var(--guidelines-bg);
   border-left: 4px solid var(--theme-color);
   border-radius: 8px;
   padding: 1rem 1.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   border: 1px solid var(--guidelines-border);
 }
 .guidelines h4 {
@@ -270,6 +269,17 @@ textarea {
   margin: 0;
   color: var(--guidelines-text);
 }
+.csv-upload {
+  text-align: center;
+  padding: 1rem;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+.csv-upload p { margin: 0 0 1rem; color: #6b7280; }
+.csv-upload input[type="file"] { display: none; }
+.csv-upload-label { cursor: pointer; color: var(--theme-color); font-weight: 600; }
+.csv-upload-label:hover { text-decoration: underline; }
 
 /* --- Class Assignment --- */
 .class-grid {
@@ -308,6 +318,7 @@ textarea {
   align-items: center;
   z-index: 10;
   border-radius: 12px;
+  padding: 2.5rem;
 }
 .success-box {
   text-align: center;
@@ -336,7 +347,6 @@ textarea {
 
 .preview-overlay {
   align-items: flex-start;
-  padding: 2.5rem;
   overflow-y: auto;
 }
 .preview-box {
@@ -345,6 +355,10 @@ textarea {
   margin: auto;
   animation: fadeIn 0.3s ease-out;
   text-align: left;
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 .preview-box h2 {
   font-size: 1.75rem;
@@ -358,3 +372,30 @@ textarea {
 .preview-problem {
   margin-bottom: 1rem;
 }
+.preview-problem strong { font-weight: 600; color: #1f2937;}
+.preview-problem p { color: #4b5563; }
+
+/* Custom Scrollbar for Preview */
+.preview-overlay::-webkit-scrollbar {
+  width: 8px;
+}
+.preview-overlay::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+.preview-overlay::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+.preview-overlay::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+/* Minigame specific styles */
+.word-pair-item { border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background-color: #fff; }
+.answer-selection { margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed #d1d5db; }
+.answer-selection > label { font-weight: 500; margin-bottom: 0.75rem; display: block; }
+.answer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.5rem; }
+.class-label.small { padding: 0.5rem 0.75rem; font-size: 0.9rem; }
+.class-label.disabled { cursor: not-allowed; color: #9ca3af; background-color: #f9fafb; }
+
