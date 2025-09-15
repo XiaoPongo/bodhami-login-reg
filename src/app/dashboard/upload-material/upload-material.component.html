@@ -44,7 +44,8 @@
   <div class="management-section">
     <div class="management-header">
       <h2>Your Materials</h2>
-      <select [ngModel]="filter.getValue()" (ngModelChange)="onFilterChange($event)">
+      <!-- THIS IS THE FIX: Bind to the simple string property -->
+      <select [(ngModel)]="selectedClassFilter" (ngModelChange)="filterFiles()">
         <option value="all">Filter by Class: All</option>
         <option value="unassigned">Unassigned</option>
         <option *ngFor="let class of (classes$ | async)" [value]="class.id">{{ class.name }}</option>
@@ -60,8 +61,7 @@
         </div>
     </div>
 
-    <!-- THIS IS THE DEFINITIVE FIX -->
-    <!-- We now use the async pipe on the filteredMaterials$ observable -->
+    <!-- Grid with Fallbacks -->
     <ng-container *ngIf="(filteredMaterials$ | async) as materials; else loading">
       <div *ngIf="materials.length > 0; else noMaterials" class="file-grid">
         <div *ngFor="let material of materials" class="file-card">

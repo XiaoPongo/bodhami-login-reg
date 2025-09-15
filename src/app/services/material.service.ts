@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { ApiService, Material } from './api.service';
 
 @Injectable({
@@ -35,5 +35,4 @@ export class MaterialService {
     );
   }
 }
-
 

@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Observable, Subscription, BehaviorSubject, combineLatest } from 'rxjs';
+import { Observable, Subscription, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpEventType, HttpEvent } from '@angular/common/http';
 import { ApiService, Classroom, Material } from '../../services/api.service';
 import { ClassService } from '../../services/class.service';
-import { MaterialService } from '../../services/material.service';
+import { MaterialService } from '../../services/material.service'; // Correctly imported
 
 interface UploadableFile {
   file: File;
@@ -38,7 +38,7 @@ export class UploadMaterialComponent implements OnInit {
   filteredMaterials$: Observable<Material[]>;
   
   private allClasses: Classroom[] = [];
-  public filter = new BehaviorSubject<string>('all');
+  selectedClassFilter: string = 'all'; // Simple property for ngModel
 
   selectedFileIds = new Set<number>();
   showBulkToolbar = false;
@@ -56,12 +56,12 @@ export class UploadMaterialComponent implements OnInit {
     this.classes$ = this.classService.classes$;
     this.materials$ = this.materialService.materials$;
 
-    // Create a new observable stream for the filtered materials
-    this.filteredMaterials$ = combineLatest([this.materials$, this.filter]).pipe(
-      map(([materials, filterValue]: [Material[], string]) => {
-        if (filterValue === 'all') return materials;
-        if (filterValue === 'unassigned') return materials.filter(m => !m.classroom);
-        return materials.filter(m => m.classroom?.id === Number(filterValue));
+    // This creates the live, filtered stream of materials
+    this.filteredMaterials$ = this.materials$.pipe(
+      map((materials: Material[]) => {
+        if (this.selectedClassFilter === 'all') return materials;
+        if (this.selectedClassFilter === 'unassigned') return materials.filter(m => !m.classroom);
+        return materials.filter(m => m.classroom?.id === Number(this.selectedClassFilter));
       })
     );
   }
@@ -72,10 +72,7 @@ export class UploadMaterialComponent implements OnInit {
     });
   }
 
-  onFilterChange(filterValue: string): void {
-    this.filter.next(filterValue);
-  }
-
+  // Helper function for the template
   getClassNameById(classId: number): string {
     const foundClass = this.allClasses.find(c => c.id === classId);
     return foundClass ? foundClass.name : 'Unknown Class';
@@ -97,7 +94,7 @@ export class UploadMaterialComponent implements OnInit {
 
   handleFiles(files: FileList) {
     const allowedExtensions = ['.docx', '.csv', '.xlsx'];
-    const maxSize = 5 * 1024 * 1024; // 5 MB
+    const maxSize = 5 * 1024 * 1024;
 
     Array.from(files).forEach(file => {
       let error = '';

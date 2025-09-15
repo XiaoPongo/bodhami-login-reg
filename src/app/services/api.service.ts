@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpEvent } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, catchError, tap } from 'rxjs/operators';
 import { AuthService } from '../auth.service';
 
 // --- DEFINITIVE DATA MODELS ---
@@ -23,7 +23,7 @@ export interface Classroom {
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private apiUrl = 'http://localhost:8080/api'; // Assuming local dev
+  private apiUrl = 'https://api-test.thebandar.co.in/api';
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 
