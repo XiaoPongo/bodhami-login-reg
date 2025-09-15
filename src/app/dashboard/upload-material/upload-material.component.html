@@ -1,10 +1,101 @@
-<div class="upload-container">
-    <div class="upload-box">
+<div class="container">
+  <!-- File Upload Section -->
+  <div 
+    class="upload-section"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+    [class.dragging]="isDragging">
+    <div class="drop-zone">
       <i class="fas fa-cloud-upload-alt"></i>
-      <h2>Upload Class Materials</h2>
-      <p>Drag & drop files here or click to browse.</p>
-      <input type="file" id="file-upload" multiple>
-      <label for="file-upload" class="btn-browse">Browse Files</label>
+      <h3>Drag & drop files here</h3>
+      <p>or</p>
+      <label for="file-upload" class="btn btn-primary">Browse Files</label>
+      <input id="file-upload" type="file" (change)="onFileSelected($event)" multiple accept=".docx,.csv,.xlsx">
+      <p class="file-info">Max size: 5MB. Allowed types: .docx, .csv, .xlsx</p>
     </div>
   </div>
-  
+
+  <!-- Upload Queue Section -->
+  <div class="upload-queue" *ngIf="filesToUpload.length > 0">
+    <h4>Upload Queue</h4>
+    <div *ngFor="let item of filesToUpload; let i = index" class="upload-item" [ngClass]="item.status">
+      <div class="file-icon"><i [class]="getFileTypeIcon(item.file.name)"></i></div>
+      <div class="file-details">
+        <span class="file-name">{{ item.file.name }}</span>
+        <div class="progress-bar-container" *ngIf="item.status === 'uploading'">
+          <div class="progress-bar" [style.width.%]="item.progress"></div>
+          <span>{{ item.progress }}%</span>
+        </div>
+        <span class="status-text error" *ngIf="item.status === 'error'"><i class="fas fa-exclamation-circle"></i> {{ item.error }}</span>
+        <span class="status-text success" *ngIf="item.status === 'success'"><i class="fas fa-check-circle"></i> Upload Complete! Added to list below.</span>
+      </div>
+      <button class="btn-remove" (click)="removeFileFromQueue(i)" title="Remove from queue">&times;</button>
+    </div>
+  </div>
+
+  <!-- File Management Section -->
+  <div class="management-section">
+    <div class="management-header">
+      <h2>Your Materials</h2>
+      <select [(ngModel)]="selectedClassFilter" (change)="filterFiles()">
+        <option value="all">Filter by Class: All</option>
+        <option value="unassigned">Unassigned</option>
+        <option *ngFor="let class of (classes$ | async)" [value]="class.id">{{ class.name }}</option>
+      </select>
+    </div>
+    
+    <!-- Bulk Action Toolbar -->
+    <div class="bulk-actions" *ngIf="showBulkToolbar">
+        <span>{{ selectedFileIds.size }} file(s) selected</span>
+        <div>
+            <button class="btn btn-secondary" (click)="openBulkAssignModal()"><i class="fas fa-plus-circle"></i> Assign to Class</button>
+            <button class="btn btn-danger" (click)="handleBulkDelete()"><i class="fas fa-trash-alt"></i> Delete Selected</button>
+        </div>
+    </div>
+
+    <div class="file-grid">
+      <div *ngFor="let material of filteredMaterials" class="file-card">
+        <input type="checkbox" class="file-checkbox" (change)="toggleFileSelection(material.id, $event)">
+        <div class="file-card-icon" [ngClass]="material.fileType.split('/').pop()">
+          <i [class]="getFileTypeIcon(material.displayName)"></i>
+        </div>
+        <div class="file-card-details">
+          <span class="file-name" title="{{ material.displayName }}">{{ material.displayName }}</span>
+          <span class="file-meta">
+            {{ material.classroom ? 'Assigned to: ' + (classService.classes$ | async)?.find(c => c.id === material.classroom?.id)?.name : 'Unassigned' }}
+          </span>
+        </div>
+      </div>
+
+      <div *ngIf="filteredMaterials.length === 0" class="empty-grid-state">
+        <i class="fas fa-folder-open"></i>
+        <p>No materials found for this filter.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Bulk Assigning -->
+<div *ngIf="isBulkAssignModalOpen" class="modal-overlay" (click)="closeBulkAssignModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Assign {{ selectedFileIds.size }} Material(s)</h3>
+      <button class="btn-close" (click)="closeBulkAssignModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="input-group">
+        <label for="assignClass">Select a Class</label>
+        <select id="assignClass" [(ngModel)]="bulkAssignClassId" name="bulkAssignClassId">
+          <option value="unassign">Unassign (make available to all)</option>
+          <option *ngFor="let class of (classes$ | async)" [value]="class.id">{{ class.name }}</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeBulkAssignModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="handleBulkAssign()">Confirm Assignment</button>
+      </div>
+    </div>
+  </div>
+</div>
+
