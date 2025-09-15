@@ -1,7 +1,16 @@
+/* =======================================
+   UNIVERSAL FORM STYLES - ELEVANA V3
+   ======================================= */
+
+/* --- Theme Variables (Change these in each component's CSS file) --- */
 :host {
-  --theme-color: #3b82f6; /* Blue-500 */
+  --theme-color: #3b82f6; /* Default Blue */
   --theme-color-dark: #2563eb;
   --theme-color-light: #dbeafe;
+  --guidelines-bg: #eff6ff;
+  --guidelines-border: #bfdbfe;
+  --guidelines-header: #1d4ed8;
+  --guidelines-text: #374151;
 }
 
 /* --- Main Container & Layout --- */
@@ -106,14 +115,15 @@ textarea {
   font-family: inherit;
 }
 
-/* --- Dynamic Lists (Passages, Scenarios, etc.) --- */
+/* --- Dynamic Content Builder Sections --- */
 .dynamic-list {
-  background-color: #f9fafb;
+  background-color: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   padding: 1.5rem;
 }
 .dynamic-list.nested {
+  background-color: #f9fafb;
   margin-bottom: 1rem;
 }
 .list-item {
@@ -122,7 +132,7 @@ textarea {
   gap: 0.75rem;
   margin-bottom: 0.75rem;
 }
-.list-item textarea {
+.list-item textarea, .list-item input[type="text"] {
   flex-grow: 1;
 }
 .mcq-option {
@@ -134,9 +144,6 @@ textarea {
   height: 20px;
   accent-color: var(--theme-color);
   margin-top: 0.6rem;
-}
-.mcq-option input[type="text"] {
-  flex-grow: 1;
 }
 
 .scenario-header {
@@ -151,7 +158,7 @@ textarea {
   font-weight: 600;
 }
 
-/* --- Add/Remove Buttons --- */
+/* --- Add/Remove Buttons (Redesigned) --- */
 .btn-add, .btn-remove {
   border: none;
   cursor: pointer;
@@ -196,7 +203,7 @@ textarea {
   font-size: 0.9rem;
 }
 
-/* --- Buttons --- */
+/* --- Action Buttons (Preview/Submit) --- */
 .action-buttons {
   display: flex;
   justify-content: flex-end;
@@ -243,24 +250,25 @@ textarea {
   background-color: #f3f4f6;
 }
 
-/* --- Guidelines Box --- */
+/* --- Guidelines Box (Styled like Mission Form) --- */
 .guidelines {
-  background-color: var(--theme-color-light);
+  background-color: var(--guidelines-bg);
   border-left: 4px solid var(--theme-color);
   border-radius: 8px;
   padding: 1rem 1.5rem;
   margin-bottom: 2rem;
+  border: 1px solid var(--guidelines-border);
 }
 .guidelines h4 {
   margin: 0 0 0.5rem 0;
-  color: var(--theme-color-dark);
+  color: var(--guidelines-header);
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 .guidelines p {
   margin: 0;
-  color: #4b5563;
+  color: var(--guidelines-text);
 }
 
 /* --- Class Assignment --- */
@@ -292,9 +300,9 @@ textarea {
 
 /* --- Overlays (Success & Preview) --- */
 .success-overlay, .preview-overlay {
-  position: absolute;
+  position: absolute; /* Will be contained by .layout-content */
   inset: 0;
-  background-color: rgba(255, 255, 255, 0.98);
+  background-color: rgba(249, 250, 251, 0.98);
   display: flex;
   justify-content: center;
   align-items: center;
