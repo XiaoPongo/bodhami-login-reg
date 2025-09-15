@@ -125,4 +125,3 @@ export class MinigameFormComponent implements OnInit {
     this.isPreviewing = false;
   }
 }
-

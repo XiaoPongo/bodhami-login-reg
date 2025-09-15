@@ -1,5 +1,4 @@
 <div class="form-container mission-theme">
-  <!-- Success Screen -->
   <div *ngIf="submissionSuccess" class="success-overlay">
     <div class="success-box">
       <i class="fas fa-check-circle"></i>
@@ -13,7 +12,6 @@
     </div>
   </div>
 
-  <!-- Preview Mode -->
   <div *ngIf="isPreviewing" class="preview-overlay">
       <div class="preview-box">
         <h2>Preview: {{ mission.title || 'Untitled Mission' }}</h2>
@@ -133,4 +131,3 @@
     </div>
   </form>
 </div>
-

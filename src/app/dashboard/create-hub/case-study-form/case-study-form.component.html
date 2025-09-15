@@ -1,5 +1,4 @@
 <div class="form-container case-study-theme">
-  <!-- Success Screen -->
   <div *ngIf="submissionSuccess" class="success-overlay">
     <div class="success-box">
       <i class="fas fa-check-circle"></i>
@@ -13,7 +12,6 @@
     </div>
   </div>
 
-  <!-- Preview Mode -->
   <div *ngIf="isPreviewing" class="preview-overlay">
       <div class="preview-box">
         <h2>Preview: {{ caseStudy.title || 'Untitled Case Study' }}</h2>
@@ -49,7 +47,6 @@
   </div>
 
   <form #caseStudyForm="ngForm" (ngSubmit)="submitForm()">
-    <!-- Basic Info -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-info-circle"></i> Basic Details</h3>
       <div class="input-group">
@@ -62,7 +59,6 @@
       </div>
     </div>
 
-    <!-- Content -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-file-alt"></i> Content</h3>
        <div class="input-group">
@@ -71,7 +67,6 @@
       </div>
     </div>
 
-    <!-- Problems -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-question-circle"></i> Problems</h3>
       <div *ngFor="let problem of caseStudy.problems; let i = index; trackBy: trackByFn" class="dynamic-list nested">
@@ -120,7 +115,6 @@
       <button type="button" class="btn-add" (click)="addProblem()"><i class="fas fa-plus"></i> Add Problem</button>
     </div>
 
-    <!-- Class Assignment -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-chalkboard-teacher"></i> Class Assignment</h3>
       <div *ngIf="(availableClasses$ | async) as classes" class="class-grid">
@@ -139,4 +133,3 @@
     </div>
   </form>
 </div>
-
