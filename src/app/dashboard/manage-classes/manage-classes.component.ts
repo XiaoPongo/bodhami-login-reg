@@ -1,9 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router'; // Import ActivatedRoute
+import { Subscription, Observable } from 'rxjs';
 import { ClassService } from '../../services/class.service';
-import { Classroom, Student } from '../../services/api.service';
+import { Classroom, Student, Activity, Material } from '../../services/api.service';
 
 @Component({
   selector: 'app-manage-classes',
@@ -13,45 +14,54 @@ import { Classroom, Student } from '../../services/api.service';
   styleUrls: ['./manage-classes.component.css'],
 })
 export class ManageClassesComponent implements OnInit, OnDestroy {
-  classes: Classroom[] = [];
-  selectedClass: Classroom | null = null;
-  
-  // --- ADDED MISSING PROPERTIES ---
+  // Use public services for direct async pipe access in the template
+  public classes$: Observable<Classroom[]>;
+  public selectedClass$: Observable<Classroom | null>;
+
   isCreateModalOpen = false;
-  isAddStudentModalOpen = false;
   newClassName = '';
   newClassDescription = '';
-  newStudentEmail = '';
-  newStudentName = '';
 
-  private classesSubscription: Subscription | undefined;
+  activeContentTab: 'students' | 'materials' | 'activities' = 'students';
 
-  constructor(private classService: ClassService) {}
+  private routeSub: Subscription | undefined;
+
+  constructor(
+    public classService: ClassService, // Make public for template access
+    private route: ActivatedRoute,
+    private router: Router
+  ) {
+    this.classes$ = this.classService.classes$;
+    this.selectedClass$ = this.classService.selectedClass$;
+  }
 
   ngOnInit(): void {
-    this.classesSubscription = this.classService.classes$.subscribe((classes: Classroom[]) => {
-      this.classes = classes.sort((a: Classroom, b: Classroom) => (b.id ?? 0) - (a.id ?? 0));
+    // Check for a classId in the URL query parameters
+    this.routeSub = this.route.queryParams.subscribe(params => {
+      const classId = params['classId'];
+      if (classId) {
+        this.classService.selectClass(Number(classId));
+      } else {
+        this.classService.selectClass(null); // Clear selection if no ID
+      }
     });
   }
 
   ngOnDestroy(): void {
-    this.classesSubscription?.unsubscribe();
+    this.routeSub?.unsubscribe();
   }
 
-  selectClass(classroom: Classroom): void {
-    this.selectedClass = classroom;
+  handleSelectClass(classId: number): void {
+    this.router.navigate([], { queryParams: { classId: classId } });
   }
 
-  // --- ADDED MISSING METHODS ---
-  unselectClass(): void {
-    this.selectedClass = null;
-  }
-
-  copyCode(code: string | undefined): void {
-    if (!code) return;
-    navigator.clipboard.writeText(code).then(() => {
-      alert(`Code "${code}" copied to clipboard!`);
-    });
+  handleDeleteClass(classId: number, className: string): void {
+    if (confirm(`Are you sure you want to permanently delete the class "${className}"?\nThis action cannot be undone.`)) {
+      this.classService.deleteClass(classId).subscribe(() => {
+        // Clear the query params if the selected class was deleted
+        this.router.navigate([], { queryParams: {} });
+      });
+    }
   }
 
   handleCreateClass(): void {
@@ -60,36 +70,25 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
         .subscribe(() => this.closeCreateModal());
     }
   }
-
-  handleAddStudent(): void {
-    if (this.selectedClass?.id && this.newStudentEmail.trim()) {
-      this.classService.addStudentToClass(this.selectedClass.id, this.newStudentEmail)
-        .subscribe(() => {
-          this.closeAddStudentModal();
-        });
-    }
-  }
-
-  handleRemoveStudent(studentId: string): void {
-    if (this.selectedClass?.id) {
-        if (confirm('Are you sure you want to remove this student?')) {
-            this.classService.removeStudentFromClass(this.selectedClass.id, studentId)
-              .subscribe(() => console.log('Student removed!'));
-        }
-    }
-  }
   
-  // --- MODAL CONTROLS ---
   openCreateModal(): void {
     this.isCreateModalOpen = true;
   }
   closeCreateModal(): void {
     this.isCreateModalOpen = false;
+    this.newClassName = '';
+    this.newClassDescription = '';
   }
-  openAddStudentModal(): void {
-    this.isAddStudentModalOpen = true;
+  
+  setActiveTab(tab: 'students' | 'materials' | 'activities'): void {
+    this.activeContentTab = tab;
   }
-  closeAddStudentModal(): void {
-    this.isAddStudentModalOpen = false;
+
+  copyCode(code: string | undefined): void {
+    if (!code) return;
+    navigator.clipboard.writeText(code).then(() => {
+      alert(`Code "${code}" copied to clipboard!`);
+    });
   }
 }
+
