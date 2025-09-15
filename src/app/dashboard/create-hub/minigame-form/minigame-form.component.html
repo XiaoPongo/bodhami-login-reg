@@ -1,22 +1,29 @@
 <div class="form-container minigame-theme">
   <!-- Success Message -->
   <div *ngIf="submissionSuccess" class="success-overlay">
-      <div class="success-box">
-          <i class="fas fa-check-circle"></i>
-          <h2>Minigame Created!</h2>
-          <p>Your new minigame has been successfully created and assigned.</p>
-          <div class="action-buttons">
-            <button (click)="resetForm()" class="btn btn-primary">Create Another Minigame</button>
-          </div>
-        </div>
+    <div class="success-box">
+      <i class="fas fa-check-circle"></i>
+      <h2>Minigame Created!</h2>
+      <p>Your new minigame has been successfully created and assigned.</p>
+      <div class="action-buttons">
+        <button (click)="resetForm()" class="btn btn-primary">Create Another Minigame</button>
+      </div>
+    </div>
   </div>
 
   <div class="form-header">
     <i class="fas fa-puzzle-piece"></i>
     <h1>Create a New Minigame</h1>
   </div>
-  
+
+  <!-- GUIDELINES BOX -->
+  <div class="guidelines">
+    <h4><i class="fas fa-info-circle"></i> Quick Guide: Word Association</h4>
+    <p>First, create a 'Word Bank' of all possible answers. Then, create 'Main Word' groups and select which words from the bank are the correct answers for each group.</p>
+  </div>
+
   <form #minigameForm="ngForm" (ngSubmit)="submitForm()">
+    <!-- Basic Info Section -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-clipboard-list"></i> Basic Info</h3>
       <div class="input-group">
@@ -24,62 +31,67 @@
         <input type="text" id="title" name="title" [(ngModel)]="minigame.title" required>
       </div>
       <div class="input-group">
-        <label for="description">Description</label>
-        <textarea id="description" name="description" [(ngModel)]="minigame.description" rows="3"></textarea>
-      </div>
-       <div class="input-group">
         <label for="xp">XP Allotment *</label>
         <input type="number" id="xp" name="xp" [(ngModel)]="minigame.xp" required min="0">
       </div>
     </div>
 
+    <!-- Content Builder Section -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-cogs"></i> Content Builder</h3>
       
+      <!-- Word Bank -->
       <div class="dynamic-list">
-        <h4>Word Bank (All possible words)</h4>
-        <div class="list-item" *ngFor="let word of minigame.wordBank; let i = index; trackBy: trackByFn">
-          <input type="text" placeholder="Enter a word for the bank" [(ngModel)]="minigame.wordBank[i]" [name]="'bankWord' + i" required>
-          <button type="button" class="btn-remove" (click)="removeWordFromBank(i)">&times;</button>
+        <div class="scenario-header">
+          <h4>Word Bank (All possible words)</h4>
         </div>
-        <button type="button" class="btn-add" (click)="addWordToBank()">+ Add to Word Bank</button>
+        <div class="list-item" *ngFor="let word of minigame.wordBank; let i = index; trackBy: trackByFn">
+          <input type="text" placeholder="Enter a word..." [(ngModel)]="minigame.wordBank[i]" [name]="'bankWord' + i" required>
+          <button type="button" class="btn-remove" (click)="removeWordFromBank(i)" title="Remove Word"><i class="fas fa-times"></i></button>
+        </div>
+        <button type="button" class="btn-add" (click)="addWordToBank()"><i class="fas fa-plus"></i> Add Word to Bank</button>
       </div>
 
-      <div class="dynamic-list">
-        <h4>List A (Main Words & Answer Selection)</h4>
+      <!-- Word Pairs & Answer Selection -->
+      <div class="dynamic-list nested">
+        <div class="scenario-header">
+          <h4>Main Words & Answer Selection</h4>
+        </div>
         <div *ngFor="let pair of minigame.wordPairs; let i = index; trackBy: trackByFn" class="word-pair-item">
           <div class="list-item">
             <input type="text" placeholder="Enter Main Word {{i + 1}}" [(ngModel)]="pair.mainWord" [name]="'mainWord' + i" required>
-            <button type="button" class="btn-remove" (click)="removeWordPair(i)">&times;</button>
+            <button type="button" class="btn-remove" (click)="removeWordPair(i)" title="Remove Main Word"><i class="fas fa-times"></i></button>
           </div>
           <div class="answer-selection">
-            <label>Select correct associated words from bank:</label>
+            <label class="sub-label">Select correct associated words from bank:</label>
             <div class="answer-grid">
-              <label *ngFor="let bankWord of minigame.wordBank; let j = index; trackBy: trackByFn" class="class-label small">
+              <label *ngFor="let bankWord of minigame.wordBank; let j = index; trackBy: trackByFn" 
+                     class="class-label small" 
+                     [class.disabled]="!bankWord.trim()">
                 <input type="checkbox" [name]="'answer' + i + '_' + j" [(ngModel)]="pair.correctAnswers[bankWord]" [disabled]="!bankWord.trim()">
-                {{ bankWord || 'Empty' }}
+                <span>{{ bankWord || 'Empty' }}</span>
               </label>
             </div>
           </div>
         </div>
-        <button type="button" class="btn-add" (click)="addWordPair()">+ Add Main Word</button>
+        <button type="button" class="btn-add" (click)="addWordPair()"><i class="fas fa-plus"></i> Add Main Word Group</button>
       </div>
     </div>
     
+    <!-- Class Assignment Section -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-chalkboard-teacher"></i> Class Assignment</h3>
       <div *ngIf="(availableClasses$ | async) as classes" class="class-grid">
         <label *ngFor="let class of classes" class="class-label">
-          <!-- THIS IS THE FIX: Convert number to string for the name attribute -->
           <input type="checkbox" [name]="'class-' + class.id" [(ngModel)]="minigame.assignedClasses[class.id!]">
-          {{ class.name }}
+          <span>{{ class.name }}</span>
         </label>
       </div>
     </div>
     
     <div class="action-buttons">
       <button type="submit" class="btn btn-primary" [disabled]="minigameForm.invalid || isSubmitting">
-        {{ isSubmitting ? 'Submitting...' : 'Submit Minigame' }}
+        <i class="fas fa-paper-plane"></i> {{ isSubmitting ? 'Submitting...' : 'Submit Minigame' }}
       </button>
     </div>
   </form>
