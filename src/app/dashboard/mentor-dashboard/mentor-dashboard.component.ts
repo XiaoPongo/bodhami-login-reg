@@ -9,40 +9,61 @@ import { Classroom } from '../../services/api.service';
 @Component({
   selector: 'app-mentor-dashboard',
   standalone: true,
-  imports: [CommonModule], // Removed unused RouterLink
+  imports: [CommonModule],
   templateUrl: './mentor-dashboard.component.html',
   styleUrls: ['./mentor-dashboard.component.css'],
 })
 export class MentorDashboardComponent implements OnInit {
   user: any = null;
-  // This is the live stream of data from your API
   classes$: Observable<Classroom[]>;
+
+  // Properties for the "Coming Soon" notification
+  showNotification = false;
+  notificationMessage = '';
+  private notificationTimeout: any;
 
   constructor(
     private authService: AuthService, 
     private router: Router,
-    private classService: ClassService // Inject the service
+    private classService: ClassService
   ) {
-    // Get the observable stream from the service
     this.classes$ = this.classService.classes$;
   }
 
   ngOnInit(): void {
     const session = this.authService.getSession();
     this.user = session?.user ?? null;
-
-    // Optional: Log the live data to the console to confirm it's arriving
-    this.classes$.subscribe(classes => {
-      console.log("Live classes received in dashboard:", classes);
-    });
   }
 
   navigateToCreate(): void {
     this.router.navigate(['/mentor/create']);
   }
 
-  // --- THIS METHOD WAS MISSING ---
   navigateToManageClasses(): void {
     this.router.navigate(['/mentor/manage-classes']);
+  }
+
+  // --- NEW METHOD ---
+  // Navigates to the manage classes page with a query parameter for the specific class
+  navigateToEditClass(classId: number | undefined): void {
+    if (!classId) return;
+    this.router.navigate(['/mentor/manage-classes'], { queryParams: { classId: classId } });
+  }
+
+  // --- NEW METHOD ---
+  // Shows the blue "Coming Soon" popup message
+  showComingSoonNotification(): void {
+    // Clear any existing timeout to prevent flickering
+    if (this.notificationTimeout) {
+      clearTimeout(this.notificationTimeout);
+    }
+
+    this.notificationMessage = 'Feature coming soon!';
+    this.showNotification = true;
+
+    // Hide the notification after 3 seconds
+    this.notificationTimeout = setTimeout(() => {
+      this.showNotification = false;
+    }, 3000);
   }
 }

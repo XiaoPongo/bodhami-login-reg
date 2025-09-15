@@ -13,12 +13,34 @@
   padding: 32px;
   background-color: var(--bg-color);
   min-height: 100%;
-  animation: fadeIn 0.5s ease-out;
+  position: relative; /* Needed for floating notification */
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* --- NEW: Floating Notification --- */
+.floating-notification {
+  position: fixed;
+  top: 80px; /* Below the header */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--primary-color);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+  animation: slideInDown 0.5s ease-out forwards;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }
 
 /* Header Section */
@@ -145,6 +167,15 @@
 .class-name { display: block; font-weight: 600; }
 .class-info { font-size: 0.875rem; color: var(--text-secondary); }
 
+/* --- NEW: Class Actions --- */
+.class-actions { display: flex; gap: 8px; }
+.btn-icon {
+  background: none; border: none; font-size: 1rem; color: var(--text-secondary);
+  cursor: pointer; padding: 8px; border-radius: 50%; width: 36px; height: 36px;
+  transition: all 0.2s ease;
+}
+.btn-icon:hover { background-color: var(--border-color); color: var(--text-primary); }
+
 .add-class-link {
   display: flex;
   align-items: center;
@@ -167,7 +198,7 @@
 }
 .placeholder {
   height: 82px;
-  background-color: var(--bg-color);
+  background-color: #f3f4f6;
   animation: pulse 1.5s infinite ease-in-out;
 }
 @keyframes pulse {
