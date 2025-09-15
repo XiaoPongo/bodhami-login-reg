@@ -2,88 +2,101 @@
   <!-- Header Section -->
   <div class="dashboard-header">
     <div>
-      <h1 class="welcome-title">Welcome, {{ user?.user_metadata?.firstName || 'Mentor' }}!</h1>
-      <p class="welcome-subtitle">Here's a snapshot of your teaching activities today.</p>
+      <h1 class="welcome-title">Mentor Dashboard</h1>
+      <p class="welcome-subtitle">Here's an overview of your activity.</p>
     </div>
-    <button class="create-btn" (click)="navigateToCreate()" type="button">
-      <i class="fas fa-plus"></i> Create New Content
+    <button class="create-btn" (click)="navigateToCreate()">
+      <i class="fas fa-plus"></i> Create Content
     </button>
   </div>
 
   <!-- Quick Action Cards -->
   <div class="cards-grid">
+    <!-- Card 1: Upload Material -->
     <div class="card create-mission">
-      <i class="fas fa-rocket card-icon"></i>
-      <h3 class="card-title">New Mission</h3>
-      <p class="card-description">Create an engaging, task-based mission for your students.</p>
-      <a (click)="navigateToCreate()" class="card-link">Start Building <i class="fas fa-arrow-right"></i></a>
+      <i class="fas fa-file-alt card-icon"></i>
+      <h3 class="card-title">Upload Material</h3>
+      <p class="card-description">Add notes, PDFs, and other resources for your students.</p>
+      <a class="card-link">Get Started <i class="fas fa-arrow-right"></i></a>
     </div>
-    <div class="card create-case-study">
-      <i class="fas fa-book-open card-icon"></i>
-      <h3 class="card-title">New Case Study</h3>
-      <p class="card-description">Design a critical thinking challenge with a real-world scenario.</p>
-      <a (click)="navigateToCreate()" class="card-link">Start Building <i class="fas fa-arrow-right"></i></a>
-    </div>
-    <div class="card manage-classes">
+    <!-- Card 2: Manage Classes (Clickable) -->
+    <div class="card manage-classes clickable" (click)="navigateToManageClasses()">
       <i class="fas fa-chalkboard-teacher card-icon"></i>
       <h3 class="card-title">Manage Classes</h3>
-      <p class="card-description">View student progress, edit class details, and manage enrollments.</p>
-      <!-- This now links to your new page -->
-      <a routerLink="/mentor/classes" class="card-link">Go to Classes <i class="fas fa-arrow-right"></i></a>
+      <p class="card-description">Create new classrooms and manage student enrollment.</p>
+      <a class="card-link">Go to Classes <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <!-- Card 3: Top Students -->
+    <div class="card view-students">
+      <i class="fas fa-user-graduate card-icon"></i>
+      <h3 class="card-title">View Students</h3>
+      <p class="card-description">See leaderboards and track top performers.</p>
+      <a class="card-link">View Details <i class="fas fa-arrow-right"></i></a>
     </div>
   </div>
 
-  <!-- Lower Section: Active Classes & Analytics -->
+  <!-- Lower Section: Two Columns -->
   <div class="lower-section">
-    <div class="active-classes">
-      <h2>Active Classes</h2>
-  
-      <div *ngIf="classes.length > 0; else noClasses">
-        <ul class="class-list">
-          <li *ngFor="let classItem of classes" class="class-card">
-            <h3>{{ classItem.name }}</h3>
-            <p>{{ classItem.description }}</p>
-            <p><strong>Code:</strong> {{ classItem.classCode }}</p>
-            <p><strong>Students:</strong> {{ classItem.students?.length || 0 }}</p>
-          </li>
-        </ul>
+    <!-- Left Column: Active Classes -->
+    <div class="active-classes-container">
+      <h2 class="section-title"><i class="fas fa-layer-group"></i> Active Classes</h2>
+      <div class="class-list">
+        <ng-container *ngIf="(classes$ | async) as classes; else loading">
+          <div *ngIf="classes.length > 0; else noClasses">
+            <div class="class-item" *ngFor="let cls of classes">
+              <div class="class-icon-wrapper">
+                <i class="fas fa-book-open"></i>
+              </div>
+              <div class="class-details">
+                <span class="class-name">{{ cls.name }}</span>
+                <span class="class-info">{{ cls.students?.length ?? 0 }} Students • {{ cls.activities?.length ?? 0 }} Activities</span>
+              </div>
+            </div>
+          </div>
+          <ng-template #noClasses>
+            <a class="add-class-link" (click)="navigateToManageClasses()">
+              <i class="fas fa-plus"></i>
+              <span>Create Your First Class</span>
+            </a>
+          </ng-template>
+        </ng-container>
+        <ng-template #loading>
+           <div class="class-item placeholder"></div>
+           <div class="class-item placeholder"></div>
+        </ng-template>
       </div>
-  
-      <ng-template #noClasses>
-        <p>No active classes yet. Create one to get started!</p>
-      </ng-template>
     </div>
 
-    <!-- Analytics Overview -->
+    <!-- Right Column: Analytics Overview -->
     <div class="analytics-container">
-       <h3 class="section-title"><i class="fas fa-chart-pie"></i> Analytics Overview</h3>
-       <div class="analytics-item">
-         <div class="analytics-icon-wrapper views">
-           <i class="fas fa-eye"></i>
-         </div>
-         <div class="analytics-details">
-           <span class="analytics-value">1,204</span>
-           <span class="analytics-label">Total Content Views</span>
-         </div>
-       </div>
-       <div class="analytics-item">
-         <div class="analytics-icon-wrapper completions">
-           <i class="fas fa-check-double"></i>
-         </div>
-         <div class="analytics-details">
-           <span class="analytics-value">85%</span>
-           <span class="analytics-label">Avg. Completion Rate</span>
-         </div>
-       </div>
-       <div class="analytics-item">
-         <div class="analytics-icon-wrapper engagement">
-           <i class="fas fa-star"></i>
-         </div>
-         <div class="analytics-details">
-           <span class="analytics-value">4.7 / 5</span>
-           <span class="analytics-label">Avg. Student Rating</span>
-         </div>
-       </div>
+      <h2 class="section-title"><i class="fas fa-chart-pie"></i> Analytics Overview</h2>
+      <div class="analytics-item">
+        <div class="analytics-icon-wrapper views">
+          <i class="fas fa-eye"></i>
+        </div>
+        <div class="analytics-details">
+          <span class="analytics-value">1,254</span>
+          <span class="analytics-label">Total Content Views</span>
+        </div>
+      </div>
+      <div class="analytics-item">
+        <div class="analytics-icon-wrapper completions">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="analytics-details">
+          <span class="analytics-value">83%</span>
+          <span class="analytics-label">Average Completion Rate</span>
+        </div>
+      </div>
+      <div class="analytics-item">
+        <div class="analytics-icon-wrapper engagement">
+          <i class="fas fa-lightbulb"></i>
+        </div>
+        <div class="analytics-details">
+          <span class="analytics-value">4.2/5</span>
+          <span class="analytics-label">Average Engagement Score</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>

@@ -13,6 +13,12 @@
   padding: 32px;
   background-color: var(--bg-color);
   min-height: 100%;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* Header Section */
@@ -65,28 +71,32 @@
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 24px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+}
+.card.clickable {
+  cursor: pointer;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
-.card:hover {
+.card.clickable:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
 }
 .card-icon { font-size: 2rem; margin-bottom: 16px; }
 .card-title { font-size: 1.25rem; font-weight: 700; margin: 0 0 8px; }
-.card-description { color: var(--text-secondary); line-height: 1.5; margin: 0 0 16px; }
+.card-description { color: var(--text-secondary); line-height: 1.5; margin: 0 0 16px; flex-grow: 1;}
 .card-link {
   color: var(--primary-color);
   font-weight: 600;
   text-decoration: none;
-  cursor: pointer;
 }
 .card-link i { margin-left: 4px; transition: transform 0.2s ease; }
-.card-link:hover i { transform: translateX(4px); }
+.card.clickable:hover .card-link i { transform: translateX(4px); }
 
 .create-mission .card-icon { color: var(--primary-color); }
-.create-case-study .card-icon { color: var(--secondary-color); }
-.manage-classes .card-icon { color: var(--accent-color); }
-.view-students .card-icon { color: #ec4899; }
+.manage-classes .card-icon { color: var(--secondary-color); }
+.view-students .card-icon { color: var(--accent-color); }
 
 /* Lower Section */
 .lower-section {
@@ -118,9 +128,8 @@
   gap: 16px;
   padding: 16px;
   border-radius: 8px;
-  transition: background-color 0.2s ease;
+  border: 1px solid var(--border-color);
 }
-.class-item:not(.placeholder):hover { background-color: var(--bg-color); }
 .class-icon-wrapper {
   flex-shrink: 0;
   width: 48px;
@@ -135,12 +144,7 @@
 .class-details { flex-grow: 1; }
 .class-name { display: block; font-weight: 600; }
 .class-info { font-size: 0.875rem; color: var(--text-secondary); }
-.class-actions { display: flex; gap: 8px; }
-.btn-icon {
-  background: none; border: none; font-size: 1rem; color: var(--text-secondary);
-  cursor: pointer; padding: 8px; border-radius: 50%; width: 36px; height: 36px;
-}
-.btn-icon:hover { background-color: var(--border-color); color: var(--text-primary); }
+
 .add-class-link {
   display: flex;
   align-items: center;
@@ -154,11 +158,22 @@
   font-weight: 600;
   text-decoration: none;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 .add-class-link:hover {
   background-color: var(--primary-light);
   border-color: var(--primary-color);
   color: var(--primary-color);
+}
+.placeholder {
+  height: 82px;
+  background-color: var(--bg-color);
+  animation: pulse 1.5s infinite ease-in-out;
+}
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
 
 
