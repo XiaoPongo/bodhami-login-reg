@@ -1,7 +1,8 @@
 <div class="form-container mission-theme">
-  <!-- Success Screen with template reference variable -->
-  <div *ngIf="submissionSuccess" class="success-overlay" #successOverlay>
-    <div class="success-box">
+  <!-- Success Screen -->
+  <div *ngIf="submissionSuccess" class="success-overlay">
+    <!-- FIX: Template reference is now on the inner box -->
+    <div class="success-box" #successBox>
       <i class="fas fa-check-circle"></i>
       <h2>Mission Created!</h2>
       <p>Your new mission has been successfully created and assigned.</p>
@@ -13,9 +14,10 @@
     </div>
   </div>
 
-  <!-- Preview Mode with template reference variable -->
-  <div *ngIf="isPreviewing" class="preview-overlay" #previewOverlay>
-      <div class="preview-box">
+  <!-- Preview Mode -->
+  <div *ngIf="isPreviewing" class="preview-overlay">
+      <!-- FIX: Template reference is now on the inner box -->
+      <div class="preview-box" #previewBox>
         <h2>Preview: {{ mission.title || 'Untitled Mission' }}</h2>
         <p><strong>XP:</strong> {{ mission.xp }}</p>
         <div *ngFor="let passage of mission.passages; let i = index">
@@ -133,3 +135,4 @@
     </div>
   </form>
 </div>
+

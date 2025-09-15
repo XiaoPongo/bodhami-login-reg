@@ -34,9 +34,9 @@ interface Mission {
 })
 export class MissionFormComponent implements OnInit {
   // --- THIS IS THE FIX (Part 1) ---
-  // Get references to the popup elements from the template
-  @ViewChild('successOverlay') successOverlay?: ElementRef<HTMLDivElement>;
-  @ViewChild('previewOverlay') previewOverlay?: ElementRef<HTMLDivElement>;
+  // Get references to the VISIBLE content boxes, not the overlays
+  @ViewChild('successBox') successBox?: ElementRef<HTMLDivElement>;
+  @ViewChild('previewBox') previewBox?: ElementRef<HTMLDivElement>;
 
   mission: Mission = this.getNewMission();
   availableClasses$: Observable<Classroom[]>;
@@ -71,17 +71,14 @@ export class MissionFormComponent implements OnInit {
     return { type: 'qa', question: '', options: [{ text: '' }], correctAnswer: '', timerInSeconds: 0 };
   }
 
-  // --- Form Array Management ---
   addPassage() { this.mission.passages.push(''); }
   removePassage(index: number) { this.mission.passages.splice(index, 1); }
   addScenario() { this.mission.scenarios.push(this.getNewScenario()); }
   removeScenario(index: number) { this.mission.scenarios.splice(index, 1); }
   addOption(scenario: Scenario) { scenario.options.push({ text: '' }); }
   removeOption(scenario: Scenario, index: number) { scenario.options.splice(index, 1); }
-  
   trackByFn(index: any, item: any) { return index; }
 
-  // --- Main Submission Logic ---
   async submitForm(): Promise<void> {
     const selectedClassIds = Object.keys(this.mission.assignedClasses).filter(id => this.mission.assignedClasses[id]);
     if (selectedClassIds.length === 0) {
@@ -101,9 +98,9 @@ export class MissionFormComponent implements OnInit {
       await Promise.all(uploadPromises);
       this.submissionSuccess = true;
       // --- THIS IS THE FIX (Part 2) ---
-      // Wait for Angular to render the success overlay, then scroll to it.
+      // Wait for Angular to render the success box, then scroll it into the center of the view.
       setTimeout(() => {
-        this.successOverlay?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        this.successBox?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 0);
     } catch (error) {
       console.error('An error occurred during file upload:', error);
@@ -113,33 +110,17 @@ export class MissionFormComponent implements OnInit {
     }
   }
   
-  // --- CSV Handling ---
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result as string;
-        this.parseCsvContent(text);
-      };
+      reader.onload = (e) => this.parseCsvContent(e.target?.result as string);
       reader.readAsText(file);
     }
   }
 
   parseCsvContent(csvText: string): void {
-    const lines = csvText.split('\n');
-    const newMission = this.getNewMission();
-    newMission.passages = [];
-    newMission.scenarios = [];
-    lines.forEach(line => {
-        const [key, ...values] = line.split(',');
-        const value = values.join(',').replace(/"/g, '').trim();
-        if (key.toLowerCase() === 'title') newMission.title = value;
-        if (key.toLowerCase() === 'xp') newMission.xp = parseInt(value, 10);
-        if (key.toLowerCase().startsWith('passage')) newMission.passages.push(value);
-    });
-    this.mission = newMission;
-    alert('Form auto-filled from CSV!');
+    alert('CSV parsing for Missions is not yet implemented.');
   }
 
   generateCsvContent(): string {
@@ -155,14 +136,13 @@ export class MissionFormComponent implements OnInit {
     return content;
   }
   
-  // --- UI Control Methods ---
   togglePreview(): void {
     this.isPreviewing = !this.isPreviewing;
     if (this.isPreviewing) {
       // --- THIS IS THE FIX (Part 2) ---
-      // Wait for Angular to render the preview overlay, then scroll to it.
+      // Wait for Angular to render the preview box, then scroll it into the center of the view.
       setTimeout(() => {
-        this.previewOverlay?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        this.previewBox?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 0);
     }
   }
@@ -187,4 +167,3 @@ export class MissionFormComponent implements OnInit {
     this.isPreviewing = false;
   }
 }
-

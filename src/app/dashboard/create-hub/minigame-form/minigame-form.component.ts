@@ -28,8 +28,8 @@ interface Minigame {
   styleUrls: ['./minigame-form.component.css']
 })
 export class MinigameFormComponent implements OnInit {
-  @ViewChild('successOverlay') successOverlay?: ElementRef<HTMLDivElement>;
-  @ViewChild('previewOverlay') previewOverlay?: ElementRef<HTMLDivElement>;
+  @ViewChild('successBox') successBox?: ElementRef<HTMLDivElement>;
+  @ViewChild('previewBox') previewBox?: ElementRef<HTMLDivElement>;
 
   minigame: Minigame = this.getNewMinigame();
   availableClasses$: Observable<Classroom[]>;
@@ -80,7 +80,7 @@ export class MinigameFormComponent implements OnInit {
       await Promise.all(uploadPromises);
       this.submissionSuccess = true;
       setTimeout(() => {
-        this.successOverlay?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        this.successBox?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 0);
     } catch (error) {
       console.error('File upload error:', error);
@@ -118,7 +118,7 @@ export class MinigameFormComponent implements OnInit {
     this.isPreviewing = !this.isPreviewing;
     if (this.isPreviewing) {
       setTimeout(() => {
-        this.previewOverlay?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        this.previewBox?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 0);
     }
   }

@@ -1,7 +1,7 @@
 <div class="form-container minigame-theme">
   <!-- Success Screen -->
-  <div *ngIf="submissionSuccess" class="success-overlay" #successOverlay>
-    <div class="success-box">
+  <div *ngIf="submissionSuccess" class="success-overlay">
+    <div class="success-box" #successBox>
       <i class="fas fa-check-circle"></i>
       <h2>Minigame Created!</h2>
       <p>Your new minigame has been successfully created and assigned.</p>
@@ -14,8 +14,8 @@
   </div>
 
   <!-- Preview Mode -->
-  <div *ngIf="isPreviewing" class="preview-overlay" #previewOverlay>
-      <div class="preview-box">
+  <div *ngIf="isPreviewing" class="preview-overlay">
+      <div class="preview-box" #previewBox>
         <h2>Preview: {{ minigame.title || 'Untitled Minigame' }}</h2>
         <!-- Add more preview details here -->
         <button (click)="togglePreview()" class="btn btn-secondary">Close Preview</button>

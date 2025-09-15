@@ -32,8 +32,8 @@ interface CaseStudy {
   styleUrls: ['./case-study-form.component.css']
 })
 export class CaseStudyFormComponent implements OnInit {
-  @ViewChild('successOverlay') successOverlay?: ElementRef<HTMLDivElement>;
-  @ViewChild('previewOverlay') previewOverlay?: ElementRef<HTMLDivElement>;
+  @ViewChild('successBox') successBox?: ElementRef<HTMLDivElement>;
+  @ViewChild('previewBox') previewBox?: ElementRef<HTMLDivElement>;
 
   caseStudy: CaseStudy = this.getNewCaseStudy();
   availableClasses$: Observable<Classroom[]>;
@@ -93,7 +93,7 @@ export class CaseStudyFormComponent implements OnInit {
       await Promise.all(uploadPromises);
       this.submissionSuccess = true;
       setTimeout(() => {
-        this.successOverlay?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        this.successBox?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 0);
     } catch (error) {
       console.error('Upload Error:', error);
@@ -133,7 +133,7 @@ export class CaseStudyFormComponent implements OnInit {
     this.isPreviewing = !this.isPreviewing;
     if (this.isPreviewing) {
       setTimeout(() => {
-        this.previewOverlay?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        this.previewBox?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 0);
     }
   }
