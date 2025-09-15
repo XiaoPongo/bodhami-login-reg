@@ -29,7 +29,7 @@ export interface Classroom {
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'https://elevana-api-env-v1.eba-kqqge9q6.eu-north-1.elasticbeanstalk.com/api';
+  private apiUrl = 'https://api-test.thebandar.co.in/api';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
