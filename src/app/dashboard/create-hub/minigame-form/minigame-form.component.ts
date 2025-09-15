@@ -1,15 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-// Assume ApiService exists for potential future use
-// import { ApiService } from '../../../services/api.service'; 
+import { Observable } from 'rxjs';
+import { ApiService } from '../../../services/api.service';
+import { ClassService } from '../../../services/class.service';
+import { Classroom } from '../../../services/api.service';
 
 interface WordPair {
   mainWord: string;
-  associatedWords: string[];
+  correctAnswers: { [word: string]: boolean };
 }
-
 interface Minigame {
   title: string;
   description: string;
@@ -28,54 +28,75 @@ interface Minigame {
 })
 export class MinigameFormComponent implements OnInit {
   minigame: Minigame = this.getNewMinigame();
-  
-  // Mock data - in a real app, this would come from a service
-  availableClasses = [
-    { id: 'class1', name: 'Grade 5 English - 2025' },
-    { id: 'class2', name: 'Vocabulary Builders' },
-  ];
+  availableClasses$: Observable<Classroom[]>;
+  isSubmitting = false;
+  submissionSuccess = false;
 
-  constructor(private router: Router) {}
-
-  ngOnInit(): void {
-    // Future: Load draft from localStorage if needed
+  constructor(
+    private apiService: ApiService,
+    private classService: ClassService
+  ) {
+    this.availableClasses$ = this.classService.classes$;
   }
+
+  ngOnInit(): void { }
 
   getNewMinigame(): Minigame {
     return {
-      title: '',
-      description: '',
-      xp: 10,
-      wordPairs: [{ mainWord: '', associatedWords: [] }],
-      wordBank: [''],
-      assignedClasses: {}
+      title: '', description: '', xp: 50,
+      wordPairs: [{ mainWord: '', correctAnswers: {} }],
+      wordBank: [''], assignedClasses: {}
     };
   }
+
+  addWordPair() { this.minigame.wordPairs.push({ mainWord: '', correctAnswers: {} }); }
+  removeWordPair(index: number) { this.minigame.wordPairs.splice(index, 1); }
+  addWordToBank() { this.minigame.wordBank.push(''); }
+  removeWordFromBank(index: number) { this.minigame.wordBank.splice(index, 1); }
+  trackByFn(index: any, item: any) { return index; }
+
+  async submitForm(): Promise<void> {
+    const selectedClassIds = Object.keys(this.minigame.assignedClasses)
+      .filter(id => this.minigame.assignedClasses[id]);
+
+    if (selectedClassIds.length === 0) {
+      alert('Please select at least one class.');
+      return;
+    }
+
+    this.isSubmitting = true;
+    const csvContent = this.generateCsvContent();
+    const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const fileName = `minigame-${this.minigame.title.replace(/\s+/g, '-')}-${Date.now()}.csv`;
+
+    const uploadPromises = selectedClassIds.map(classId => 
+      this.apiService.uploadFile(csvBlob, 'minigame', fileName, Number(classId)).toPromise()
+    );
+
+    try {
+      await Promise.all(uploadPromises);
+      this.submissionSuccess = true;
+    } catch (error) {
+      console.error('File upload error:', error);
+      alert('An error occurred during upload.');
+    } finally {
+      this.isSubmitting = false;
+    }
+  }
+
+  generateCsvContent(): string {
+    let content = `Title,${this.minigame.title}\nXP,${this.minigame.xp}\n`;
+    this.minigame.wordBank.forEach((w, i) => content += `Word Bank ${i + 1},"${w.replace(/"/g, '""')}"\n`);
+    this.minigame.wordPairs.forEach((p, i) => {
+      content += `List A Word ${i + 1},"${p.mainWord.replace(/"/g, '""')}"\n`;
+      const correct = Object.keys(p.correctAnswers).filter(key => p.correctAnswers[key]);
+      content += `List A Answers ${i + 1},"${correct.join('|')}"\n`;
+    });
+    return content;
+  }
   
-  addWordPair(): void {
-    this.minigame.wordPairs.push({ mainWord: '', associatedWords: [] });
-  }
-
-  removeWordPair(index: number): void {
-    this.minigame.wordPairs.splice(index, 1);
-  }
-
-  addWordToBank(): void {
-    this.minigame.wordBank.push('');
-  }
-
-  removeWordFromBank(index: number): void {
-    this.minigame.wordBank.splice(index, 1);
-  }
-
-  // TrackBy functions to prevent focus loss on input
-  trackByFn(index: any, item: any) {
-    return index;
-  }
-
-  submitForm(): void {
-    console.log("Submitting Minigame:", JSON.stringify(this.minigame, null, 2));
-    alert('Minigame structure logged to console. CSV export can be added here.');
-    // Logic for CSV generation and submission to API would go here
+  resetForm(): void {
+    this.minigame = this.getNewMinigame();
+    this.submissionSuccess = false;
   }
 }

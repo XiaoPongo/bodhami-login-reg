@@ -1,8 +1,7 @@
-// src/app/services/api.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap, switchMap } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
 import { AuthService } from '../auth.service';
 
 // --- EXPORTS ---
@@ -15,7 +14,7 @@ export interface Student {
 
 export interface Classroom {
   id?: number;
-  name: string;
+  name:string;
   description: string;
   classCode?: string;
   mentorId?: string;
@@ -33,20 +32,45 @@ export class ApiService {
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
-  private getHeaders(): HttpHeaders {
+  // This getHeaders is for JSON content
+  private getJsonHeaders(): HttpHeaders {
     const token = this.authService.getToken();
-    console.log("🔑 Final token:", token);
-
     return new HttpHeaders({
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     });
   }
 
-  // --- Classroom Endpoints ---
+  // --- THIS IS THE NEW, CRITICAL METHOD ---
+  uploadFile(file: Blob, type: 'mission' | 'case-study' | 'minigame', fileName: string, classroomId: number): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file, fileName);
+
+    const token = this.authService.getToken();
+    if (!token) {
+      return throwError(() => new Error('User is not authenticated.'));
+    }
+    
+    // For multipart/form-data, only set the Authorization header.
+    // The browser will automatically set the Content-Type with the correct boundary.
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    const uploadUrl = `${this.apiUrl}/upload/${classroomId}/${type}`;
+    
+    return this.http.post(uploadUrl, formData, { headers }).pipe(
+      catchError(err => {
+        console.error(`❌ Failed to upload ${type} file`, err);
+        return throwError(() => err);
+      })
+    );
+  }
+
+  // --- Classroom Endpoints (Unchanged) ---
   getClassrooms(): Observable<Classroom[]> {
     return this.http.get<Classroom[]>(`${this.apiUrl}/classrooms`, {
-      headers: this.getHeaders()
+      headers: this.getJsonHeaders()
     }).pipe(
       tap(classes => console.log("📦 API returned classes:", classes)),
       catchError(err => {
@@ -58,13 +82,13 @@ export class ApiService {
 
   createClassroom(classroomData: { name: string, description: string }): Observable<Classroom> {
     return this.http.post<Classroom>(`${this.apiUrl}/classrooms`, classroomData, {
-      headers: this.getHeaders()
+      headers: this.getJsonHeaders()
     });
   }
 
   deleteClassroom(classId: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/classrooms/${classId}`, {
-      headers: this.getHeaders()
+      headers: this.getJsonHeaders()
     });
   }
 }

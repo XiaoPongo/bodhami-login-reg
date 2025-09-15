@@ -1,29 +1,27 @@
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
+import { ApiService } from '../../../services/api.service';
+import { ClassService } from '../../../services/class.service';
+import { Classroom } from '../../../services/api.service';
 
-type QuestionType = 'qa' | 'mcq' | 'fib';
-
-interface MCQOption {
-  text: string;
-}
-
+// Interfaces specific to Case Study
 interface Problem {
-  type: QuestionType;
-  scenario: string;
-  options: MCQOption[];
-  answers: string[];
-  correctMcqIndex?: number;
+  type: 'qa' | 'mcq' | 'fill';
+  question: string;
+  options: { text: string }[];
+  correctAnswer: string;
+  timerInSeconds: number;
 }
-
 interface CaseStudy {
   title: string;
   passage: string;
+  xp: number;
   problems: Problem[];
-  summaryFeedback: string;
   tags: string[];
-  classIds: string[];
+  assignedClasses: { [classId: string]: boolean };
 }
 
 @Component({
@@ -31,176 +29,96 @@ interface CaseStudy {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './case-study-form.component.html',
-  styleUrls: [
-    './case-study-form.component.css',
-    '../shared-form-styles.css'
-  ]
+  styleUrls: ['./case-study-form.component.css']
 })
 export class CaseStudyFormComponent implements OnInit {
-  isSubmitted = false;
-  isPreviewing = false;
-  caseStudy: CaseStudy = this.getInitialCaseStudyState();
-  tagInput: string = '';
-
-  availableClasses = [
-    { id: 'c1', name: 'Grade 5 Math - 2025' },
-    { id: 'c2', name: 'Grade 6 Science - 2025' },
-    { id: 'c3', name: 'History 101' },
-    { id: 'c4', name: 'Introduction to Physics' }
+  caseStudy: CaseStudy = this.getNewCaseStudy();
+  availableClasses$: Observable<Classroom[]>;
+  isSubmitting = false;
+  submissionSuccess = false;
+  
+  timerOptions = [
+    { value: 0, label: 'No Timer' }, { value: 5, label: '5 seconds' },
+    { value: 10, label: '10 seconds' }, { value: 15, label: '15 seconds' },
+    { value: 30, label: '30 seconds' }, { value: 60, label: '1 minute' },
   ];
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router, 
+    private apiService: ApiService,
+    private classService: ClassService
+  ) {
+    this.availableClasses$ = this.classService.classes$;
+  }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {}
 
-  getInitialCaseStudyState(): CaseStudy {
+  getNewCaseStudy(): CaseStudy {
     return {
-      title: '',
-      passage: '',
-      problems: [{ type: 'qa', scenario: '', options: [], answers: [''], correctMcqIndex: undefined }],
-      summaryFeedback: '',
-      tags: [],
-      classIds: []
+      title: '', passage: '', xp: 150,
+      problems: [this.getNewProblem()], tags: [], assignedClasses: {}
     };
   }
-  
-  trackByFn(index: number, item: any): number { return index; }
 
-  addProblem() {
-    this.caseStudy.problems.push({ type: 'qa', scenario: '', options: [], answers: [''], correctMcqIndex: undefined });
+  getNewProblem(): Problem {
+    return { type: 'qa', question: '', options: [{ text: '' }], correctAnswer: '', timerInSeconds: 0 };
   }
+
+  // --- Form Array Management ---
+  addProblem() { this.caseStudy.problems.push(this.getNewProblem()); }
   removeProblem(index: number) { this.caseStudy.problems.splice(index, 1); }
+  addOption(problem: Problem) { problem.options.push({ text: '' }); }
+  removeOption(problem: Problem, index: number) { problem.options.splice(index, 1); }
   
-  onQuestionTypeChange(problemIndex: number, newType: QuestionType) {
-    const problem = this.caseStudy.problems[problemIndex];
-    problem.options = [];
-    problem.answers = [''];
-    problem.correctMcqIndex = undefined;
-    if (newType === 'mcq') {
-      problem.options = [{ text: '' }, { text: '' }];
-      problem.answers = [];
+  trackByFn(index: any, item: any) { return index; }
+
+  // --- Main Submission Logic ---
+  async submitForm(): Promise<void> {
+    const selectedClassIds = Object.keys(this.caseStudy.assignedClasses)
+      .filter(id => this.caseStudy.assignedClasses[id]);
+
+    if (selectedClassIds.length === 0) {
+      alert('Please select at least one class to assign this case study to.');
+      return;
+    }
+
+    this.isSubmitting = true;
+    const csvContent = this.generateCsvContent();
+    const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const fileName = `case-study-${this.caseStudy.title.replace(/\s+/g, '-')}-${Date.now()}.csv`;
+
+    const uploadPromises = selectedClassIds.map(classId => 
+      this.apiService.uploadFile(csvBlob, 'case-study', fileName, Number(classId)).toPromise()
+    );
+
+    try {
+      await Promise.all(uploadPromises);
+      this.submissionSuccess = true;
+    } catch (error) {
+      console.error('An error occurred during file upload:', error);
+      alert('An error occurred. Please check the console and try again.');
+    } finally {
+      this.isSubmitting = false;
     }
   }
 
-  addMcqOption(problemIndex: number) { this.caseStudy.problems[problemIndex].options.push({ text: '' }); }
-  removeMcqOption(problemIndex: number, optionIndex: number) {
-    this.caseStudy.problems[problemIndex].options.splice(optionIndex, 1);
-  }
-
-  addAnswer(problemIndex: number) { this.caseStudy.problems[problemIndex].answers.push(''); }
-  removeAnswer(problemIndex: number, answerIndex: number) {
-    this.caseStudy.problems[problemIndex].answers.splice(answerIndex, 1);
-  }
-
-  addTag(event: Event) {
-    event.preventDefault();
-    if (this.tagInput.trim() && !this.caseStudy.tags.includes(this.tagInput.trim())) {
-      this.caseStudy.tags.push(this.tagInput.trim());
-    }
-    this.tagInput = '';
-  }
-  removeTag(index: number) { this.caseStudy.tags.splice(index, 1); }
-  
-  onClassChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const classId = input.value;
-    if (input.checked) {
-      if (!this.caseStudy.classIds.includes(classId)) this.caseStudy.classIds.push(classId);
-    } else {
-      this.caseStudy.classIds = this.caseStudy.classIds.filter(id => id !== classId);
-    }
-  }
-
-  togglePreview() { this.isPreviewing = !this.isPreviewing; }
-  
-  onSubmit() {
-    this.isSubmitted = true;
-    this.isPreviewing = false;
-  }
-
-  resetForm() {
-    this.caseStudy = this.getInitialCaseStudyState();
-    this.isSubmitted = false;
-  }
-  
-  navigateToDashboard() { this.router.navigate(['/mentor/dashboard']); }
-
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = () => this.parseCaseStudyCsv(reader.result as string);
-      reader.readAsText(file);
-    }
-  }
-
-  private parseCaseStudyCsv(csvText: string): void {
-    const newCs = this.getInitialCaseStudyState();
-    newCs.problems = []; newCs.tags = []; newCs.classIds = [];
-    const lines = csvText.split('\n').filter(line => line.trim() !== '');
-
-    for (const line of lines.slice(1)) {
-      const [key, value] = line.split(/,(.+)/).map(s => s.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-      const keyParts = key.split('_'); 
-      
-      const index = parseInt(keyParts[1], 10) - 1;
-
-      switch (keyParts[0]) {
-        case 'title': newCs.title = value; break;
-        case 'passage': newCs.passage = value; break;
-        case 'summaryFeedback': newCs.summaryFeedback = value; break;
-        case 'tag': newCs.tags.push(value); break;
-        case 'classId': newCs.classIds.push(value); break;
-        case 'problem':
-          const problemIndex = parseInt(keyParts[1], 10) - 1;
-          const problemField = keyParts[2];
-          const answerOrOptionIndex = parseInt(keyParts[3], 10) - 1;
-
-          while(newCs.problems.length <= problemIndex) newCs.problems.push({ type: 'qa', scenario: '', options: [], answers: [] });
-          const problem = newCs.problems[problemIndex];
-
-          if (problemField === 'type') problem.type = value as QuestionType;
-          if (problemField === 'scenario') problem.scenario = value;
-          if (problemField === 'answer') problem.answers[answerOrOptionIndex] = value;
-          if (problemField === 'option') problem.options[answerOrOptionIndex] = { text: value };
-          if (problemField === 'correctOptionIndex') problem.correctMcqIndex = parseInt(value, 10);
-          break;
-      }
-    }
-    this.caseStudy = newCs;
-  }
-
-  exportToCsv() {
-    const cs = this.caseStudy;
-    const rows = [['Key', 'Value']];
-    const escape = (val: any) => `"${String(val).replace(/"/g, '""')}"`;
-    
-    rows.push(['title', escape(cs.title)]);
-    rows.push(['passage', escape(cs.passage)]);
-    cs.problems.forEach((p, i) => {
-      rows.push([`problem_${i + 1}_type`, p.type]);
-      rows.push([`problem_${i + 1}_scenario`, escape(p.scenario)]);
-      if (p.type === 'qa' || p.type === 'fib') {
-        p.answers.forEach((a, j) => rows.push([`problem_${i + 1}_answer_${j + 1}`, escape(a)]));
-      }
-      if (p.type === 'mcq') {
-        p.options.forEach((o, j) => rows.push([`problem_${i + 1}_option_${j + 1}`, escape(o.text)]));
-        if (p.correctMcqIndex !== undefined) {
-          rows.push([`problem_${i + 1}_correctOptionIndex`, p.correctMcqIndex.toString()]);
-        }
-      }
+  // --- CSV Generation ---
+  generateCsvContent(): string {
+    let content = `Title,${this.caseStudy.title}\n`;
+    content += `XP,${this.caseStudy.xp}\n`;
+    content += `Passage,"${this.caseStudy.passage.replace(/"/g, '""')}"\n`;
+    this.caseStudy.problems.forEach((p, i) => {
+      content += `Problem ${i + 1} Type,${p.type}\n`;
+      content += `Problem ${i + 1} Question,"${p.question.replace(/"/g, '""')}"\n`;
+      content += `Problem ${i + 1} Timer,${p.timerInSeconds}\n`;
+      p.options.forEach((o, j) => content += `Problem ${i + 1} Option ${j + 1},"${o.text.replace(/"/g, '""')}"\n`);
+      content += `Problem ${i + 1} Answer,"${p.correctAnswer.replace(/"/g, '""')}"\n`;
     });
-    rows.push(['summaryFeedback', escape(cs.summaryFeedback)]);
-    cs.tags.forEach((t, i) => rows.push([`tag_${i + 1}`, escape(t)]));
-    cs.classIds.forEach(id => rows.push(['classId', escape(id)]));
-
-    const csvContent = rows.map(e => e.join(",")).join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `case-study_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`;
-    link.click();
-    URL.revokeObjectURL(link.href);
+    return content;
+  }
+  
+  resetForm(): void {
+    this.caseStudy = this.getNewCaseStudy();
+    this.submissionSuccess = false;
   }
 }

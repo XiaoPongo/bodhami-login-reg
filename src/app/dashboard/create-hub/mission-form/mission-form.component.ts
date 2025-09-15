@@ -1,29 +1,28 @@
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
+import { ApiService } from '../../../services/api.service';
+import { ClassService } from '../../../services/class.service';
+import { Classroom } from '../../../services/api.service';
 
-type QuestionType = 'qa' | 'mcq' | 'fib';
-
-interface MCQOption {
-  text: string;
-}
-
+// Updated interfaces
+interface Answer { text: string; }
 interface Scenario {
-  type: QuestionType;
+  type: 'qa' | 'mcq' | 'fill';
   question: string;
-  options: MCQOption[];
-  answers: string[];
-  correctMcqIndex?: number;
+  options: Answer[];
+  correctAnswer: string;
+  timerInSeconds: number;
 }
-
 interface Mission {
   title: string;
   description: string;
   xp: number;
   passages: string[];
   scenarios: Scenario[];
-  classIds: string[];
+  assignedClasses: { [classId: string]: boolean };
 }
 
 @Component({
@@ -31,178 +30,95 @@ interface Mission {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './mission-form.component.html',
-  styleUrls: [
-    './mission-form.component.css',
-    '../shared-form-styles.css'
-  ]
+  // Only its own stylesheet is needed now.
+  styleUrls: ['./mission-form.component.css']
 })
 export class MissionFormComponent implements OnInit {
-  isSubmitted = false;
-  isPreviewing = false;
-  mission: Mission = this.getInitialMissionState();
-
-  availableClasses = [
-    { id: 'c1', name: 'Grade 5 Math - 2025' },
-    { id: 'c2', name: 'Grade 6 Science - 2025' },
-    { id: 'c3', name: 'History 101' },
-    { id: 'c4', name: 'Introduction to Physics' }
+  mission: Mission = this.getNewMission();
+  availableClasses$: Observable<Classroom[]>;
+  isSubmitting = false;
+  submissionSuccess = false;
+  
+  timerOptions = [
+    { value: 0, label: 'No Timer' }, { value: 5, label: '5 seconds' },
+    { value: 10, label: '10 seconds' }, { value: 15, label: '15 seconds' },
+    { value: 30, label: '30 seconds' }, { value: 60, label: '1 minute' },
   ];
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router, 
+    private apiService: ApiService,
+    private classService: ClassService
+  ) {
+    this.availableClasses$ = this.classService.classes$;
+  }
 
   ngOnInit(): void {}
 
-  getInitialMissionState(): Mission {
+  getNewMission(): Mission {
     return {
-      title: '',
-      description: '',
-      xp: 100,
-      passages: [''],
-      scenarios: [{ type: 'qa', question: '', options: [], answers: [''], correctMcqIndex: undefined }],
-      classIds: []
+      title: '', description: '', xp: 100,
+      passages: [''], scenarios: [this.getNewScenario()], assignedClasses: {}
     };
+  }
+
+  getNewScenario(): Scenario {
+    return { type: 'qa', question: '', options: [{ text: '' }], correctAnswer: '', timerInSeconds: 0 };
   }
 
   addPassage() { this.mission.passages.push(''); }
   removePassage(index: number) { this.mission.passages.splice(index, 1); }
+  addScenario() { this.mission.scenarios.push(this.getNewScenario()); }
+  removeScenario(index: number) { this.mission.scenarios.splice(index, 1); }
+  addOption(scenario: Scenario) { scenario.options.push({ text: '' }); }
+  removeOption(scenario: Scenario, index: number) { scenario.options.splice(index, 1); }
+  
+  trackByFn(index: any, item: any) { return index; }
 
-  addScenario() {
-    this.mission.scenarios.push({ type: 'qa', question: '', options: [], answers: [''], correctMcqIndex: undefined });
-  }
-  removeScenario(scenarioIndex: number) {
-    this.mission.scenarios.splice(scenarioIndex, 1);
-  }
+  async submitForm(): Promise<void> {
+    const selectedClassIds = Object.keys(this.mission.assignedClasses)
+      .filter(id => this.mission.assignedClasses[id]);
 
-  onQuestionTypeChange(scenarioIndex: number, newType: QuestionType) {
-    const scenario = this.mission.scenarios[scenarioIndex];
-    scenario.options = [];
-    scenario.answers = [''];
-    scenario.correctMcqIndex = undefined;
-    if (newType === 'mcq') {
-      scenario.options = [{ text: '' }, { text: '' }];
-      scenario.answers = []; // MCQ answer is stored in correctMcqIndex
+    if (selectedClassIds.length === 0) {
+      alert('Please select at least one class to assign this mission to.');
+      return;
+    }
+
+    this.isSubmitting = true;
+    const csvContent = this.generateCsvContent();
+    const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const fileName = `mission-${this.mission.title.replace(/\s+/g, '-')}-${Date.now()}.csv`;
+
+    const uploadPromises = selectedClassIds.map(classId => 
+      this.apiService.uploadFile(csvBlob, 'mission', fileName, Number(classId)).toPromise()
+    );
+
+    try {
+      await Promise.all(uploadPromises);
+      this.submissionSuccess = true;
+    } catch (error) {
+      console.error('An error occurred during file upload:', error);
+      alert('An error occurred. Please check the console and try again.');
+    } finally {
+      this.isSubmitting = false;
     }
   }
 
-  addMcqOption(scenarioIndex: number) { this.mission.scenarios[scenarioIndex].options.push({ text: '' }); }
-  removeMcqOption(scenarioIndex: number, optionIndex: number) {
-    this.mission.scenarios[scenarioIndex].options.splice(optionIndex, 1);
-  }
-
-  addAnswer(scenarioIndex: number) { this.mission.scenarios[scenarioIndex].answers.push(''); }
-  removeAnswer(scenarioIndex: number, answerIndex: number) {
-    this.mission.scenarios[scenarioIndex].answers.splice(answerIndex, 1);
-  }
-
-  trackByFn(index: number, item: any): number { return index; }
-
-  onClassChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const classId = input.value;
-    if (input.checked) {
-      if (!this.mission.classIds.includes(classId)) this.mission.classIds.push(classId);
-    } else {
-      this.mission.classIds = this.mission.classIds.filter(id => id !== classId);
-    }
-  }
-
-  togglePreview() { this.isPreviewing = !this.isPreviewing; }
-
-  onSubmit() {
-    this.isSubmitted = true;
-    this.isPreviewing = false;
-  }
-
-  resetForm() {
-    this.mission = this.getInitialMissionState();
-    this.isSubmitted = false;
+  generateCsvContent(): string {
+    let content = `Title,${this.mission.title}\nXP,${this.mission.xp}\n`;
+    this.mission.passages.forEach((p, i) => content += `Passage ${i + 1},"${p.replace(/"/g, '""')}"\n`);
+    this.mission.scenarios.forEach((s, i) => {
+      content += `Problem ${i + 1} Type,${s.type}\n`;
+      content += `Problem ${i + 1} Question,"${s.question.replace(/"/g, '""')}"\n`;
+      content += `Problem ${i + 1} Timer,${s.timerInSeconds}\n`;
+      s.options.forEach((o, j) => content += `Problem ${i + 1} Option ${j + 1},"${o.text.replace(/"/g, '""')}"\n`);
+      content += `Problem ${i + 1} Answer,"${s.correctAnswer.replace(/"/g, '""')}"\n`;
+    });
+    return content;
   }
   
-  navigateToDashboard() { this.router.navigate(['/mentor/dashboard']); }
-
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = (e) => this.parseMissionCsv(reader.result as string);
-      reader.readAsText(file);
-    }
-  }
-
-  private parseMissionCsv(csvText: string): void {
-    const newMission = this.getInitialMissionState();
-    newMission.passages = []; newMission.scenarios = []; newMission.classIds = [];
-    const lines = csvText.split('\n').filter(line => line.trim() !== '');
-
-    for (const line of lines.slice(1)) {
-      const [key, value] = line.split(/,(.+)/).map(s => s.replace(/^"|"$/g, '').replace(/""/g, '"').trim());
-      const keyParts = key.split('_');
-      
-      const index = parseInt(keyParts[1], 10) - 1;
-      
-      switch (keyParts[0]) {
-        case 'title': newMission.title = value; break;
-        case 'description': newMission.description = value; break;
-        case 'xp': newMission.xp = parseInt(value, 10) || 100; break;
-        case 'passage':
-          // Ensure array is large enough
-          while(newMission.passages.length <= index) newMission.passages.push('');
-          newMission.passages[index] = value; 
-          break;
-        case 'classId': newMission.classIds.push(value); break;
-        case 'scenario':
-          const scenarioField = keyParts[2];
-          const answerOrOptionIndex = parseInt(keyParts[3], 10) - 1;
-
-          while(newMission.scenarios.length <= index) newMission.scenarios.push({ type: 'qa', question: '', options: [], answers: [] });
-          const scenario = newMission.scenarios[index];
-
-          if (scenarioField === 'type') scenario.type = value as QuestionType;
-          if (scenarioField === 'question') scenario.question = value;
-          if (scenarioField === 'answer') scenario.answers[answerOrOptionIndex] = value;
-          if (scenarioField === 'option') scenario.options[answerOrOptionIndex] = { text: value };
-          if (scenarioField === 'correctOptionIndex') scenario.correctMcqIndex = parseInt(value, 10);
-          break;
-      }
-    }
-    this.mission = newMission;
-  }
-
-  exportToCsv() {
-    const mission = this.mission;
-    const rows = [['Key', 'Value']];
-    const escape = (val: any) => `"${String(val).replace(/"/g, '""')}"`;
-
-    rows.push(['title', escape(mission.title)]);
-    rows.push(['description', escape(mission.description)]);
-    rows.push(['xp', mission.xp.toString()]);
-    mission.passages.forEach((p, i) => rows.push([`passage_${i + 1}`, escape(p)]));
-    mission.scenarios.forEach((s, i) => {
-      rows.push([`scenario_${i + 1}_type`, s.type]);
-      rows.push([`scenario_${i + 1}_question`, escape(s.question)]);
-      if (s.type === 'qa' || s.type === 'fib') {
-        s.answers.forEach((a, j) => rows.push([`scenario_${i + 1}_answer_${j + 1}`, escape(a)]));
-      }
-      if (s.type === 'mcq') {
-        s.options.forEach((o, j) => rows.push([`scenario_${i + 1}_option_${j + 1}`, escape(o.text)]));
-        if (s.correctMcqIndex !== undefined) {
-          rows.push([`scenario_${i + 1}_correctOptionIndex`, s.correctMcqIndex.toString()]);
-        }
-      }
-    });
-    mission.classIds.forEach(id => rows.push(['classId', escape(id)]));
-
-    const csvContent = rows.map(e => e.join(",")).join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
-    link.download = `mission_${timestamp}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+  resetForm(): void {
+    this.mission = this.getNewMission();
+    this.submissionSuccess = false;
   }
 }
-
-
