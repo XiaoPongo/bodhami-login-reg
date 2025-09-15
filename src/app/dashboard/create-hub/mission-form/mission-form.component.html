@@ -16,7 +16,14 @@
     <h1>Create a New Mission</h1>
   </div>
 
+  <!-- GUIDELINES BOX -->
+  <div class="guidelines">
+    <h4><i class="fas fa-info-circle"></i> Quick Guide: Missions</h4>
+    <p>Missions are task-oriented challenges. Use passages for context and scenarios for questions. You can add timers and multiple question types for each problem.</p>
+  </div>
+
   <form #missionForm="ngForm" (ngSubmit)="submitForm()">
+    <!-- Basic Info Section -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-clipboard-list"></i> Basic Info</h3>
       <div class="input-group">
@@ -29,37 +36,43 @@
       </div>
     </div>
 
+    <!-- Passages Section -->
     <div class="form-section">
         <h3 class="section-title"><i class="fas fa-file-alt"></i> Passages</h3>
-        <div *ngFor="let passage of mission.passages; let i = index; trackBy: trackByFn" class="list-item">
-            <textarea placeholder="Enter passage {{i + 1}}" [(ngModel)]="mission.passages[i]" [name]="'passage' + i"></textarea>
-            <button type="button" class="btn-remove" (click)="removePassage(i)" title="Remove Passage">&times;</button>
+        <div class="dynamic-list">
+          <div *ngFor="let passage of mission.passages; let i = index; trackBy: trackByFn" class="list-item">
+              <textarea placeholder="Enter passage content here..." [(ngModel)]="mission.passages[i]" [name]="'passage' + i"></textarea>
+              <button type="button" class="btn-remove" (click)="removePassage(i)" title="Remove Passage"><i class="fas fa-times"></i></button>
+          </div>
         </div>
-        <button type="button" class="btn-add" (click)="addPassage()">+ Add Passage</button>
+        <button type="button" class="btn-add" (click)="addPassage()"><i class="fas fa-plus"></i> Add Passage</button>
     </div>
 
+    <!-- Scenarios Section -->
     <div class="form-section">
         <h3 class="section-title"><i class="fas fa-question-circle"></i> Scenarios (Problems)</h3>
-        <div *ngFor="let scenario of mission.scenarios; let i = index; trackBy: trackByFn" class="dynamic-list">
+        <div *ngFor="let scenario of mission.scenarios; let i = index; trackBy: trackByFn" class="dynamic-list nested">
           <div class="scenario-header">
             <h4>Problem {{i + 1}}</h4>
-            <button type="button" class="btn-remove" (click)="removeScenario(i)">&times;</button>
+            <button type="button" class="btn-remove" (click)="removeScenario(i)" title="Remove Problem"><i class="fas fa-times"></i></button>
           </div>
           
-          <div class="input-group">
-            <label [for]="'qtype' + i">Question Type</label>
-            <select [id]="'qtype' + i" [(ngModel)]="scenario.type" [name]="'qtype' + i">
-              <option value="qa">Question & Answer</option>
-              <option value="mcq">Multiple Choice</option>
-              <option value="fill">Fill in the Blanks</option>
-            </select>
-          </div>
-
-          <div class="input-group">
-            <label [for]="'timer' + i">Timer</label>
-            <select [id]="'timer' + i" [(ngModel)]="scenario.timerInSeconds" [name]="'timer' + i">
-              <option *ngFor="let opt of timerOptions" [value]="opt.value">{{ opt.label }}</option>
-            </select>
+          <div class="input-grid">
+            <div class="input-group">
+              <label [for]="'qtype' + i">Question Type</label>
+              <select [id]="'qtype' + i" [(ngModel)]="scenario.type" [name]="'qtype' + i">
+                <option value="qa">Question & Answer</option>
+                <option value="mcq">Multiple Choice</option>
+                <option value="fill">Fill in the Blanks</option>
+              </select>
+            </div>
+  
+            <div class="input-group">
+              <label [for]="'timer' + i">Timer</label>
+              <select [id]="'timer' + i" [(ngModel)]="scenario.timerInSeconds" [name]="'timer' + i">
+                <option *ngFor="let opt of timerOptions" [value]="opt.value">{{ opt.label }}</option>
+              </select>
+            </div>
           </div>
 
           <div class="input-group">
@@ -67,38 +80,40 @@
               <textarea [id]="'question' + i" [(ngModel)]="scenario.question" [name]="'question' + i" required></textarea>
           </div>
 
+          <!-- Multiple Choice Options -->
           <div *ngIf="scenario.type === 'mcq'">
-              <label>Options</label>
-              <div *ngFor="let option of scenario.options; let j = index; trackBy: trackByFn" class="list-item">
-                  <input type="text" placeholder="Option {{j + 1}}" [(ngModel)]="option.text" [name]="'option' + i + '_' + j">
+              <label class="sub-label">Options</label>
+              <div *ngFor="let option of scenario.options; let j = index; trackBy: trackByFn" class="list-item mcq-option">
                   <input type="radio" [value]="option.text" [(ngModel)]="scenario.correctAnswer" [name]="'correctAnswer' + i" title="Set as correct answer">
-                  <button type="button" class="btn-remove" (click)="removeOption(scenario, j)">&times;</button>
+                  <input type="text" placeholder="Option {{j + 1}}" [(ngModel)]="option.text" [name]="'option' + i + '_' + j">
+                  <button type="button" class="btn-remove small" (click)="removeOption(scenario, j)"><i class="fas fa-times"></i></button>
               </div>
-              <button type="button" class="btn-add" (click)="addOption(scenario)">+ Add Option</button>
+              <button type="button" class="btn-add small" (click)="addOption(scenario)"><i class="fas fa-plus"></i> Add Option</button>
           </div>
 
+          <!-- Q&A and Fill in the Blank Answer -->
           <div *ngIf="scenario.type !== 'mcq'" class="input-group">
               <label [for]="'answer' + i">Correct Answer *</label>
               <input type="text" [id]="'answer' + i" [(ngModel)]="scenario.correctAnswer" [name]="'correctAnswer' + i" required>
           </div>
         </div>
-        <button type="button" class="btn-add" (click)="addScenario()">+ Add Problem</button>
+        <button type="button" class="btn-add" (click)="addScenario()"><i class="fas fa-plus"></i> Add Problem</button>
     </div>
 
+    <!-- Class Assignment Section -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-chalkboard-teacher"></i> Class Assignment</h3>
       <div *ngIf="(availableClasses$ | async) as classes" class="class-grid">
         <label *ngFor="let class of classes" class="class-label">
-          <!-- THIS IS THE FIX: Convert number to string for the name attribute -->
           <input type="checkbox" [name]="'class-' + class.id" [(ngModel)]="mission.assignedClasses[class.id!]">
-          {{ class.name }}
+          <span>{{ class.name }}</span>
         </label>
       </div>
     </div>
 
     <div class="action-buttons">
       <button type="submit" class="btn btn-primary" [disabled]="missionForm.invalid || isSubmitting">
-        {{ isSubmitting ? 'Submitting...' : 'Submit Mission' }}
+        <i class="fas fa-paper-plane"></i> {{ isSubmitting ? 'Submitting...' : 'Submit Mission' }}
       </button>
     </div>
   </form>
