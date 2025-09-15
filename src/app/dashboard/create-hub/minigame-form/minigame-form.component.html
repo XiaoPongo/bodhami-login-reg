@@ -1,5 +1,6 @@
 <div class="form-container minigame-theme">
-  <div *ngIf="submissionSuccess" class="success-overlay">
+  <!-- Success Screen -->
+  <div *ngIf="submissionSuccess" class="success-overlay" #successOverlay>
     <div class="success-box">
       <i class="fas fa-check-circle"></i>
       <h2>Minigame Created!</h2>
@@ -12,9 +13,11 @@
     </div>
   </div>
 
-  <div *ngIf="isPreviewing" class="preview-overlay">
+  <!-- Preview Mode -->
+  <div *ngIf="isPreviewing" class="preview-overlay" #previewOverlay>
       <div class="preview-box">
         <h2>Preview: {{ minigame.title || 'Untitled Minigame' }}</h2>
+        <!-- Add more preview details here -->
         <button (click)="togglePreview()" class="btn btn-secondary">Close Preview</button>
       </div>
   </div>
@@ -36,6 +39,7 @@
   </div>
 
   <form #minigameForm="ngForm" (ngSubmit)="submitForm()">
+    <!-- Basic Info Section -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-clipboard-list"></i> Basic Info</h3>
       <div class="input-group">
@@ -48,6 +52,7 @@
       </div>
     </div>
 
+    <!-- Content Builder Section -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-cogs"></i> Content Builder</h3>
       
@@ -105,3 +110,4 @@
     </div>
   </form>
 </div>
+

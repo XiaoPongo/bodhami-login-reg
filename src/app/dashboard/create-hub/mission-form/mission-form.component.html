@@ -1,5 +1,6 @@
 <div class="form-container mission-theme">
-  <div *ngIf="submissionSuccess" class="success-overlay">
+  <!-- Success Screen with template reference variable -->
+  <div *ngIf="submissionSuccess" class="success-overlay" #successOverlay>
     <div class="success-box">
       <i class="fas fa-check-circle"></i>
       <h2>Mission Created!</h2>
@@ -12,7 +13,8 @@
     </div>
   </div>
 
-  <div *ngIf="isPreviewing" class="preview-overlay">
+  <!-- Preview Mode with template reference variable -->
+  <div *ngIf="isPreviewing" class="preview-overlay" #previewOverlay>
       <div class="preview-box">
         <h2>Preview: {{ mission.title || 'Untitled Mission' }}</h2>
         <p><strong>XP:</strong> {{ mission.xp }}</p>
