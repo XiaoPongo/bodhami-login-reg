@@ -60,26 +60,36 @@
         </div>
     </div>
 
-    <!-- Grid now uses the simple array directly -->
-    <div class="file-grid">
-      <div *ngFor="let material of filteredMaterials" class="file-card">
-        <input type="checkbox" class="file-checkbox" (change)="toggleFileSelection(material.id, $event)">
-        <div class="file-card-icon" [ngClass]="material.fileType.split('/').pop()">
-          <i [class]="getFileTypeIcon(material.displayName)"></i>
-        </div>
-        <div class="file-card-details">
-          <span class="file-name" title="{{ material.displayName }}">{{ material.displayName }}</span>
-          <span class="file-meta">
-            {{ material.classroom ? 'Assigned to: ' + getClassNameById(material.classroom.id) : 'Unassigned' }}
-          </span>
+    <!-- THIS IS THE DEFINITIVE FIX -->
+    <!-- We now use the async pipe on the filteredMaterials$ observable -->
+    <ng-container *ngIf="(filteredMaterials$ | async) as materials; else loading">
+      <div *ngIf="materials.length > 0; else noMaterials" class="file-grid">
+        <div *ngFor="let material of materials" class="file-card">
+          <input type="checkbox" class="file-checkbox" (change)="toggleFileSelection(material.id, $event)">
+          <div class="file-card-icon" [ngClass]="material.fileType.split('/').pop()">
+            <i [class]="getFileTypeIcon(material.displayName)"></i>
+          </div>
+          <div class="file-card-details">
+            <span class="file-name" title="{{ material.displayName }}">{{ material.displayName }}</span>
+            <span class="file-meta">
+              {{ material.classroom ? 'Assigned to: ' + getClassNameById(material.classroom.id) : 'Unassigned' }}
+            </span>
+          </div>
         </div>
       </div>
+      <ng-template #noMaterials>
+        <div class="empty-grid-state">
+          <i class="fas fa-folder-open"></i>
+          <p>No materials found for this filter.</p>
+        </div>
+      </ng-template>
+    </ng-container>
 
-      <div *ngIf="filteredMaterials.length === 0" class="empty-grid-state">
-        <i class="fas fa-folder-open"></i>
-        <p>No materials found for this filter.</p>
+    <ng-template #loading>
+      <div class="file-grid">
+        <div class="file-card placeholder" *ngFor="let i of [1,2,3,4]"></div>
       </div>
-    </div>
+    </ng-template>
   </div>
 </div>
 
