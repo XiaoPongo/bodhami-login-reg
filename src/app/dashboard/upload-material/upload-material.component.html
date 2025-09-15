@@ -6,19 +6,29 @@
   </div>
 
   <!-- File Upload Section -->
-  <div 
-    class="upload-section"
-    (dragover)="onDragOver($event)"
-    (dragleave)="onDragLeave($event)"
-    (drop)="onDrop($event)"
-    [class.dragging]="isDragging">
-    <div class="drop-zone">
-      <i class="fas fa-cloud-upload-alt"></i>
-      <h3>Drag & drop files here</h3>
-      <p>or</p>
-      <label for="file-upload" class="btn btn-primary">Browse Files</label>
-      <input id="file-upload" type="file" (change)="onFileSelected($event)" multiple accept=".docx,.csv,.xlsx">
-      <p class="file-info">Max size: 5MB. Allowed types: .docx, .csv, .xlsx</p>
+  <div class="upload-section">
+    <div class="upload-target-selector">
+      <label for="class-target">1. Select a Class to Upload To:</label>
+      <select id="class-target" [(ngModel)]="uploadTargetClassId">
+        <option value="" disabled>-- Choose a class --</option>
+        <option *ngFor="let class of (classes$ | async)" [value]="class.id">{{ class.name }}</option>
+      </select>
+    </div>
+    <div 
+      class="drop-zone-wrapper"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+      [class.dragging]="isDragging"
+      [class.disabled]="!uploadTargetClassId">
+      <div class="drop-zone">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <h3>Drag & drop files here</h3>
+        <p>or</p>
+        <label for="file-upload" class="btn btn-primary" [class.disabled]="!uploadTargetClassId">2. Browse Files</label>
+        <input id="file-upload" type="file" (change)="onFileSelected($event)" multiple accept=".docx,.csv,.xlsx" [disabled]="!uploadTargetClassId">
+        <p class="file-info">Max size: 5MB. Allowed types: .docx, .csv, .xlsx</p>
+      </div>
     </div>
   </div>
 
@@ -44,21 +54,20 @@
   <div class="management-section">
     <div class="management-header">
       <h2>Your Materials</h2>
-      <!-- THIS IS THE FIX: Bind to the simple string property -->
-      <select [(ngModel)]="selectedClassFilter" (ngModelChange)="filterFiles()">
+      <select [(ngModel)]="filter" (ngModelChange)="onFilterChange($event)">
         <option value="all">Filter by Class: All</option>
         <option value="unassigned">Unassigned</option>
         <option *ngFor="let class of (classes$ | async)" [value]="class.id">{{ class.name }}</option>
       </select>
     </div>
-    
+
     <!-- Bulk Action Toolbar -->
     <div class="bulk-actions" *ngIf="showBulkToolbar">
-        <span>{{ selectedFileIds.size }} file(s) selected</span>
-        <div>
-            <button class="btn btn-secondary" (click)="openBulkAssignModal()"><i class="fas fa-plus-circle"></i> Assign to Class</button>
-            <button class="btn btn-danger" (click)="handleBulkDelete()"><i class="fas fa-trash-alt"></i> Delete Selected</button>
-        </div>
+      <span>{{ selectedFileIds.size }} file(s) selected</span>
+      <div>
+        <button class="btn btn-secondary" (click)="openBulkAssignModal()"><i class="fas fa-plus-circle"></i> Assign to Class</button>
+        <button class="btn btn-danger" (click)="handleBulkDelete()"><i class="fas fa-trash-alt"></i> Delete Selected</button>
+      </div>
     </div>
 
     <!-- Grid with Fallbacks -->
@@ -98,7 +107,7 @@
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3>Assign {{ selectedFileIds.size }} Material(s)</h3>
-      <button class="btn-close" (click)="closeBulkAssignModal()">&times;</button>
+      <button class="btn btn-close" (click)="closeBulkAssignModal()">&times;</button>
     </div>
     <div class="modal-body">
       <div class="input-group">
@@ -115,4 +124,3 @@
     </div>
   </div>
 </div>
-

@@ -1,38 +1,38 @@
+// material.service.ts (New/Fixed File)
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { ApiService, Material } from './api.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MaterialService {
+  // Holds the list of all materials for the mentor
   private readonly _materials = new BehaviorSubject<Material[]>([]);
   public readonly materials$: Observable<Material[]> = this._materials.asObservable();
 
   constructor(private apiService: ApiService) {
-    this.loadMaterials(); // Load materials when the app starts
+    this.loadMaterials();
   }
 
-  /** Fetches the latest materials from the API and updates the stream */
+  // --- Public Methods for Components ---
+
   loadMaterials(): void {
     this.apiService.getMaterials().subscribe({
-      next: (materials: Material[]) => this._materials.next(materials),
-      error: (err: any) => console.error("Failed to load materials", err)
+      next: (materials) => this._materials.next(materials),
+      error: (err) => console.error("Failed to load materials", err)
     });
   }
 
-  /** Deletes one or more materials via the API and refreshes the list */
   deleteMaterials(ids: number[]): Observable<any> {
     return this.apiService.deleteMaterials(ids).pipe(
-      tap(() => this.loadMaterials()) // Reload the list on success
+      tap(() => this.loadMaterials())
     );
   }
 
-  /** Assigns one or more materials to a class and refreshes the list */
-  assignMaterials(ids: number[], classroomId: number | null): Observable<any> {
-    return this.apiService.assignMaterials(ids, classroomId).pipe(
+  assignMaterials(materialIds: number[], classroomId: number | null): Observable<any> {
+    return this.apiService.assignMaterials(materialIds, classroomId).pipe(
       tap(() => this.loadMaterials())
     );
   }
 }
-
