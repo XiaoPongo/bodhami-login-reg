@@ -16,8 +16,6 @@ import { Classroom } from '../../services/api.service';
 export class MentorDashboardComponent implements OnInit {
   user: any = null;
   classes$: Observable<Classroom[]>;
-
-  // Properties for the "Coming Soon" notification
   showNotification = false;
   notificationMessage = '';
   private notificationTimeout: any;
@@ -44,26 +42,19 @@ export class MentorDashboardComponent implements OnInit {
   }
 
   // --- NEW METHOD ---
-  // Navigates to the manage classes page with a query parameter for the specific class
+  navigateToUploadMaterial(): void {
+    this.router.navigate(['/mentor/upload-material']);
+  }
+
   navigateToEditClass(classId: number | undefined): void {
     if (!classId) return;
     this.router.navigate(['/mentor/manage-classes'], { queryParams: { classId: classId } });
   }
 
-  // --- NEW METHOD ---
-  // Shows the blue "Coming Soon" popup message
   showComingSoonNotification(): void {
-    // Clear any existing timeout to prevent flickering
-    if (this.notificationTimeout) {
-      clearTimeout(this.notificationTimeout);
-    }
-
+    if (this.notificationTimeout) clearTimeout(this.notificationTimeout);
     this.notificationMessage = 'Feature coming soon!';
     this.showNotification = true;
-
-    // Hide the notification after 3 seconds
-    this.notificationTimeout = setTimeout(() => {
-      this.showNotification = false;
-    }, 3000);
+    this.notificationTimeout = setTimeout(() => { this.showNotification = false; }, 3000);
   }
 }

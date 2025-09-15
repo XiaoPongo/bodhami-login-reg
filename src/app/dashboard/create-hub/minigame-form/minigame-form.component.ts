@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../services/api.service';
 import { ClassService } from '../../../services/class.service';
@@ -31,8 +32,10 @@ export class MinigameFormComponent implements OnInit {
   availableClasses$: Observable<Classroom[]>;
   isSubmitting = false;
   submissionSuccess = false;
+  isPreviewing = false;
 
   constructor(
+    private router: Router,
     private apiService: ApiService,
     private classService: ClassService
   ) {
@@ -56,9 +59,7 @@ export class MinigameFormComponent implements OnInit {
   trackByFn(index: any, item: any) { return index; }
 
   async submitForm(): Promise<void> {
-    const selectedClassIds = Object.keys(this.minigame.assignedClasses)
-      .filter(id => this.minigame.assignedClasses[id]);
-
+    const selectedClassIds = Object.keys(this.minigame.assignedClasses).filter(id => this.minigame.assignedClasses[id]);
     if (selectedClassIds.length === 0) {
       alert('Please select at least one class.');
       return;
@@ -68,7 +69,6 @@ export class MinigameFormComponent implements OnInit {
     const csvContent = this.generateCsvContent();
     const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const fileName = `minigame-${this.minigame.title.replace(/\s+/g, '-')}-${Date.now()}.csv`;
-
     const uploadPromises = selectedClassIds.map(classId => 
       this.apiService.uploadFile(csvBlob, 'minigame', fileName, Number(classId)).toPromise()
     );
@@ -95,8 +95,20 @@ export class MinigameFormComponent implements OnInit {
     return content;
   }
   
+  togglePreview(): void { this.isPreviewing = !this.isPreviewing; }
+  exportToCsv(): void {
+    const csvContent = this.generateCsvContent();
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `minigame-template-${this.minigame.title.replace(/\s+/g, '-')}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+  navigateToDashboard(): void { this.router.navigate(['/mentor/dashboard']); }
   resetForm(): void {
     this.minigame = this.getNewMinigame();
     this.submissionSuccess = false;
+    this.isPreviewing = false;
   }
 }

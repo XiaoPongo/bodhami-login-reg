@@ -1,19 +1,45 @@
 <div class="form-container case-study-theme">
-  <!-- Success Message -->
+  <!-- Success Screen -->
   <div *ngIf="submissionSuccess" class="success-overlay">
     <div class="success-box">
       <i class="fas fa-check-circle"></i>
       <h2>Case Study Created!</h2>
       <p>Your new case study has been successfully created and assigned.</p>
-      <div class="action-buttons">
-        <button (click)="resetForm()" class="btn btn-primary">Create Another</button>
+      <div class="success-actions">
+        <button (click)="exportToCsv()" class="btn btn-secondary"><i class="fas fa-download"></i> Download CSV</button>
+        <button (click)="navigateToDashboard()" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+        <button (click)="resetForm()" class="btn btn-primary"><i class="fas fa-plus"></i> Create Another</button>
       </div>
     </div>
+  </div>
+
+  <!-- Preview Mode -->
+  <div *ngIf="isPreviewing" class="preview-overlay">
+      <div class="preview-box">
+        <h2>Preview: {{ caseStudy.title || 'Untitled Case Study' }}</h2>
+        <p><strong>XP:</strong> {{ caseStudy.xp }}</p>
+        <div>
+          <strong>Passage / Context:</strong>
+          <p>{{ caseStudy.passage || 'No content.' }}</p>
+        </div>
+        <hr>
+        <div *ngFor="let problem of caseStudy.problems; let i = index" class="preview-problem">
+            <strong>Problem {{i + 1}} ({{problem.type | uppercase}}):</strong>
+            <p>{{ problem.question || 'No question provided.' }}</p>
+            <p><em>Answer: {{ problem.correctAnswer || 'No answer set.' }}</em></p>
+        </div>
+        <button (click)="togglePreview()" class="btn btn-secondary">Close Preview</button>
+      </div>
   </div>
 
   <div class="form-header">
     <i class="fas fa-book-open"></i>
     <h1>Create a New Case Study</h1>
+  </div>
+
+  <div class="guidelines">
+    <h4><i class="fas fa-info-circle"></i> Quick Guide: Case Studies</h4>
+    <p>Case studies present real-world scenarios. Use the passage for context and problems for critical thinking questions.</p>
   </div>
 
   <form #caseStudyForm="ngForm" (ngSubmit)="submitForm()">
@@ -42,26 +68,27 @@
     <!-- Problems -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-question-circle"></i> Problems</h3>
-      <div *ngFor="let problem of caseStudy.problems; let i = index; trackBy: trackByFn" class="dynamic-list">
+      <div *ngFor="let problem of caseStudy.problems; let i = index; trackBy: trackByFn" class="dynamic-list nested">
         <div class="scenario-header">
           <h4>Problem {{i + 1}}</h4>
-          <button type="button" class="btn-remove" (click)="removeProblem(i)">&times;</button>
+          <button type="button" class="btn-remove" (click)="removeProblem(i)" title="Remove Problem"><i class="fas fa-times"></i></button>
         </div>
         
-        <div class="input-group">
-          <label [for]="'qtype' + i">Question Type</label>
-          <select [id]="'qtype' + i" [(ngModel)]="problem.type" [name]="'qtype' + i">
-            <option value="qa">Question & Answer</option>
-            <option value="mcq">Multiple Choice</option>
-            <option value="fill">Fill in the Blanks</option>
-          </select>
-        </div>
-
-        <div class="input-group">
-          <label [for]="'timer' + i">Timer</label>
-          <select [id]="'timer' + i" [(ngModel)]="problem.timerInSeconds" [name]="'timer' + i">
-            <option *ngFor="let opt of timerOptions" [value]="opt.value">{{ opt.label }}</option>
-          </select>
+        <div class="input-grid">
+            <div class="input-group">
+              <label [for]="'qtype' + i">Question Type</label>
+              <select [id]="'qtype' + i" [(ngModel)]="problem.type" [name]="'qtype' + i">
+                <option value="qa">Question & Answer</option>
+                <option value="mcq">Multiple Choice</option>
+                <option value="fill">Fill in the Blanks</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label [for]="'timer' + i">Timer</label>
+              <select [id]="'timer' + i" [(ngModel)]="problem.timerInSeconds" [name]="'timer' + i">
+                <option *ngFor="let opt of timerOptions" [value]="opt.value">{{ opt.label }}</option>
+              </select>
+            </div>
         </div>
 
         <div class="input-group">
@@ -70,13 +97,13 @@
         </div>
 
         <div *ngIf="problem.type === 'mcq'">
-            <label>Options</label>
-            <div *ngFor="let option of problem.options; let j = index; trackBy: trackByFn" class="list-item">
-                <input type="text" placeholder="Option {{j + 1}}" [(ngModel)]="option.text" [name]="'option' + i + '_' + j">
+            <label class="sub-label">Options</label>
+            <div *ngFor="let option of problem.options; let j = index; trackBy: trackByFn" class="list-item mcq-option">
                 <input type="radio" [value]="option.text" [(ngModel)]="problem.correctAnswer" [name]="'correctAnswer' + i" title="Set as correct answer">
-                <button type="button" class="btn-remove" (click)="removeOption(problem, j)">&times;</button>
+                <input type="text" placeholder="Option {{j + 1}}" [(ngModel)]="option.text" [name]="'option' + i + '_' + j">
+                <button type="button" class="btn-remove small" (click)="removeOption(problem, j)"><i class="fas fa-times"></i></button>
             </div>
-            <button type="button" class="btn-add" (click)="addOption(problem)">+ Add Option</button>
+            <button type="button" class="btn-add small" (click)="addOption(problem)"><i class="fas fa-plus"></i> Add Option</button>
         </div>
 
         <div *ngIf="problem.type !== 'mcq'" class="input-group">
@@ -84,7 +111,7 @@
             <input type="text" [id]="'answer' + i" [(ngModel)]="problem.correctAnswer" [name]="'correctAnswer' + i" required>
         </div>
       </div>
-      <button type="button" class="btn-add" (click)="addProblem()">+ Add Problem</button>
+      <button type="button" class="btn-add" (click)="addProblem()"><i class="fas fa-plus"></i> Add Problem</button>
     </div>
 
     <!-- Class Assignment -->
@@ -92,16 +119,16 @@
       <h3 class="section-title"><i class="fas fa-chalkboard-teacher"></i> Class Assignment</h3>
       <div *ngIf="(availableClasses$ | async) as classes" class="class-grid">
         <label *ngFor="let class of classes" class="class-label">
-          <!-- THIS IS THE FIX: Convert number to string for the name attribute -->
           <input type="checkbox" [name]="'class-' + class.id" [(ngModel)]="caseStudy.assignedClasses[class.id!]">
-          {{ class.name }}
+          <span>{{ class.name }}</span>
         </label>
       </div>
     </div>
 
     <div class="action-buttons">
+      <button type="button" (click)="togglePreview()" class="btn btn-secondary"><i class="fas fa-eye"></i> Preview</button>
       <button type="submit" class="btn btn-primary" [disabled]="caseStudyForm.invalid || isSubmitting">
-        {{ isSubmitting ? 'Submitting...' : 'Submit Case Study' }}
+        <i class="fas fa-paper-plane"></i> {{ isSubmitting ? 'Submitting...' : 'Submit Case Study' }}
       </button>
     </div>
   </form>

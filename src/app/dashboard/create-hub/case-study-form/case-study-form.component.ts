@@ -36,11 +36,12 @@ export class CaseStudyFormComponent implements OnInit {
   availableClasses$: Observable<Classroom[]>;
   isSubmitting = false;
   submissionSuccess = false;
+  isPreviewing = false;
   
   timerOptions = [
-    { value: 0, label: 'No Timer' }, { value: 5, label: '5 seconds' },
-    { value: 10, label: '10 seconds' }, { value: 15, label: '15 seconds' },
-    { value: 30, label: '30 seconds' }, { value: 60, label: '1 minute' },
+    { value: 0, label: 'No Timer' }, { value: 30, label: '30 seconds' },
+    { value: 60, label: '1 minute' }, { value: 120, label: '2 minutes' },
+    { value: 300, label: '5 minutes' }
   ];
 
   constructor(
@@ -68,15 +69,12 @@ export class CaseStudyFormComponent implements OnInit {
   removeProblem(index: number) { this.caseStudy.problems.splice(index, 1); }
   addOption(problem: Problem) { problem.options.push({ text: '' }); }
   removeOption(problem: Problem, index: number) { problem.options.splice(index, 1); }
-  
   trackByFn(index: any, item: any) { return index; }
 
   async submitForm(): Promise<void> {
-    const selectedClassIds = Object.keys(this.caseStudy.assignedClasses)
-      .filter(id => this.caseStudy.assignedClasses[id]);
-
+    const selectedClassIds = Object.keys(this.caseStudy.assignedClasses).filter(id => this.caseStudy.assignedClasses[id]);
     if (selectedClassIds.length === 0) {
-      alert('Please select at least one class to assign this case study to.');
+      alert('Please select at least one class.');
       return;
     }
 
@@ -84,7 +82,6 @@ export class CaseStudyFormComponent implements OnInit {
     const csvContent = this.generateCsvContent();
     const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const fileName = `case-study-${this.caseStudy.title.replace(/\s+/g, '-')}-${Date.now()}.csv`;
-
     const uploadPromises = selectedClassIds.map(classId => 
       this.apiService.uploadFile(csvBlob, 'case-study', fileName, Number(classId)).toPromise()
     );
@@ -93,16 +90,15 @@ export class CaseStudyFormComponent implements OnInit {
       await Promise.all(uploadPromises);
       this.submissionSuccess = true;
     } catch (error) {
-      console.error('An error occurred during file upload:', error);
-      alert('An error occurred. Please check the console and try again.');
+      console.error('Upload Error:', error);
+      alert('An error occurred during upload.');
     } finally {
       this.isSubmitting = false;
     }
   }
 
   generateCsvContent(): string {
-    let content = `Title,${this.caseStudy.title}\n`;
-    content += `XP,${this.caseStudy.xp}\n`;
+    let content = `Title,${this.caseStudy.title}\nXP,${this.caseStudy.xp}\n`;
     content += `Passage,"${this.caseStudy.passage.replace(/"/g, '""')}"\n`;
     this.caseStudy.problems.forEach((p, i) => {
       content += `Problem ${i + 1} Type,${p.type}\n`;
@@ -114,8 +110,20 @@ export class CaseStudyFormComponent implements OnInit {
     return content;
   }
   
+  togglePreview(): void { this.isPreviewing = !this.isPreviewing; }
+  exportToCsv(): void {
+    const csvContent = this.generateCsvContent();
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `case-study-template-${this.caseStudy.title.replace(/\s+/g, '-')}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+  navigateToDashboard(): void { this.router.navigate(['/mentor/dashboard']); }
   resetForm(): void {
     this.caseStudy = this.getNewCaseStudy();
     this.submissionSuccess = false;
+    this.isPreviewing = false;
   }
 }

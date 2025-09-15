@@ -7,7 +7,7 @@ import { ApiService } from '../../../services/api.service';
 import { ClassService } from '../../../services/class.service';
 import { Classroom } from '../../../services/api.service';
 
-// Updated interfaces
+// Interfaces for the Mission data structure
 interface Answer { text: string; }
 interface Scenario {
   type: 'qa' | 'mcq' | 'fill';
@@ -30,7 +30,6 @@ interface Mission {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './mission-form.component.html',
-  // Only its own stylesheet is needed now.
   styleUrls: ['./mission-form.component.css']
 })
 export class MissionFormComponent implements OnInit {
@@ -38,6 +37,7 @@ export class MissionFormComponent implements OnInit {
   availableClasses$: Observable<Classroom[]>;
   isSubmitting = false;
   submissionSuccess = false;
+  isPreviewing = false;
   
   timerOptions = [
     { value: 0, label: 'No Timer' }, { value: 5, label: '5 seconds' },
@@ -66,6 +66,7 @@ export class MissionFormComponent implements OnInit {
     return { type: 'qa', question: '', options: [{ text: '' }], correctAnswer: '', timerInSeconds: 0 };
   }
 
+  // --- Form Array Management ---
   addPassage() { this.mission.passages.push(''); }
   removePassage(index: number) { this.mission.passages.splice(index, 1); }
   addScenario() { this.mission.scenarios.push(this.getNewScenario()); }
@@ -75,10 +76,9 @@ export class MissionFormComponent implements OnInit {
   
   trackByFn(index: any, item: any) { return index; }
 
+  // --- Main Submission Logic ---
   async submitForm(): Promise<void> {
-    const selectedClassIds = Object.keys(this.mission.assignedClasses)
-      .filter(id => this.mission.assignedClasses[id]);
-
+    const selectedClassIds = Object.keys(this.mission.assignedClasses).filter(id => this.mission.assignedClasses[id]);
     if (selectedClassIds.length === 0) {
       alert('Please select at least one class to assign this mission to.');
       return;
@@ -88,7 +88,6 @@ export class MissionFormComponent implements OnInit {
     const csvContent = this.generateCsvContent();
     const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const fileName = `mission-${this.mission.title.replace(/\s+/g, '-')}-${Date.now()}.csv`;
-
     const uploadPromises = selectedClassIds.map(classId => 
       this.apiService.uploadFile(csvBlob, 'mission', fileName, Number(classId)).toPromise()
     );
@@ -104,6 +103,7 @@ export class MissionFormComponent implements OnInit {
     }
   }
 
+  // --- CSV Generation ---
   generateCsvContent(): string {
     let content = `Title,${this.mission.title}\nXP,${this.mission.xp}\n`;
     this.mission.passages.forEach((p, i) => content += `Passage ${i + 1},"${p.replace(/"/g, '""')}"\n`);
@@ -117,8 +117,28 @@ export class MissionFormComponent implements OnInit {
     return content;
   }
   
+  // --- UI Control Methods ---
+  togglePreview(): void {
+    this.isPreviewing = !this.isPreviewing;
+  }
+
+  exportToCsv(): void {
+    const csvContent = this.generateCsvContent();
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `mission-template-${this.mission.title.replace(/\s+/g, '-')}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  navigateToDashboard(): void {
+    this.router.navigate(['/mentor/dashboard']);
+  }
+
   resetForm(): void {
     this.mission = this.getNewMission();
     this.submissionSuccess = false;
+    this.isPreviewing = false;
   }
 }

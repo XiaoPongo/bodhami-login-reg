@@ -1,14 +1,25 @@
 <div class="form-container minigame-theme">
-  <!-- Success Message -->
+  <!-- Success Screen -->
   <div *ngIf="submissionSuccess" class="success-overlay">
     <div class="success-box">
       <i class="fas fa-check-circle"></i>
       <h2>Minigame Created!</h2>
       <p>Your new minigame has been successfully created and assigned.</p>
-      <div class="action-buttons">
-        <button (click)="resetForm()" class="btn btn-primary">Create Another Minigame</button>
+      <div class="success-actions">
+        <button (click)="exportToCsv()" class="btn btn-secondary"><i class="fas fa-download"></i> Download CSV</button>
+        <button (click)="navigateToDashboard()" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+        <button (click)="resetForm()" class="btn btn-primary"><i class="fas fa-plus"></i> Create Another</button>
       </div>
     </div>
+  </div>
+
+  <!-- Preview Mode -->
+  <div *ngIf="isPreviewing" class="preview-overlay">
+      <div class="preview-box">
+        <h2>Preview: {{ minigame.title || 'Untitled Minigame' }}</h2>
+        <!-- Add more preview details here -->
+        <button (click)="togglePreview()" class="btn btn-secondary">Close Preview</button>
+      </div>
   </div>
 
   <div class="form-header">
@@ -16,12 +27,12 @@
     <h1>Create a New Minigame</h1>
   </div>
 
-  <!-- GUIDELINES BOX -->
+  <!-- Guidelines Box -->
   <div class="guidelines">
     <h4><i class="fas fa-info-circle"></i> Quick Guide: Word Association</h4>
     <p>First, create a 'Word Bank' of all possible answers. Then, create 'Main Word' groups and select which words from the bank are the correct answers for each group.</p>
   </div>
-
+  
   <form #minigameForm="ngForm" (ngSubmit)="submitForm()">
     <!-- Basic Info Section -->
     <div class="form-section">
@@ -40,7 +51,6 @@
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-cogs"></i> Content Builder</h3>
       
-      <!-- Word Bank -->
       <div class="dynamic-list">
         <div class="scenario-header">
           <h4>Word Bank (All possible words)</h4>
@@ -52,7 +62,6 @@
         <button type="button" class="btn-add" (click)="addWordToBank()"><i class="fas fa-plus"></i> Add Word to Bank</button>
       </div>
 
-      <!-- Word Pairs & Answer Selection -->
       <div class="dynamic-list nested">
         <div class="scenario-header">
           <h4>Main Words & Answer Selection</h4>
@@ -78,7 +87,6 @@
       </div>
     </div>
     
-    <!-- Class Assignment Section -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-chalkboard-teacher"></i> Class Assignment</h3>
       <div *ngIf="(availableClasses$ | async) as classes" class="class-grid">
@@ -90,6 +98,7 @@
     </div>
     
     <div class="action-buttons">
+      <button type="button" (click)="togglePreview()" class="btn btn-secondary"><i class="fas fa-eye"></i> Preview</button>
       <button type="submit" class="btn btn-primary" [disabled]="minigameForm.invalid || isSubmitting">
         <i class="fas fa-paper-plane"></i> {{ isSubmitting ? 'Submitting...' : 'Submit Minigame' }}
       </button>

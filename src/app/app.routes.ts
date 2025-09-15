@@ -9,8 +9,8 @@ import { StudentLayoutComponent } from './dashboard/layout/student-layout/studen
 import { MentorDashboardComponent } from './dashboard/mentor-dashboard/mentor-dashboard.component';
 import { StudentDashboardComponent } from './dashboard/student-dashboard/student-dashboard.component';
 import { CreateHubComponent } from './dashboard/create-hub/create-hub.component';
-// --- IMPORT THE NEW COMPONENT ---
 import { ManageClassesComponent } from './dashboard/manage-classes/manage-classes.component'; 
+import { UploadMaterialComponent } from './dashboard/upload-material/upload-material.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -25,8 +25,10 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: MentorDashboardComponent },
       { path: 'create', component: CreateHubComponent },
-      // --- ADD THE NEW ROUTE FOR MANAGING CLASSES ---
-      { path: 'classes', component: ManageClassesComponent }, 
+      // Corrected path to 'manage-classes'
+      { path: 'manage-classes', component: ManageClassesComponent }, 
+      // Added new route for material uploader
+      { path: 'upload-material', component: UploadMaterialComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ],
   },
@@ -46,4 +48,3 @@ export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' }
 ];
-
