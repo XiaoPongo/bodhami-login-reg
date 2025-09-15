@@ -56,7 +56,7 @@ export class UploadMaterialComponent implements OnInit {
     this.classes$ = this.classService.classes$;
     this.materials$ = this.materialService.materials$;
 
-    // This creates the live, filtered stream of materials
+    // Create a new observable stream for the filtered materials
     this.filteredMaterials$ = combineLatest([this.materials$, this.filter]).pipe(
       map(([materials, filterValue]: [Material[], string]) => {
         if (filterValue === 'all') return materials;
@@ -97,7 +97,7 @@ export class UploadMaterialComponent implements OnInit {
 
   handleFiles(files: FileList) {
     const allowedExtensions = ['.docx', '.csv', '.xlsx'];
-    const maxSize = 5 * 1024 * 1024;
+    const maxSize = 5 * 1024 * 1024; // 5 MB
 
     Array.from(files).forEach(file => {
       let error = '';

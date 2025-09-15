@@ -1,14 +1,12 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { ApiService, Material, Classroom } from './api.service';
+import { BehaviorSubject, Observable, tap, throwError } from 'rxjs';
+import { ApiService, Material } from './api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MaterialService {
-  // A private BehaviorSubject to hold the current list of materials
   private readonly _materials = new BehaviorSubject<Material[]>([]);
-  // A public Observable that components can subscribe to for live updates
   public readonly materials$: Observable<Material[]> = this._materials.asObservable();
 
   constructor(private apiService: ApiService) {
@@ -37,4 +35,5 @@ export class MaterialService {
     );
   }
 }
+
 
