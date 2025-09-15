@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -32,6 +32,9 @@ interface CaseStudy {
   styleUrls: ['./case-study-form.component.css']
 })
 export class CaseStudyFormComponent implements OnInit {
+  @ViewChild('successOverlay') successOverlay?: ElementRef<HTMLDivElement>;
+  @ViewChild('previewOverlay') previewOverlay?: ElementRef<HTMLDivElement>;
+
   caseStudy: CaseStudy = this.getNewCaseStudy();
   availableClasses$: Observable<Classroom[]>;
   isSubmitting = false;
@@ -89,6 +92,9 @@ export class CaseStudyFormComponent implements OnInit {
     try {
       await Promise.all(uploadPromises);
       this.submissionSuccess = true;
+      setTimeout(() => {
+        this.successOverlay?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
     } catch (error) {
       console.error('Upload Error:', error);
       alert('An error occurred during upload.');
@@ -123,7 +129,14 @@ export class CaseStudyFormComponent implements OnInit {
      alert('CSV parsing for Case Studies is not yet implemented.');
   }
   
-  togglePreview(): void { this.isPreviewing = !this.isPreviewing; }
+  togglePreview(): void {
+    this.isPreviewing = !this.isPreviewing;
+    if (this.isPreviewing) {
+      setTimeout(() => {
+        this.previewOverlay?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
+    }
+  }
   exportToCsv(): void {
     const csvContent = this.generateCsvContent();
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -140,3 +153,4 @@ export class CaseStudyFormComponent implements OnInit {
     this.isPreviewing = false;
   }
 }
+

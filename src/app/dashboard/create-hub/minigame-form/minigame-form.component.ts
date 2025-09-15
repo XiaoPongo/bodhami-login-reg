@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -28,6 +28,9 @@ interface Minigame {
   styleUrls: ['./minigame-form.component.css']
 })
 export class MinigameFormComponent implements OnInit {
+  @ViewChild('successOverlay') successOverlay?: ElementRef<HTMLDivElement>;
+  @ViewChild('previewOverlay') previewOverlay?: ElementRef<HTMLDivElement>;
+
   minigame: Minigame = this.getNewMinigame();
   availableClasses$: Observable<Classroom[]>;
   isSubmitting = false;
@@ -76,6 +79,9 @@ export class MinigameFormComponent implements OnInit {
     try {
       await Promise.all(uploadPromises);
       this.submissionSuccess = true;
+      setTimeout(() => {
+        this.successOverlay?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
     } catch (error) {
       console.error('File upload error:', error);
       alert('An error occurred during upload.');
@@ -108,7 +114,14 @@ export class MinigameFormComponent implements OnInit {
      alert('CSV parsing for Minigames is not yet implemented.');
   }
 
-  togglePreview(): void { this.isPreviewing = !this.isPreviewing; }
+  togglePreview(): void {
+    this.isPreviewing = !this.isPreviewing;
+    if (this.isPreviewing) {
+      setTimeout(() => {
+        this.previewOverlay?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
+    }
+  }
   exportToCsv(): void {
     const csvContent = this.generateCsvContent();
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -125,3 +138,4 @@ export class MinigameFormComponent implements OnInit {
     this.isPreviewing = false;
   }
 }
+

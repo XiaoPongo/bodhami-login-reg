@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -33,6 +33,11 @@ interface Mission {
   styleUrls: ['./mission-form.component.css']
 })
 export class MissionFormComponent implements OnInit {
+  // --- THIS IS THE FIX (Part 1) ---
+  // Get references to the popup elements from the template
+  @ViewChild('successOverlay') successOverlay?: ElementRef<HTMLDivElement>;
+  @ViewChild('previewOverlay') previewOverlay?: ElementRef<HTMLDivElement>;
+
   mission: Mission = this.getNewMission();
   availableClasses$: Observable<Classroom[]>;
   isSubmitting = false;
@@ -95,6 +100,11 @@ export class MissionFormComponent implements OnInit {
     try {
       await Promise.all(uploadPromises);
       this.submissionSuccess = true;
+      // --- THIS IS THE FIX (Part 2) ---
+      // Wait for Angular to render the success overlay, then scroll to it.
+      setTimeout(() => {
+        this.successOverlay?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
     } catch (error) {
       console.error('An error occurred during file upload:', error);
       alert('An error occurred. Please check the console and try again.');
@@ -117,22 +127,17 @@ export class MissionFormComponent implements OnInit {
   }
 
   parseCsvContent(csvText: string): void {
-    // Basic CSV parsing - can be made more robust
     const lines = csvText.split('\n');
     const newMission = this.getNewMission();
     newMission.passages = [];
     newMission.scenarios = [];
-
     lines.forEach(line => {
         const [key, ...values] = line.split(',');
         const value = values.join(',').replace(/"/g, '').trim();
-
         if (key.toLowerCase() === 'title') newMission.title = value;
         if (key.toLowerCase() === 'xp') newMission.xp = parseInt(value, 10);
         if (key.toLowerCase().startsWith('passage')) newMission.passages.push(value);
-        // ... more complex parsing for scenarios would be needed here
     });
-
     this.mission = newMission;
     alert('Form auto-filled from CSV!');
   }
@@ -153,6 +158,13 @@ export class MissionFormComponent implements OnInit {
   // --- UI Control Methods ---
   togglePreview(): void {
     this.isPreviewing = !this.isPreviewing;
+    if (this.isPreviewing) {
+      // --- THIS IS THE FIX (Part 2) ---
+      // Wait for Angular to render the preview overlay, then scroll to it.
+      setTimeout(() => {
+        this.previewOverlay?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
+    }
   }
 
   exportToCsv(): void {
@@ -175,3 +187,4 @@ export class MissionFormComponent implements OnInit {
     this.isPreviewing = false;
   }
 }
+
