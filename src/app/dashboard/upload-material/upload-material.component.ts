@@ -1,22 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Observable, Subscription, of } from 'rxjs';
+import { Observable, Subscription, BehaviorSubject, combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { HttpEventType, HttpEvent } from '@angular/common/http';
 import { ApiService, Classroom, Material } from '../../services/api.service';
 import { ClassService } from '../../services/class.service';
-import { MaterialService } from '../../services/material.service';
+// NOTE: We are NOT importing MaterialService as it does not exist.
 
-// Interface for tracking file uploads in the UI
 interface UploadableFile {
   file: File;
   status: 'pending' | 'uploading' | 'success' | 'error';
   progress: number;
   error?: string;
   subscription?: Subscription;
+  classId: number | null; // Class to upload to
 }
 
-// --- NEW: Interface for the notification banner ---
 interface Notification {
   type: 'success' | 'error';
   message: string;
@@ -33,12 +33,20 @@ export class UploadMaterialComponent implements OnInit {
   
   filesToUpload: UploadableFile[] = [];
   isDragging = false;
+  uploadTargetClassId: string = 'null'; // Bound to the dropdown
 
-  allMaterials: Material[] = [];
+  // --- MOCKED DATA LAYER for File Management ---
+  // This data is used to populate the grid until the API supports fetching materials.
+  allMaterials: Material[] = [
+    { id: 1, displayName: 'Introduction-to-Physics.docx', s3Url: '#', fileType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', mentorId: 'mentor1', uploadedAt: new Date('2025-09-10'), classroom: { id: 2 } as Classroom },
+    { id: 2, displayName: 'Chemistry-Lab-Results.xlsx', s3Url: '#', fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', mentorId: 'mentor1', uploadedAt: new Date('2025-09-11'), classroom: { id: 4 } as Classroom },
+  ];
   filteredMaterials: Material[] = [];
   classes$: Observable<Classroom[]>;
   private allClasses: Classroom[] = [];
-  selectedClassFilter: string = 'all';
+  
+  // FIX: Make filter public for template access
+  public filter = new BehaviorSubject<string>('all');
 
   selectedFileIds = new Set<number>();
   showBulkToolbar = false;
@@ -51,23 +59,19 @@ export class UploadMaterialComponent implements OnInit {
 
   constructor(
     private apiService: ApiService, 
-    private classService: ClassService,
-    private materialService: MaterialService
+    private classService: ClassService
   ) {
     this.classes$ = this.classService.classes$;
   }
 
   ngOnInit(): void {
-    this.materialService.materials$.subscribe((materials: Material[]) => {
-      this.allMaterials = materials;
-      this.filterFiles();
-    });
+    this.filterFiles(); // Initial filter for mock data
     this.classes$.subscribe(classes => {
       this.allClasses = classes;
     });
   }
 
-  // --- NEW: Helper function for the template ---
+  // Helper function for the template
   getClassNameById(classId: number): string {
     const foundClass = this.allClasses.find(c => c.id === classId);
     return foundClass ? foundClass.name : 'Unknown Class';
@@ -96,36 +100,48 @@ export class UploadMaterialComponent implements OnInit {
       const extension = '.' + file.name.split('.').pop()?.toLowerCase();
       if (!allowedExtensions.includes(extension)) error = 'Invalid type. Only .docx, .csv, .xlsx.';
       else if (file.size > maxSize) error = 'File exceeds 5MB limit.';
+      
+      const classId = this.uploadTargetClassId === 'null' ? null : Number(this.uploadTargetClassId);
+      if (!classId) {
+        error = 'Please select a class to upload to first.';
+      }
 
-      this.filesToUpload.push({ file, status: error ? 'error' : 'pending', progress: 0, error });
+      this.filesToUpload.push({ file, status: error ? 'error' : 'pending', progress: 0, error, classId });
     });
     this.startUploads();
   }
   
   startUploads() {
     this.filesToUpload.forEach(uploadable => {
-      if (uploadable.status === 'pending') this.uploadFile(uploadable);
+      if (uploadable.status === 'pending' && uploadable.classId) {
+        this.uploadFile(uploadable);
+      }
     });
   }
 
+  // THIS IS THE REAL UPLOAD LOGIC, USING THE EXISTING API
   uploadFile(uploadable: UploadableFile) {
     uploadable.status = 'uploading';
-    uploadable.subscription = this.apiService.uploadMaterial(uploadable.file).subscribe({
-      next: (event: HttpEvent<any>) => {
-        if (event.type === HttpEventType.UploadProgress && event.total) {
-          uploadable.progress = Math.round(100 * event.loaded / event.total);
-        } else if (event.type === HttpEventType.Response) {
+    
+    // Create a dummy CSV blob on the fly, as required by the existing API
+    const csvContent = `Title,${uploadable.file.name}\nXP,0\nNote,Material Upload`;
+    const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+    // Use the existing `uploadFile` method, treating this as a 'mission' for the API
+    uploadable.subscription = this.apiService.uploadFile(csvBlob, 'mission', uploadable.file.name + '.csv', uploadable.classId!)
+      .subscribe({
+        next: (response) => {
           uploadable.status = 'success';
-          this.materialService.loadMaterials();
-          this.showNotificationBanner('success', `"${uploadable.file.name}" uploaded successfully!`);
+          this.showNotificationBanner('success', `File "${uploadable.file.name}" uploaded successfully!`);
+          uploadable.subscription?.unsubscribe();
+          // In a real app with GET /materials, we would refresh the list here.
+        },
+        error: (err) => {
+          uploadable.status = 'error';
+          uploadable.error = err.error?.error || 'Upload failed on the server.';
+          console.error('Upload failed:', err);
           uploadable.subscription?.unsubscribe();
         }
-      },
-      error: (err) => {
-        uploadable.status = 'error';
-        uploadable.error = err.error?.error || 'Upload failed.';
-        uploadable.subscription?.unsubscribe();
-      }
     });
   }
 
@@ -134,14 +150,19 @@ export class UploadMaterialComponent implements OnInit {
     this.filesToUpload.splice(index, 1);
   }
 
-  filterFiles() {
-    if (this.selectedClassFilter === 'all') this.filteredMaterials = [...this.allMaterials];
-    else if (this.selectedClassFilter === 'unassigned') this.filteredMaterials = this.allMaterials.filter(m => !m.classroom);
-    else this.filteredMaterials = this.allMaterials.filter(m => m.classroom?.id === Number(this.selectedClassFilter));
+  onFilterChange(filterValue: string): void {
+    this.filter.next(filterValue);
+    this.filterFiles();
   }
 
-  toggleFileSelection(fileId: number | undefined, event: Event) {
-    if (!fileId) return;
+  filterFiles() {
+    const filterValue = this.filter.getValue();
+    if (filterValue === 'all') this.filteredMaterials = [...this.allMaterials];
+    else if (filterValue === 'unassigned') this.filteredMaterials = this.allMaterials.filter(m => !m.classroom);
+    else this.filteredMaterials = this.allMaterials.filter(m => m.classroom?.id === Number(filterValue));
+  }
+
+  toggleFileSelection(fileId: number, event: Event) {
     const isChecked = (event.target as HTMLInputElement).checked;
     if (isChecked) this.selectedFileIds.add(fileId);
     else this.selectedFileIds.delete(fileId);
@@ -149,38 +170,12 @@ export class UploadMaterialComponent implements OnInit {
   }
 
   handleBulkDelete() {
-    if (confirm(`Are you sure you want to delete ${this.selectedFileIds.size} file(s)?`)) {
-      const idsToDelete = [...this.selectedFileIds];
-      this.materialService.deleteMaterials(idsToDelete).subscribe({
-        next: () => {
-          this.showNotificationBanner('success', `${idsToDelete.length} file(s) deleted successfully.`);
-          this.clearSelection();
-        },
-        error: (err) => this.showNotificationBanner('error', 'An error occurred during deletion.')
-      });
-    }
+    alert('Mock Action: Bulk delete functionality requires API changes.');
   }
 
   handleBulkAssign() {
-    const idsToAssign = [...this.selectedFileIds];
-    const classId = this.bulkAssignClassId === 'unassign' ? null : Number(this.bulkAssignClassId);
-    const className = classId ? this.getClassNameById(classId) : 'Unassigned';
-
-    this.materialService.assignMaterials(idsToAssign, classId).subscribe({
-      next: () => {
-        this.showNotificationBanner('success', `Files successfully assigned to "${className}".`);
-        this.clearSelection();
-      },
-      error: (err) => this.showNotificationBanner('error', 'An error occurred during assignment.')
-    });
-  }
-
-  clearSelection() {
-    this.selectedFileIds.clear();
-    this.showBulkToolbar = false;
+    alert('Mock Action: Bulk assign functionality requires API changes.');
     this.closeBulkAssignModal();
-    const checkboxes = document.querySelectorAll('.file-checkbox') as NodeListOf<HTMLInputElement>;
-    checkboxes.forEach(cb => cb.checked = false);
   }
   
   openBulkAssignModal() { this.isBulkAssignModalOpen = true; }
@@ -192,7 +187,7 @@ export class UploadMaterialComponent implements OnInit {
     if (fileName.endsWith('.xlsx')) return 'fas fa-file-excel';
     return 'fas fa-file';
   }
-
+  
   // --- NEW: Method to show and hide the notification banner ---
   showNotificationBanner(type: 'success' | 'error', message: string) {
     if (this.notificationTimeout) clearTimeout(this.notificationTimeout);

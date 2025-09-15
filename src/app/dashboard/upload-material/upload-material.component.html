@@ -1,5 +1,5 @@
 <div class="container">
-  <!-- NEW: Notification Banner -->
+  <!-- Notification Banner -->
   <div *ngIf="notification" class="notification-banner" [ngClass]="notification.type">
     <i [class]="notification.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle'"></i>
     <span>{{ notification.message }}</span>
@@ -44,13 +44,14 @@
   <div class="management-section">
     <div class="management-header">
       <h2>Your Materials</h2>
-      <select [(ngModel)]="selectedClassFilter" (change)="filterFiles()">
+      <select [ngModel]="filter.getValue()" (ngModelChange)="onFilterChange($event)">
         <option value="all">Filter by Class: All</option>
         <option value="unassigned">Unassigned</option>
         <option *ngFor="let class of (classes$ | async)" [value]="class.id">{{ class.name }}</option>
       </select>
     </div>
     
+    <!-- Bulk Action Toolbar -->
     <div class="bulk-actions" *ngIf="showBulkToolbar">
         <span>{{ selectedFileIds.size }} file(s) selected</span>
         <div>
@@ -59,6 +60,7 @@
         </div>
     </div>
 
+    <!-- Grid now uses the simple array directly -->
     <div class="file-grid">
       <div *ngFor="let material of filteredMaterials" class="file-card">
         <input type="checkbox" class="file-checkbox" (change)="toggleFileSelection(material.id, $event)">
