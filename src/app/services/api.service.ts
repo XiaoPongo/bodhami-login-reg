@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpEvent } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs'; // Added 'of' import
+import { Observable, of, throwError } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { AuthService } from '../auth.service';
 
@@ -23,7 +23,7 @@ export interface Classroom {
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private apiUrl = 'https://elevana-api-env-v1.eba-kqqge9q6.eu-north-1.elasticbeanstalk.com/api'; // Updated to Elastic Beanstalk URL
+  private apiUrl = 'https://api-test.thebandar.co.in/api';
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 
@@ -31,10 +31,10 @@ export class ApiService {
     const session = this.authService.getSession();
     const token = session?.access_token;
     if (!token) return throwError(() => new Error('User not authenticated!'));
-
+    
     let headersConfig: { [key: string]: string } = { 'Authorization': `Bearer ${token}` };
     if (!isFormData) headersConfig['Content-Type'] = 'application/json';
-
+    
     return of(new HttpHeaders(headersConfig));
   }
 
@@ -47,7 +47,7 @@ export class ApiService {
       switchMap(headers => this.http.post(uploadUrl, formData, { headers }))
     );
   }
-
+  
   // --- MATERIAL ENDPOINTS ---
   getMaterials(): Observable<Material[]> {
     return this.getAuthHeaders().pipe(
@@ -55,22 +55,21 @@ export class ApiService {
     );
   }
 
-  uploadMaterial(file: File, classId: number): Observable<HttpEvent<any>> {
+  uploadMaterial(file: File): Observable<HttpEvent<any>> {
     const formData = new FormData();
     formData.append('displayName', file.name);
     formData.append('file', file, file.name);
-    formData.append('classId', classId.toString());
     return this.getAuthHeaders(true).pipe(
       switchMap(headers => this.http.post(`${this.apiUrl}/materials/upload`, formData, {
         headers, reportProgress: true, observe: 'events'
       }))
     );
   }
-
+  
   deleteMaterials(ids: number[]): Observable<any> {
-    return this.getAuthHeaders().pipe(
-      switchMap(headers => this.http.request('delete', `${this.apiUrl}/materials`, { headers, body: ids }))
-    );
+      return this.getAuthHeaders().pipe(
+          switchMap(headers => this.http.request('delete', `${this.apiUrl}/materials`, { headers, body: ids }))
+      );
   }
 
   assignMaterials(materialIds: number[], classroomId: number | null): Observable<any> {
@@ -86,22 +85,20 @@ export class ApiService {
       switchMap(headers => this.http.get<Classroom[]>(`${this.apiUrl}/classrooms`, { headers }))
     );
   }
-
   getClassroomById(id: number): Observable<Classroom> {
-    return this.getAuthHeaders().pipe(
+     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.get<Classroom>(`${this.apiUrl}/classrooms/${id}/content`, { headers }))
     );
   }
-
   createClassroom(data: { name: string, description: string }): Observable<Classroom> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.post<Classroom>(`${this.apiUrl}/classrooms`, data, { headers }))
     );
   }
-
   deleteClassroom(id: number): Observable<any> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.delete(`${this.apiUrl}/classrooms/${id}`, { headers }))
     );
   }
 }
+

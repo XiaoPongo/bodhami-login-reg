@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Observable, Subscription, combineLatest } from 'rxjs';
+import { Observable, Subscription, BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpEventType, HttpEvent } from '@angular/common/http';
 import { ApiService, Classroom, Material } from '../../services/api.service';
@@ -14,7 +14,6 @@ interface UploadableFile {
   progress: number;
   error?: string;
   subscription?: Subscription;
-  classId: number | null;
 }
 
 interface Notification {
@@ -30,37 +29,38 @@ interface Notification {
   styleUrls: ['./upload-material.component.css']
 })
 export class UploadMaterialComponent implements OnInit {
+  
   filesToUpload: UploadableFile[] = [];
   isDragging = false;
-  uploadTargetClassId: string = '';
-  filter: string = 'all'; // Simplified from BehaviorSubject to string
 
   classes$: Observable<Classroom[]>;
   materials$: Observable<Material[]>;
   filteredMaterials$: Observable<Material[]>;
-
+  
   private allClasses: Classroom[] = [];
+  public filter = new BehaviorSubject<string>('all');
+
   selectedFileIds = new Set<number>();
   showBulkToolbar = false;
   isBulkAssignModalOpen = false;
   bulkAssignClassId: string = 'unassign';
-
+  
   notification: Notification | null = null;
   private notificationTimeout: any;
 
   constructor(
-    private apiService: ApiService,
+    private apiService: ApiService, 
     private classService: ClassService,
     private materialService: MaterialService
   ) {
     this.classes$ = this.classService.classes$;
     this.materials$ = this.materialService.materials$;
 
-    this.filteredMaterials$ = combineLatest([this.materials$, this.classes$]).pipe(
-      map(([materials, classes]: [Material[], Classroom[]]) => {
-        if (this.filter === 'all') return materials;
-        if (this.filter === 'unassigned') return materials.filter(m => !m.classroom);
-        return materials.filter(m => m.classroom?.id === Number(this.filter));
+    this.filteredMaterials$ = combineLatest([this.materials$, this.filter]).pipe(
+      map(([materials, filterValue]: [Material[], string]) => {
+        if (filterValue === 'all') return materials;
+        if (filterValue === 'unassigned') return materials.filter(m => !m.classroom);
+        return materials.filter(m => m.classroom?.id === Number(filterValue));
       })
     );
   }
@@ -69,11 +69,10 @@ export class UploadMaterialComponent implements OnInit {
     this.classes$.subscribe((classes: Classroom[]) => {
       this.allClasses = classes;
     });
-    this.materialService.loadMaterials(); // Ensure materials are loaded
   }
 
   onFilterChange(filterValue: string): void {
-    this.filter = filterValue;
+    this.filter.next(filterValue);
   }
 
   getClassNameById(classId: number): string {
@@ -96,12 +95,8 @@ export class UploadMaterialComponent implements OnInit {
   }
 
   handleFiles(files: FileList) {
-    if (!this.uploadTargetClassId) {
-      this.showNotificationBanner('error', 'Please select a class to upload files to first.');
-      return;
-    }
     const allowedExtensions = ['.docx', '.csv', '.xlsx'];
-    const maxSize = 5 * 1024 * 1024; // 5 MB
+    const maxSize = 5 * 1024 * 1024;
 
     Array.from(files).forEach(file => {
       let error = '';
@@ -109,23 +104,20 @@ export class UploadMaterialComponent implements OnInit {
       if (!allowedExtensions.includes(extension)) error = 'Invalid type. Only .docx, .csv, .xlsx.';
       else if (file.size > maxSize) error = 'File exceeds 5MB limit.';
 
-      const classId = Number(this.uploadTargetClassId);
-      this.filesToUpload.push({ file, status: error ? 'error' : 'pending', progress: 0, error, classId });
+      this.filesToUpload.push({ file, status: error ? 'error' : 'pending', progress: 0, error });
     });
     this.startUploads();
   }
-
+  
   startUploads() {
     this.filesToUpload.forEach(uploadable => {
-      if (uploadable.status === 'pending' && uploadable.classId) {
-        this.uploadFile(uploadable);
-      }
+      if (uploadable.status === 'pending') this.uploadFile(uploadable);
     });
   }
 
   uploadFile(uploadable: UploadableFile) {
     uploadable.status = 'uploading';
-    uploadable.subscription = this.apiService.uploadMaterial(uploadable.file, uploadable.classId!).subscribe({
+    uploadable.subscription = this.apiService.uploadMaterial(uploadable.file).subscribe({
       next: (event: HttpEvent<any>) => {
         if (event.type === HttpEventType.UploadProgress && event.total) {
           uploadable.progress = Math.round(100 * event.loaded / event.total);
@@ -191,7 +183,7 @@ export class UploadMaterialComponent implements OnInit {
     const checkboxes = document.querySelectorAll('.file-checkbox') as NodeListOf<HTMLInputElement>;
     checkboxes.forEach(cb => cb.checked = false);
   }
-
+  
   openBulkAssignModal() { this.isBulkAssignModalOpen = true; }
   closeBulkAssignModal() { this.isBulkAssignModalOpen = false; }
 
@@ -208,3 +200,4 @@ export class UploadMaterialComponent implements OnInit {
     this.notificationTimeout = setTimeout(() => this.notification = null, 5000);
   }
 }
+
