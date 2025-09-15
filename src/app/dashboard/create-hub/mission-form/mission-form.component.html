@@ -17,7 +17,6 @@
   </div>
 
   <form #missionForm="ngForm" (ngSubmit)="submitForm()">
-    <!-- ... (Basic Info Section remains the same) ... -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-clipboard-list"></i> Basic Info</h3>
       <div class="input-group">
@@ -30,7 +29,6 @@
       </div>
     </div>
 
-    <!-- Content Builder with Timer -->
     <div class="form-section">
         <h3 class="section-title"><i class="fas fa-file-alt"></i> Passages</h3>
         <div *ngFor="let passage of mission.passages; let i = index; trackBy: trackByFn" class="list-item">
@@ -69,7 +67,6 @@
               <textarea [id]="'question' + i" [(ngModel)]="scenario.question" [name]="'question' + i" required></textarea>
           </div>
 
-          <!-- Multiple Choice Options -->
           <div *ngIf="scenario.type === 'mcq'">
               <label>Options</label>
               <div *ngFor="let option of scenario.options; let j = index; trackBy: trackByFn" class="list-item">
@@ -80,7 +77,6 @@
               <button type="button" class="btn-add" (click)="addOption(scenario)">+ Add Option</button>
           </div>
 
-          <!-- Q&A and Fill in the Blank Answer -->
           <div *ngIf="scenario.type !== 'mcq'" class="input-group">
               <label [for]="'answer' + i">Correct Answer *</label>
               <input type="text" [id]="'answer' + i" [(ngModel)]="scenario.correctAnswer" [name]="'correctAnswer' + i" required>
@@ -89,12 +85,12 @@
         <button type="button" class="btn-add" (click)="addScenario()">+ Add Problem</button>
     </div>
 
-    <!-- Live Class Assignment -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-chalkboard-teacher"></i> Class Assignment</h3>
       <div *ngIf="(availableClasses$ | async) as classes" class="class-grid">
         <label *ngFor="let class of classes" class="class-label">
-          <input type="checkbox" [name]="class.id" [(ngModel)]="mission.assignedClasses[class.id!]">
+          <!-- THIS IS THE FIX: Convert number to string for the name attribute -->
+          <input type="checkbox" [name]="'class-' + class.id" [(ngModel)]="mission.assignedClasses[class.id!]">
           {{ class.name }}
         </label>
       </div>

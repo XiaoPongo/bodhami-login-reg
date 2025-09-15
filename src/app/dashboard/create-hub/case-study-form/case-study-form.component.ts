@@ -64,7 +64,6 @@ export class CaseStudyFormComponent implements OnInit {
     return { type: 'qa', question: '', options: [{ text: '' }], correctAnswer: '', timerInSeconds: 0 };
   }
 
-  // --- Form Array Management ---
   addProblem() { this.caseStudy.problems.push(this.getNewProblem()); }
   removeProblem(index: number) { this.caseStudy.problems.splice(index, 1); }
   addOption(problem: Problem) { problem.options.push({ text: '' }); }
@@ -72,7 +71,6 @@ export class CaseStudyFormComponent implements OnInit {
   
   trackByFn(index: any, item: any) { return index; }
 
-  // --- Main Submission Logic ---
   async submitForm(): Promise<void> {
     const selectedClassIds = Object.keys(this.caseStudy.assignedClasses)
       .filter(id => this.caseStudy.assignedClasses[id]);
@@ -102,7 +100,6 @@ export class CaseStudyFormComponent implements OnInit {
     }
   }
 
-  // --- CSV Generation ---
   generateCsvContent(): string {
     let content = `Title,${this.caseStudy.title}\n`;
     content += `XP,${this.caseStudy.xp}\n`;

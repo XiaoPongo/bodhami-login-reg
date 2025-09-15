@@ -1,175 +1,108 @@
-<div class="form-container">
-  
-    <!-- SUCCESS VIEW -->
-    <div *ngIf="isSubmitted" class="success-view">
+<div class="form-container case-study-theme">
+  <!-- Success Message -->
+  <div *ngIf="submissionSuccess" class="success-overlay">
+    <div class="success-box">
       <i class="fas fa-check-circle"></i>
       <h2>Case Study Created!</h2>
-      <p>Your new case study has been saved. You can now create another, export the data, or return to the dashboard.</p>
-      <div class="success-actions">
-        <button type="button" class="btn btn-primary" (click)="resetForm()"><i class="fas fa-plus"></i> Create Another</button>
-        <button type="button" class="btn btn-secondary" (click)="exportToCsv()"><i class="fas fa-download"></i> Export to CSV</button>
-        <button type="button" class="btn btn-secondary" (click)="navigateToDashboard()"><i class="fas fa-tachometer-alt"></i> Return to Dashboard</button>
+      <p>Your new case study has been successfully created and assigned.</p>
+      <div class="action-buttons">
+        <button (click)="resetForm()" class="btn btn-primary">Create Another</button>
       </div>
-    </div>
-  
-    <!-- FORM & PREVIEW CONTAINER -->
-    <div *ngIf="!isSubmitted">
-      <h2>{{ isPreviewing ? 'Case Study Preview' : 'Create Case Study' }}</h2>
-  
-      <!-- PREVIEW MODE -->
-      <div *ngIf="isPreviewing" class="preview-container">
-        <div class="preview-section">
-          <h3>{{ caseStudy.title || 'Untitled Case Study' }}</h3>
-          <div class="tag-list-preview">
-            <span *ngFor="let tag of caseStudy.tags" class="tag-chip">{{ tag }}</span>
-          </div>
-        </div>
-        <div class="preview-section">
-          <h4>Passage</h4>
-          <p [innerHTML]="caseStudy.passage || 'No passage provided.'"></p>
-        </div>
-        <div class="preview-section">
-          <h4>Problem Scenarios</h4>
-          <div *ngFor="let problem of caseStudy.problems; let i = index" class="preview-item">
-            <strong>Problem {{i + 1}}:</strong> {{ problem.scenario }}
-            <ul class="preview-answer-list">
-              <li *ngIf="problem.type === 'qa' || problem.type === 'fib'"><strong>Answers:</strong> {{ problem.answers.join(', ') }}</li>
-              <!-- FIX: Separated *ngIf and *ngFor -->
-              <ng-container *ngIf="problem.type === 'mcq'">
-                <li *ngFor="let option of problem.options; let j = index">
-                  {{ j === problem.correctMcqIndex ? '✔️' : '⚪' }} {{ option.text }}
-                </li>
-              </ng-container>
-            </ul>
-          </div>
-        </div>
-        <div class="preview-section">
-          <h4>Mentor's Feedback / Model Response</h4>
-          <p>{{ caseStudy.summaryFeedback || 'No feedback guidelines provided.' }}</p>
-        </div>
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="togglePreview()"><i class="fas fa-edit"></i> Back to Edit</button>
-        </div>
-      </div>
-  
-      <!-- EDIT MODE (Rest of the file is unchanged) -->
-      <form *ngIf="!isPreviewing" #caseStudyForm="ngForm" (ngSubmit)="onSubmit()">
-        
-        <div class="guidelines-box">
-          <i class="fas fa-info-circle"></i>
-          <div>
-            <strong>Quick Guide:</strong>
-            <p>Build a rich scenario with a passage, add one or more problems with different question types, and provide feedback guidelines.</p>
-          </div>
-        </div>
-        <div class="upload-section">
-          <label for="csvUpload-cs" class="btn btn-upload"><i class="fas fa-file-csv"></i> Have a CSV? Upload here to auto-fill</label>
-          <input type="file" id="csvUpload-cs" (change)="onFileSelected($event)" accept=".csv" hidden>
-        </div>
-  
-        <div class="form-section">
-          <div class="section-header"><h3><i class="fas fa-book-open"></i> Core Information</h3></div>
-          <div class="form-group">
-            <label for="caseTitle">Case Title *</label>
-            <input type="text" id="caseTitle" name="caseTitle" [(ngModel)]="caseStudy.title" required>
-          </div>
-          <div class="form-group">
-            <label for="passage">Passage / Context</label>
-            <textarea id="passage" name="passage" rows="6" [(ngModel)]="caseStudy.passage" placeholder="Provide the background narrative..."></textarea>
-          </div>
-        </div>
-        
-        <div class="form-section">
-          <div class="section-header"><h3><i class="fas fa-puzzle-piece"></i> Problem Scenarios</h3></div>
-          <div *ngFor="let problem of caseStudy.problems; let i = index; trackBy: trackByFn" class="problem-block">
-            <div class="problem-header">
-              <h4>Problem {{i + 1}}</h4>
-              <button type="button" class="btn-remove-problem" (click)="removeProblem(i)" title="Remove Problem"><i class="fas fa-trash-alt"></i></button>
-            </div>
-            
-            <div class="question-type-selector">
-              <label [for]="'cs-type' + i">Question Type</label>
-              <select [name]="'cs-type' + i" [(ngModel)]="problem.type" (change)="onQuestionTypeChange(i, $any($event.target).value)">
-                <option value="qa">Critical Thinking Question</option>
-                <option value="mcq">Multiple Choice</option>
-                <option value="fib">Fill in the Blanks</option>
-              </select>
-            </div>
-  
-            <div class="form-group">
-              <label [for]="'scenario' + i">Scenario / Question *</label>
-              <textarea [id]="'scenario' + i" [name]="'scenario' + i" rows="4" [(ngModel)]="problem.scenario" required></textarea>
-            </div>
-  
-            <div *ngIf="problem.type === 'qa'" class="answer-section">
-              <label>Model Answer(s)</label>
-              <div *ngFor="let answer of problem.answers; let j = index; trackBy: trackByFn" class="dynamic-input">
-                <input type="text" [name]="'cs-answer' + i + '-' + j" [(ngModel)]="problem.answers[j]" placeholder="Answer {{j + 1}}">
-                <button type="button" class="btn-remove" (click)="removeAnswer(i, j)">&times;</button>
-              </div>
-              <button type="button" class="btn-add" (click)="addAnswer(i)"><i class="fas fa-plus"></i> Add Answer</button>
-            </div>
-  
-            <div *ngIf="problem.type === 'fib'" class="answer-section">
-              <label>Word(s) for the Blank(s)</label>
-              <div *ngFor="let answer of problem.answers; let j = index; trackBy: trackByFn" class="dynamic-input">
-                <input type="text" [name]="'cs-fib-answer' + i + '-' + j" [(ngModel)]="problem.answers[j]" placeholder="Correct word {{j + 1}}">
-                <button type="button" class="btn-remove" (click)="removeAnswer(i, j)">&times;</button>
-              </div>
-              <button type="button" class="btn-add" (click)="addAnswer(i)"><i class="fas fa-plus"></i> Add Word</button>
-            </div>
-  
-            <div *ngIf="problem.type === 'mcq'" class="answer-section">
-              <label>Options (select the correct one)</label>
-              <div *ngFor="let option of problem.options; let j = index; trackBy: trackByFn" class="dynamic-input mcq-option">
-                <input type="radio" [name]="'cs-correctMcq' + i" [value]="j" [(ngModel)]="problem.correctMcqIndex">
-                <input type="text" [name]="'cs-mcqOption' + i + '-' + j" [(ngModel)]="option.text" placeholder="Option {{j + 1}}">
-                <button type="button" class="btn-remove" (click)="removeMcqOption(i, j)">&times;</button>
-              </div>
-              <button type="button" class="btn-add" (click)="addMcqOption(i)"><i class="fas fa-plus"></i> Add Option</button>
-            </div>
-          </div>
-          <button type="button" class="btn-add" (click)="addProblem()"><i class="fas fa-plus"></i> Add Another Problem</button>
-        </div>
-  
-        <div class="form-section">
-          <div class="section-header"><h3><i class="fas fa-lightbulb"></i> Guidance & Categorization</h3></div>
-          <div class="form-group">
-            <label for="summaryFeedback">Expected Answer Guidelines (Mentor's Feedback)</label>
-            <textarea id="summaryFeedback" name="summaryFeedback" rows="4" [(ngModel)]="caseStudy.summaryFeedback"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Tags / Skills Tested</label>
-            <div class="tag-input-container">
-              <input type="text" placeholder="Type a tag and press Enter" [(ngModel)]="tagInput" (keydown.enter)="addTag($event)" name="tagInput">
-              <button type="button" class="btn-add-tag" (click)="addTag($event)">Add</button>
-            </div>
-            <div class="tag-list">
-              <span *ngFor="let tag of caseStudy.tags; let i = index" class="tag-chip">
-                {{ tag }}
-                <button type="button" class="btn-remove-tag" (click)="removeTag(i)">&times;</button>
-              </span>
-            </div>
-          </div>
-        </div>
-  
-        <div class="form-section">
-          <div class="section-header"><h3><i class="fas fa-chalkboard-teacher"></i> Class Assignment</h3></div>
-          <label>Assign to Classes *</label>
-          <div class="class-selection-container">
-            <div *ngFor="let class of availableClasses" class="class-item">
-              <input type="checkbox" [id]="'class-cs-' + class.id" [value]="class.id" (change)="onClassChange($event)" [checked]="caseStudy.classIds.includes(class.id)">
-              <label [for]="'class-cs-' + class.id">{{ class.name }}</label>
-            </div>
-          </div>
-        </div>
-  
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="togglePreview()"><i class="fas fa-eye"></i> Preview</button>
-          <button type="submit" class="btn btn-primary" [disabled]="caseStudyForm.invalid || caseStudy.classIds.length === 0"><i class="fas fa-paper-plane"></i> Submit Case Study</button>
-        </div>
-      </form>
     </div>
   </div>
-  
-  
+
+  <div class="form-header">
+    <i class="fas fa-book-open"></i>
+    <h1>Create a New Case Study</h1>
+  </div>
+
+  <form #caseStudyForm="ngForm" (ngSubmit)="submitForm()">
+    <!-- Basic Info -->
+    <div class="form-section">
+      <h3 class="section-title"><i class="fas fa-info-circle"></i> Basic Details</h3>
+      <div class="input-group">
+        <label for="title">Case Study Title *</label>
+        <input type="text" id="title" name="title" [(ngModel)]="caseStudy.title" required>
+      </div>
+      <div class="input-group">
+        <label for="xp">XP Allotment *</label>
+        <input type="number" id="xp" name="xp" [(ngModel)]="caseStudy.xp" required min="0">
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="form-section">
+      <h3 class="section-title"><i class="fas fa-file-alt"></i> Content</h3>
+       <div class="input-group">
+        <label for="passage">Passage / Context *</label>
+        <textarea id="passage" name="passage" [(ngModel)]="caseStudy.passage" rows="6" required></textarea>
+      </div>
+    </div>
+
+    <!-- Problems -->
+    <div class="form-section">
+      <h3 class="section-title"><i class="fas fa-question-circle"></i> Problems</h3>
+      <div *ngFor="let problem of caseStudy.problems; let i = index; trackBy: trackByFn" class="dynamic-list">
+        <div class="scenario-header">
+          <h4>Problem {{i + 1}}</h4>
+          <button type="button" class="btn-remove" (click)="removeProblem(i)">&times;</button>
+        </div>
+        
+        <div class="input-group">
+          <label [for]="'qtype' + i">Question Type</label>
+          <select [id]="'qtype' + i" [(ngModel)]="problem.type" [name]="'qtype' + i">
+            <option value="qa">Question & Answer</option>
+            <option value="mcq">Multiple Choice</option>
+            <option value="fill">Fill in the Blanks</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label [for]="'timer' + i">Timer</label>
+          <select [id]="'timer' + i" [(ngModel)]="problem.timerInSeconds" [name]="'timer' + i">
+            <option *ngFor="let opt of timerOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+            <label [for]="'question' + i">Question *</label>
+            <textarea [id]="'question' + i" [(ngModel)]="problem.question" [name]="'question' + i" required></textarea>
+        </div>
+
+        <div *ngIf="problem.type === 'mcq'">
+            <label>Options</label>
+            <div *ngFor="let option of problem.options; let j = index; trackBy: trackByFn" class="list-item">
+                <input type="text" placeholder="Option {{j + 1}}" [(ngModel)]="option.text" [name]="'option' + i + '_' + j">
+                <input type="radio" [value]="option.text" [(ngModel)]="problem.correctAnswer" [name]="'correctAnswer' + i" title="Set as correct answer">
+                <button type="button" class="btn-remove" (click)="removeOption(problem, j)">&times;</button>
+            </div>
+            <button type="button" class="btn-add" (click)="addOption(problem)">+ Add Option</button>
+        </div>
+
+        <div *ngIf="problem.type !== 'mcq'" class="input-group">
+            <label [for]="'answer' + i">Correct Answer *</label>
+            <input type="text" [id]="'answer' + i" [(ngModel)]="problem.correctAnswer" [name]="'correctAnswer' + i" required>
+        </div>
+      </div>
+      <button type="button" class="btn-add" (click)="addProblem()">+ Add Problem</button>
+    </div>
+
+    <!-- Class Assignment -->
+    <div class="form-section">
+      <h3 class="section-title"><i class="fas fa-chalkboard-teacher"></i> Class Assignment</h3>
+      <div *ngIf="(availableClasses$ | async) as classes" class="class-grid">
+        <label *ngFor="let class of classes" class="class-label">
+          <!-- THIS IS THE FIX: Convert number to string for the name attribute -->
+          <input type="checkbox" [name]="'class-' + class.id" [(ngModel)]="caseStudy.assignedClasses[class.id!]">
+          {{ class.name }}
+        </label>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button type="submit" class="btn btn-primary" [disabled]="caseStudyForm.invalid || isSubmitting">
+        {{ isSubmitting ? 'Submitting...' : 'Submit Case Study' }}
+      </button>
+    </div>
+  </form>
+</div>
