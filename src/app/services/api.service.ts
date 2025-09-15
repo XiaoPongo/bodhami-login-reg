@@ -55,17 +55,24 @@ export class ApiService {
     );
   }
 
-  uploadMaterial(file: File): Observable<HttpEvent<any>> {
+  uploadMaterial(file: File, classId: number): Observable<HttpEvent<any>> {
     const formData = new FormData();
     formData.append('displayName', file.name);
     formData.append('file', file, file.name);
+    const uploadUrl = `${this.apiUrl}/classrooms/${classId}/materials`;
     return this.getAuthHeaders(true).pipe(
-      switchMap(headers => this.http.post(`${this.apiUrl}/materials/upload`, formData, {
+      switchMap(headers => this.http.post(uploadUrl, formData, {
         headers, reportProgress: true, observe: 'events'
       }))
     );
   }
   
+  deleteMaterial(id: number): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => this.http.delete(`${this.apiUrl}/materials/${id}`, { headers }))
+    );
+  }
+
   deleteMaterials(ids: number[]): Observable<any> {
       return this.getAuthHeaders().pipe(
           switchMap(headers => this.http.request('delete', `${this.apiUrl}/materials`, { headers, body: ids }))
@@ -85,16 +92,19 @@ export class ApiService {
       switchMap(headers => this.http.get<Classroom[]>(`${this.apiUrl}/classrooms`, { headers }))
     );
   }
+
   getClassroomById(id: number): Observable<Classroom> {
      return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.get<Classroom>(`${this.apiUrl}/classrooms/${id}/content`, { headers }))
     );
   }
+
   createClassroom(data: { name: string, description: string }): Observable<Classroom> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.post<Classroom>(`${this.apiUrl}/classrooms`, data, { headers }))
     );
   }
+
   deleteClassroom(id: number): Observable<any> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.delete(`${this.apiUrl}/classrooms/${id}`, { headers }))

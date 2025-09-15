@@ -9,7 +9,6 @@ export class ClassService {
   private readonly _classes = new BehaviorSubject<Classroom[]>([]);
   public readonly classes$: Observable<Classroom[]> = this._classes.asObservable();
   
-  // --- ADDED MISSING PROPERTIES ---
   private readonly _selectedClass = new BehaviorSubject<Classroom | null>(null);
   public readonly selectedClass$: Observable<Classroom | null> = this._selectedClass.asObservable();
 
@@ -24,7 +23,6 @@ export class ClassService {
     });
   }
 
-  // --- ADDED MISSING METHOD ---
   selectClass(id: number | null): void {
     if (id === null) {
       this._selectedClass.next(null);
