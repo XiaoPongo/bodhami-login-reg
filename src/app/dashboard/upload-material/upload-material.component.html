@@ -63,7 +63,8 @@
         <div class="file-card-details">
           <span class="file-name" title="{{ material.displayName }}">{{ material.displayName }}</span>
           <span class="file-meta">
-            {{ material.classroom ? 'Assigned to: ' + (classService.classes$ | async)?.find(c => c.id === material.classroom?.id)?.name : 'Unassigned' }}
+            <!-- THIS IS THE DEFINITIVE FIX -->
+            {{ material.classroom ? 'Assigned to: ' + getClassNameById(material.classroom.id) : 'Unassigned' }}
           </span>
         </div>
       </div>

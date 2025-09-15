@@ -48,7 +48,7 @@ export class ApiService {
     return of(new HttpHeaders(headersConfig));
   }
 
-  // --- Activity CSV Upload ---
+  // --- This is the REAL upload endpoint for Missions, Case Studies, and Minigames ---
   uploadFile(file: Blob, type: 'mission' | 'case-study' | 'minigame', fileName: string, classroomId: number): Observable<any> {
     const formData = new FormData();
     formData.append('file', file, fileName);
@@ -58,29 +58,6 @@ export class ApiService {
     );
   }
   
-  // --- NEW: General Material Upload Endpoint ---
-  uploadMaterial(file: File): Observable<HttpEvent<any>> {
-    const formData = new FormData();
-    formData.append('displayName', file.name);
-    formData.append('file', file, file.name);
-    
-    return this.getAuthHeaders(true).pipe(
-      switchMap(headers => {
-        return this.http.post(`${this.apiUrl}/materials/upload`, formData, {
-          headers: headers,
-          reportProgress: true, // This is crucial for progress bars
-          observe: 'events'
-        });
-      })
-    );
-  }
-  
-  deleteMaterial(id: number): Observable<any> {
-    return this.getAuthHeaders().pipe(
-      switchMap(headers => this.http.delete(`${this.apiUrl}/materials/${id}`, { headers }))
-    );
-  }
-
   // --- Classroom Endpoints ---
   getClassrooms(): Observable<Classroom[]> {
     return this.getAuthHeaders().pipe(
