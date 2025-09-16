@@ -204,23 +204,3 @@
 .input-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
 .input-group input, .input-group textarea { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; }
-
-/* Toast Notification */
-.toast-notification {
-  position: fixed;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%) translateY(150%);
-  background-color: #111827;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  z-index: 2000;
-  transition: transform 0.4s ease-in-out;
-  font-weight: 500;
-}
-.toast-notification.show {
-  transform: translateX(-50%) translateY(0);
-}
-

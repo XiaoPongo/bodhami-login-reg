@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, throwError, of } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { ApiService, Classroom } from './api.service';
 import { MaterialService } from './material.service';
 
@@ -34,9 +34,11 @@ export class ClassService {
   selectClass(id: number | null): void {
     if (id === null) {
       this._selectedClass.next(null);
+      this._isLoading.next(false);
       return;
     }
-    if (id === this._selectedClass.value?.id) {
+
+    if (id === this._selectedClass.value?.id && !this._isLoading.value) {
         return;
     }
     
@@ -65,14 +67,13 @@ export class ClassService {
   updateClass(id: number, name: string, description: string): Observable<Classroom> {
     return this.apiService.updateClassroom(id, { name, description }).pipe(
       tap((updatedClass) => {
-        this.loadClasses();
-        this._selectedClass.next(updatedClass);
+        this._selectedClass.next(updatedClass); // Immediately update the view
+        this.loadClasses(); // Refresh the list in the background
       })
     );
   }
 
   deleteClass(classId: number): Observable<any> {
-    if (!classId) return throwError(() => new Error('Invalid Class ID'));
     return this.apiService.deleteClassroom(classId).pipe(
       tap(() => {
         this.loadClasses();
@@ -85,24 +86,31 @@ export class ClassService {
 
   removeStudent(classId: number, studentId: string): Observable<any> {
     return this.apiService.removeStudentFromClass(classId, studentId).pipe(
-      tap(() => this.refreshClassData(classId))
+      tap(() => this.refreshSelectedClassData(classId))
     );
   }
 
   unassignMaterial(classId: number, materialId: number): Observable<any> {
+    // Unassigning is done by assigning the material to a `null` classroom
     return this.materialService.assignMaterials([materialId], null).pipe(
-      tap(() => this.refreshClassData(classId))
+      tap(() => this.refreshSelectedClassData(classId))
     );
   }
 
   unassignActivity(classId: number, activityId: number): Observable<any> {
     return this.apiService.unassignActivityFromClass(classId, activityId).pipe(
-      tap(() => this.refreshClassData(classId))
+      tap(() => this.refreshSelectedClassData(classId))
     );
   }
 
-  private refreshClassData(classId: number): void {
-    this.loadClasses();
-    this.selectClass(classId);
+  private refreshSelectedClassData(classId: number): void {
+    this.loadClasses(); // Refresh counts on the left panel
+    // Re-fetch the selected class's data to show the updated content
+    // This is better than just selecting, as it forces a fresh API call
+    this.apiService.getClassroomById(classId).subscribe({
+        next: (classroom) => this._selectedClass.next(classroom),
+        error: (err) => console.error(`Failed to refresh class data for id ${classId}`, err),
+    });
   }
 }
+

@@ -59,7 +59,13 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
   }
 
   handleSelectClass(classId: number): void {
-    this.router.navigate([], { queryParams: { classId: classId } });
+    // Only navigate if the class ID in the URL is different
+    if (this.route.snapshot.queryParams['classId'] != classId) {
+        this.router.navigate([], { queryParams: { classId: classId } });
+    } else {
+        // If the same class is clicked again, ensure data is fresh
+        this.classService.selectClass(classId);
+    }
     this.isEditingClass = false; // Ensure we exit edit mode when switching classes
   }
 
@@ -70,7 +76,7 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
       message: `Are you sure you want to permanently delete <strong>"${className}"</strong>? This action cannot be undone.`,
       onConfirm: () => {
         this.classService.deleteClass(classId).subscribe(() => {
-          // If the deleted class was selected, clear the query params
+          // If the deleted class was the one selected, clear the query params
           if (this.route.snapshot.queryParams['classId'] == classId) {
              this.router.navigate([], { queryParams: {} });
           }
