@@ -60,17 +60,20 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
 
   handleSelectClass(classId: number): void {
     this.router.navigate([], { queryParams: { classId: classId } });
-    this.isEditingClass = false;
+    this.isEditingClass = false; // Ensure we exit edit mode when switching classes
   }
 
   handleDeleteClass(classId: number, className: string): void {
     this.confirmModal = {
       isOpen: true,
       title: 'Delete Class',
-      message: `Are you sure you want to permanently delete "${className}"? This action cannot be undone.`,
+      message: `Are you sure you want to permanently delete <strong>"${className}"</strong>? This action cannot be undone.`,
       onConfirm: () => {
         this.classService.deleteClass(classId).subscribe(() => {
-          this.router.navigate([], { queryParams: {} });
+          // If the deleted class was selected, clear the query params
+          if (this.route.snapshot.queryParams['classId'] == classId) {
+             this.router.navigate([], { queryParams: {} });
+          }
           this.showToast('Class deleted successfully.');
           this.closeConfirmModal();
         });
@@ -83,7 +86,7 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
       this.classService.createClass(this.newClassName, this.newClassDescription)
         .subscribe(() => {
             this.showToast('Class created successfully!');
-            this.closeCreateModal()
+            this.closeCreateModal();
         });
     }
   }
@@ -111,7 +114,7 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
      this.confirmModal = {
       isOpen: true,
       title: 'Remove Student',
-      message: `Are you sure you want to remove ${student.name} from this class?`,
+      message: `Are you sure you want to remove <strong>${student.name}</strong> from this class?`,
       onConfirm: () => {
         this.classService.removeStudent(classId, student.id).subscribe(() => {
           this.showToast(`${student.name} has been removed.`);
@@ -125,7 +128,7 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
       this.confirmModal = {
       isOpen: true,
       title: 'Unassign Material',
-      message: `Are you sure you want to unassign "${material.displayName}"?`,
+      message: `Are you sure you want to unassign <strong>"${material.displayName}"</strong>?`,
       onConfirm: () => {
         this.classService.unassignMaterial(classId, material.id).subscribe(() => {
           this.showToast(`Material unassigned.`);
@@ -139,7 +142,7 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
       this.confirmModal = {
       isOpen: true,
       title: 'Unassign Activity',
-      message: `Are you sure you want to unassign "${activity.title}"?`,
+      message: `Are you sure you want to unassign <strong>"${activity.title}"</strong>?`,
       onConfirm: () => {
         this.classService.unassignActivity(classId, activity.id).subscribe(() => {
           this.showToast(`Activity unassigned.`);

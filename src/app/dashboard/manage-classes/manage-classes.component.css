@@ -139,7 +139,7 @@
 /* Content Table Styles */
 .content-table-wrapper { border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
 .content-table { width: 100%; border-collapse: collapse; }
-.content-table th, .content-table td { padding: 1rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+.content-table th, .content-table td { padding: 1rem; text-align: left; border-bottom: 1px solid #e5e7eb; vertical-align: middle; }
 .content-table thead { background-color: #f9fafb; }
 .content-table th { font-weight: 600; color: #374151; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
 .content-table tbody tr:last-child td { border-bottom: none; }
@@ -147,12 +147,27 @@
 .content-table td:last-child { text-align: right; }
 .content-table i { margin-right: 0.5rem; color: #9ca3af; }
 
+/* NEW: Student Name/Email styling */
+.student-name {
+  font-weight: 600;
+  color: #1f2937;
+  display: block;
+}
+.student-email {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+
 /* Empty States */
 .empty-state, .empty-state-large { text-align: center; color: #9ca3af; }
 .empty-state-large { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; }
 .empty-state-large i { font-size: 4rem; margin-bottom: 1rem; color: #d1d5db; }
 .empty-state-large h2 { font-size: 1.5rem; }
-.placeholder-text { padding: 2rem; text-align: center; color: #6b7280; background-color: #f9fafb; border-radius: 8px; }
+.placeholder-text { padding: 3rem 2rem; text-align: center; color: #6b7280; background-color: #f9fafb; border-radius: 8px; }
+.placeholder-text i { font-size: 2.5rem; color: #d1d5db; margin-bottom: 1rem; display: block; }
+.placeholder-text h3 { margin: 0 0 0.5rem 0; color: #1f2937;}
+.placeholder-text p { margin: 0; }
 
 /* Loading Skeleton for Right Panel */
 .loading-skeleton {

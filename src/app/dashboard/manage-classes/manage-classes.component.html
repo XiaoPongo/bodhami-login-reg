@@ -3,7 +3,7 @@
   <div class="left-panel">
     <div class="panel-header">
       <div class="panel-title-group">
-        <a routerLink="/dashboard" class="back-link" title="Back to Dashboard"><i class="fas fa-arrow-left"></i></a>
+        <a routerLink="/mentor/dashboard" class="back-link" title="Back to Dashboard"><i class="fas fa-arrow-left"></i></a>
         <h2>Classrooms</h2>
       </div>
       <button class="btn btn-primary" (click)="openCreateModal()">
@@ -96,12 +96,18 @@
               <table class="content-table">
                 <thead>
                   <tr>
-                    <th>Name</th><th>Email</th><th>XP</th><th>Actions</th>
+                    <th>Student</th><th>XP</th><th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let student of selectedClass.students">
-                    <td>{{ student.name }}</td><td>{{ student.email }}</td><td>{{ student.xp }}</td>
+                    <td>
+                      <div>
+                        <span class="student-name">{{ student.name }}</span>
+                        <span class="student-email">{{ student.email }}</span>
+                      </div>
+                    </td>
+                    <td>{{ student.xp }}</td>
                     <td>
                       <button class="btn-icon btn-danger-outline" title="Remove Student" (click)="handleRemoveStudent(selectedClass.id, student)">
                         <i class="fas fa-user-minus"></i>
@@ -193,7 +199,9 @@
 
     <ng-template #emptyContent>
       <div class="placeholder-text">
-        <p>There is no content in this section.</p>
+        <i class="fas fa-box-open"></i>
+        <h3>Nothing to see here yet.</h3>
+        <p>This section is currently empty.</p>
       </div>
     </ng-template>
   </div>
@@ -232,7 +240,7 @@
       <h3>{{ confirmModal.title }}</h3>
     </div>
     <div class="modal-body">
-      <p>{{ confirmModal.message }}</p>
+      <p [innerHTML]="confirmModal.message"></p>
       <div class="modal-actions">
         <button type="button" class="btn btn-secondary" (click)="closeConfirmModal()">Cancel</button>
         <button type="button" class="btn btn-danger" (click)="confirmModal.onConfirm()">Confirm</button>
