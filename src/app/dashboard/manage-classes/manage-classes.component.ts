@@ -9,7 +9,7 @@ import { Classroom, Student, Activity, Material } from '../../services/api.servi
 @Component({
   selector: 'app-manage-classes',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule], 
+  imports: [CommonModule, FormsModule, RouterModule],  
   templateUrl: './manage-classes.component.html',
   styleUrls: ['./manage-classes.component.css'],
 })
@@ -28,7 +28,8 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
 
   activeContentTab: 'students' | 'materials' | 'activities' = 'students';
 
-  toast = { isVisible: false, message: '' };
+  // --- UPDATED TOAST AND MODAL ---
+  toast = { isVisible: false, message: '', type: 'success' };
   confirmModal = { isOpen: false, title: '', message: '', onConfirm: () => {} };
   
   private routeSub: Subscription | undefined;
@@ -77,7 +78,7 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
           if (this.route.snapshot.queryParams['classId'] == classId) {
              this.router.navigate([], { queryParams: {} });
           }
-          this.showToast('Class deleted successfully.');
+          this.showToast('Class deleted successfully.', 'success');
           this.closeConfirmModal();
         });
       }
@@ -89,12 +90,12 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
       this.classService.createClass(this.newClassName, this.newClassDescription)
         .subscribe({
           next: (newClass) => {
-            this.showToast(`Class "${newClass.name}" created successfully!`);
+            this.showToast(`Class "${newClass.name}" created successfully!`, 'success');
             this.closeCreateModal();
           },
           error: (err) => {
             console.error("Failed to create class:", err);
-            this.showToast('Error: Could not create the class. Please try again.');
+            this.showToast('Error: Could not create the class.', 'error');
           }
         });
     }
@@ -110,7 +111,7 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
     if (!this.editableClassName.trim()) return;
     this.classService.updateClass(classId, this.editableClassName, this.editableClassDescription)
       .subscribe(() => {
-        this.showToast('Class updated successfully!');
+        this.showToast('Class updated successfully!', 'success');
         this.isEditingClass = false;
       });
   }
@@ -126,7 +127,7 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
       message: `Are you sure you want to remove <strong>${student.name}</strong> from this class?`,
       onConfirm: () => {
         this.classService.removeStudent(classId, student.id).subscribe(() => {
-          this.showToast(`${student.name} has been removed.`);
+          this.showToast(`${student.name} has been removed.`, 'success');
           this.closeConfirmModal();
         });
       }
@@ -140,7 +141,7 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
       message: `Are you sure you want to unassign <strong>"${material.displayName}"</strong>?`,
       onConfirm: () => {
         this.classService.unassignMaterial(classId, material.id).subscribe(() => {
-          this.showToast(`Material unassigned.`);
+          this.showToast(`Material unassigned.`, 'success');
           this.closeConfirmModal();
         });
       }
@@ -154,7 +155,7 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
       message: `Are you sure you want to unassign <strong>"${activity.title}"</strong>?`,
       onConfirm: () => {
         this.classService.unassignActivity(classId, activity.id).subscribe(() => {
-          this.showToast(`Activity unassigned.`);
+          this.showToast(`Activity unassigned.`, 'success');
           this.closeConfirmModal();
         });
       }
@@ -175,12 +176,12 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
   copyCode(code: string | undefined): void {
     if (!code) return;
     navigator.clipboard.writeText(code).then(() => {
-      this.showToast(`Code "${code}" copied to clipboard!`);
+      this.showToast(`Code "${code}" copied to clipboard!`, 'success');
     });
   }
   
-  showToast(message: string): void {
-    this.toast = { isVisible: true, message };
+  showToast(message: string, type: 'success' | 'error' = 'success'): void {
+    this.toast = { isVisible: true, message, type };
     setTimeout(() => { this.toast.isVisible = false; }, 3000);
   }
 }
