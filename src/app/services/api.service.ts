@@ -85,7 +85,7 @@ export class ApiService {
       switchMap(headers => this.http.post(`${this.apiUrl}/materials/assign`, payload, { headers }))
     );
   }
-
+  
   // --- Classroom Endpoints ---
   getClassrooms(): Observable<Classroom[]> {
     return this.getAuthHeaders().pipe(
@@ -104,11 +104,38 @@ export class ApiService {
       switchMap(headers => this.http.post<Classroom>(`${this.apiUrl}/classrooms`, data, { headers }))
     );
   }
+  
+  updateClassroom(id: number, data: { name: string, description: string }): Observable<Classroom> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => this.http.put<Classroom>(`${this.apiUrl}/classrooms/${id}`, data, { headers }))
+    );
+  }
 
   deleteClassroom(id: number): Observable<any> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.delete(`${this.apiUrl}/classrooms/${id}`, { headers }))
     );
   }
-}
 
+  // --- Student & Content Management in Class ---
+  removeStudentFromClass(classId: number, studentId: string): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => this.http.delete(`${this.apiUrl}/classrooms/${classId}/students/${studentId}`, { headers }))
+    );
+  }
+
+  unassignMaterialFromClass(classId: number, materialId: number): Observable<any> {
+    // This assumes an endpoint exists to unassign a specific material.
+    // An alternative is using the existing assignMaterials with a null classroomId if the API supports that for un-assignment.
+    // For now, we'll assume a dedicated DELETE endpoint.
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => this.http.delete(`${this.apiUrl}/classrooms/${classId}/materials/${materialId}`, { headers }))
+    );
+  }
+
+  unassignActivityFromClass(classId: number, activityId: number): Observable<any> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => this.http.delete(`${this.apiUrl}/classrooms/${classId}/activities/${activityId}`, { headers }))
+    );
+  }
+}

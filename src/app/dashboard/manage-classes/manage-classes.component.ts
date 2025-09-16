@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router'; // Import ActivatedRoute
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subscription, Observable } from 'rxjs';
 import { ClassService } from '../../services/class.service';
 import { Classroom, Student, Activity, Material } from '../../services/api.service';
@@ -9,25 +9,32 @@ import { Classroom, Student, Activity, Material } from '../../services/api.servi
 @Component({
   selector: 'app-manage-classes',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule], // Add RouterModule
   templateUrl: './manage-classes.component.html',
   styleUrls: ['./manage-classes.component.css'],
 })
 export class ManageClassesComponent implements OnInit, OnDestroy {
-  // Use public services for direct async pipe access in the template
   public classes$: Observable<Classroom[]>;
   public selectedClass$: Observable<Classroom | null>;
 
   isCreateModalOpen = false;
   newClassName = '';
   newClassDescription = '';
+  
+  isEditingClass = false;
+  editableClassName = '';
+  editableClassDescription = '';
 
   activeContentTab: 'students' | 'materials' | 'activities' = 'students';
 
+  // --- UI State for Modals and Toasts ---
+  toast = { isVisible: false, message: '' };
+  confirmModal = { isOpen: false, title: '', message: '', onConfirm: () => {} };
+  
   private routeSub: Subscription | undefined;
 
   constructor(
-    public classService: ClassService, // Make public for template access
+    public classService: ClassService,
     private route: ActivatedRoute,
     private router: Router
   ) {
@@ -36,13 +43,12 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Check for a classId in the URL query parameters
     this.routeSub = this.route.queryParams.subscribe(params => {
       const classId = params['classId'];
       if (classId) {
         this.classService.selectClass(Number(classId));
       } else {
-        this.classService.selectClass(null); // Clear selection if no ID
+        this.classService.selectClass(null);
       }
     });
   }
@@ -53,42 +59,118 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
 
   handleSelectClass(classId: number): void {
     this.router.navigate([], { queryParams: { classId: classId } });
+    this.isEditingClass = false; // Cancel edit mode on class switch
   }
 
+  // --- Class CRUD ---
   handleDeleteClass(classId: number, className: string): void {
-    if (confirm(`Are you sure you want to permanently delete the class "${className}"?\nThis action cannot be undone.`)) {
-      this.classService.deleteClass(classId).subscribe(() => {
-        // Clear the query params if the selected class was deleted
-        this.router.navigate([], { queryParams: {} });
-      });
-    }
+    this.confirmModal = {
+      isOpen: true,
+      title: 'Delete Class',
+      message: `Are you sure you want to permanently delete "${className}"? This action cannot be undone.`,
+      onConfirm: () => {
+        this.classService.deleteClass(classId).subscribe(() => {
+          this.router.navigate([], { queryParams: {} });
+          this.showToast('Class deleted successfully.');
+          this.closeConfirmModal();
+        });
+      }
+    };
   }
 
   handleCreateClass(): void {
     if (this.newClassName.trim()) {
       this.classService.createClass(this.newClassName, this.newClassDescription)
-        .subscribe(() => this.closeCreateModal());
+        .subscribe(() => {
+            this.showToast('Class created successfully!');
+            this.closeCreateModal()
+        });
     }
   }
   
-  openCreateModal(): void {
-    this.isCreateModalOpen = true;
+  handleEditClass(currentClass: Classroom): void {
+    this.isEditingClass = true;
+    this.editableClassName = currentClass.name;
+    this.editableClassDescription = currentClass.description;
   }
+  
+  handleSaveClass(classId: number): void {
+    if (!this.editableClassName.trim()) return;
+    this.classService.updateClass(classId, this.editableClassName, this.editableClassDescription)
+      .subscribe(() => {
+        this.showToast('Class updated successfully!');
+        this.isEditingClass = false;
+      });
+  }
+  
+  handleCancelEdit(): void {
+    this.isEditingClass = false;
+  }
+  
+  // --- Content Management ---
+  handleRemoveStudent(classId: number, student: Student): void {
+     this.confirmModal = {
+      isOpen: true,
+      title: 'Remove Student',
+      message: `Are you sure you want to remove ${student.name} from this class?`,
+      onConfirm: () => {
+        this.classService.removeStudent(classId, student.id).subscribe(() => {
+          this.showToast(`${student.name} has been removed.`);
+          this.closeConfirmModal();
+        });
+      }
+    };
+  }
+
+  handleUnassignMaterial(classId: number, material: Material): void {
+      this.confirmModal = {
+      isOpen: true,
+      title: 'Unassign Material',
+      message: `Are you sure you want to unassign "${material.displayName}"?`,
+      onConfirm: () => {
+        this.classService.unassignMaterial(classId, material.id).subscribe(() => {
+          this.showToast(`Material unassigned.`);
+          this.closeConfirmModal();
+        });
+      }
+    };
+  }
+
+  handleUnassignActivity(classId: number, activity: Activity): void {
+      this.confirmModal = {
+      isOpen: true,
+      title: 'Unassign Activity',
+      message: `Are you sure you want to unassign "${activity.title}"?`,
+      onConfirm: () => {
+        this.classService.unassignActivity(classId, activity.id).subscribe(() => {
+          this.showToast(`Activity unassigned.`);
+          this.closeConfirmModal();
+        });
+      }
+    };
+  }
+  
+  // --- UI Helpers ---
+  openCreateModal(): void { this.isCreateModalOpen = true; }
   closeCreateModal(): void {
     this.isCreateModalOpen = false;
     this.newClassName = '';
     this.newClassDescription = '';
   }
   
-  setActiveTab(tab: 'students' | 'materials' | 'activities'): void {
-    this.activeContentTab = tab;
-  }
+  closeConfirmModal(): void { this.confirmModal.isOpen = false; }
+  
+  setActiveTab(tab: 'students' | 'materials' | 'activities'): void { this.activeContentTab = tab; }
 
   copyCode(code: string | undefined): void {
     if (!code) return;
     navigator.clipboard.writeText(code).then(() => {
-      alert(`Code "${code}" copied to clipboard!`);
+      this.showToast(`Code "${code}" copied to clipboard!`);
     });
   }
+  
+  showToast(message: string): void {
+    this.toast = { isVisible: true, message };
+    setTimeout(() => { this.toast.isVisible = false; }, 3000);
+  }
 }
-
