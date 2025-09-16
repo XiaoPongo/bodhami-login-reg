@@ -16,7 +16,7 @@
 .main-title {
   font-size: 32px;
   font-weight: bold;
-  color: #3f51b5;
+  color: #0000ee; /* Changed to 'Elevana blue' */
 }
 
 .sub-title {
@@ -34,13 +34,22 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 24px; /* emoji size */
-  transition: transform 0.2s ease, color 0.2s ease;
+  font-size: 20px; /* Adjusted for icon font */
+  color: #64748b; /* A neutral, elegant icon color */
+  padding: 8px; /* Added for a better click area */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .icon-btn:hover {
-  color: #3f51b5;
-  transform: scale(1.2);
+  color: #3b82f6; /* Uses the vibrant blue from the dashboard on hover */
+  background-color: #eff6ff; /* A light blue background on hover */
+  transform: scale(1.1);
 }
 
 .popup {
@@ -98,3 +107,4 @@
 .month .highlight {
   background-color: yellow;
 }
+

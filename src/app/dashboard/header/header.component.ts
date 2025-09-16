@@ -43,7 +43,11 @@ export class HeaderComponent implements OnInit {
   user: User = {
     firstName: '',
     lastName: '',
-    email: ''
+    email: '',
+    preferences: {
+      theme: 'light',
+      notifications: true
+    }
   };
 
   @ViewChild('notificationPopup') notificationPopup!: ElementRef;
@@ -67,10 +71,10 @@ export class HeaderComponent implements OnInit {
       const metadata = data.user.user_metadata || {};
 
       this.user = {
-        firstName: metadata['firstName'] || '',
+        firstName: metadata['firstName'] || 'Student',
         lastName: metadata['lastName'] || '',
         email: data.user.email || '',
-        preferences: metadata['preferences'] || {}
+        preferences: metadata['preferences'] || { theme: 'light', notifications: true }
       };
     }
   }
@@ -151,15 +155,15 @@ export class HeaderComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   clickout(event: Event) {
-    if (this.showNotification && !this.notificationPopup.nativeElement.contains(event.target) &&
+    if (this.showNotification && this.notificationPopup && this.bellButton && !this.notificationPopup.nativeElement.contains(event.target) &&
         !this.bellButton.nativeElement.contains(event.target)) {
       this.showNotification = false;
     }
-    if (this.showCalendar && !this.calendarPopup.nativeElement.contains(event.target) &&
+    if (this.showCalendar && this.calendarPopup && this.calendarButton && !this.calendarPopup.nativeElement.contains(event.target) &&
         !this.calendarButton.nativeElement.contains(event.target)) {
       this.showCalendar = false;
     }
-    if (this.showProfile && !this.profilePopup.nativeElement.contains(event.target) &&
+    if (this.showProfile && this.profilePopup && this.profileButton && !this.profilePopup.nativeElement.contains(event.target) &&
         !this.profileButton.nativeElement.contains(event.target)) {
       this.showProfile = false;
     }

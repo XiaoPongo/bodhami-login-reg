@@ -1,130 +1,179 @@
-<div class="dashboard-wrapper" [style.backgroundImage]="'url(' + dashboardImageUrl + ')'">
-  <div class="content-overlay">
-     
-    <!-- Header Welcome -->
-    <div class="welcome-header">
-      <h1>Welcome, {{ welcomeName }}!</h1>
-    </div>
-
-    <!-- Stats Bar -->
-    <div class="stats-bar">
-      <div class="stat-item">
-        <i class="fas fa-star"></i>
-        <span>{{ xp }} XP</span>
+<!-- Main Dashboard View -->
+<div *ngIf="!showQuiz; else quizView">
+  <div class="dashboard-wrapper" [style.backgroundImage]="'url(' + dashboardImageUrl + ')'">
+    <div class="content-overlay">
+      
+      <!-- Loading Spinner -->
+      <div *ngIf="isLoading" class="loading-overlay">
+        <div class="spinner"></div>
       </div>
-      <div class="stat-item">
-        <i class="fas fa-trophy"></i>
-        <span>Level {{ level }}</span>
+
+      <!-- Header Welcome -->
+      <div class="welcome-header" *ngIf="!isLoading">
+        <h1>Welcome, {{ welcomeName }}!</h1>
       </div>
-      <div class="stat-item">
-        <i class="fas fa-fire"></i>
-        <span>{{ streakDays }} Day Streak</span>
-      </div>
-    </div>
 
-    <!-- Interactive Buttons -->
-    <div class="interactive-elements">
-      <button class="btn-quiz">Start Quiz</button>
-      <button class="btn-achievements" (click)="toggleAchievements()">
-        <i class="fas fa-medal"></i> Achievements
-      </button>
-      <button class="btn-streak" (click)="toggleStreak()">
-        <i class="fas fa-bolt"></i> View Streak
-      </button>
-      <button class="btn-notes" (click)="toggleNotes()">
-        <i class="fas fa-book-open"></i> My Notes
-      </button>
-    </div>
-
-  </div>
-</div>
-
-<!-- Achievements Modal -->
-<div class="modal-overlay" *ngIf="showAchievements" (click)="toggleAchievements()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2><i class="fas fa-medal"></i> Your Achievements</h2>
-      <button class="btn-close" (click)="toggleAchievements()"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="achievements-grid">
-        <div class="badge" *ngFor="let ach of achievements" [class.locked]="!ach.unlocked">
-          <div class="badge-icon">
-            <i [class]="ach.icon"></i>
-          </div>
-          <h3 class="badge-title">{{ ach.title }}</h3>
-          <p class="badge-description">{{ ach.description }}</p>
+      <!-- Stats Bar -->
+      <div class="stats-bar" *ngIf="!isLoading">
+        <div class="stat-item">
+          <i class="fas fa-star"></i>
+          <span>{{ xp }} XP</span>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-trophy"></i>
+          <span>Level {{ level }}</span>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-fire"></i>
+          <span>{{ streakDays }} Day Streak</span>
         </div>
       </div>
+
+      <!-- Interactive Buttons -->
+      <div class="interactive-elements" *ngIf="!isLoading">
+        <button class="btn-quiz" (click)="startQuiz()">Start Quiz</button>
+        <button class="btn-achievements" (click)="toggleAchievements()">
+          <i class="fas fa-medal"></i> Achievements
+        </button>
+        <button class="btn-streak" (click)="toggleStreak()">
+          <i class="fas fa-bolt"></i> View Streak
+        </button>
+        <button class="btn-notes" (click)="toggleNotes()">
+          <i class="fas fa-book-open"></i> My Notes
+        </button>
+      </div>
+
     </div>
   </div>
-</div>
 
-<!-- Streak Modal -->
-<div class="modal-overlay" *ngIf="showStreak" (click)="toggleStreak()">
-  <div class="modal-content streak-modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2><i class="fas fa-bolt" style="color: #f59e0b;"></i> Your Learning Streak</h2>
-      <button class="btn-close" (click)="toggleStreak()"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="streak-header">
-        <h3>Current Streak: {{ streakDays }} Days!</h3>
-        <p>{{ streakStage.description }}</p>
+  <!-- Achievements Modal -->
+  <div class="modal-overlay" *ngIf="showAchievements" (click)="toggleAchievements()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2><i class="fas fa-medal"></i> Your Achievements</h2>
+        <button class="btn-close" (click)="toggleAchievements()"><i class="fas fa-times"></i></button>
       </div>
-      <div class="streak-progress-container">
-        <div class="progress-bar-track">
-          <div class="progress-bar-fill" [style.width.%]="streakStage.progress"></div>
-        </div>
-        <div class="stage-markers">
-          <div class="stage-marker" [class.active]="streakDays >= 1">
-            <i class="fa-solid fa-circle-dot"></i>
-            <span>Seed</span>
-          </div>
-          <div class="stage-marker" [class.active]="streakDays >= 4">
-            <i class="fa-solid fa-leaf"></i>
-            <span>Sapling</span>
-          </div>
-          <div class="stage-marker" [class.active]="streakDays >= 8">
-            <i class="fa-solid fa-seedling"></i>
-            <span>Young Plant</span>
-          </div>
-          <div class="stage-marker" [class.active]="streakDays >= 12">
-            <i class="fa-solid fa-tree"></i>
-            <span>Full Plant</span>
+      <div class="modal-body">
+        <div class="achievements-grid">
+          <div class="badge" *ngFor="let ach of achievements" [class.locked]="!ach.unlocked">
+            <div class="badge-icon"><i [class]="ach.icon"></i></div>
+            <h3 class="badge-title">{{ ach.title }}</h3>
+            <p class="badge-description">{{ ach.description }}</p>
           </div>
         </div>
-      </div>
-      <div class="current-stage-info">
-        <div class="stage-icon">
-          <i [class]="streakStage.icon"></i>
-        </div>
-        <h4>Current Stage: {{ streakStage.name }}</h4>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Notes Modal -->
-<div class="modal-overlay" *ngIf="showNotes" (click)="toggleNotes()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2><i class="fas fa-book-open" style="color: #8b5cf6;"></i> My Notes</h2>
-      <button class="btn-close" (click)="toggleNotes()"><i class="fas fa-times"></i></button>
+  <!-- Streak Modal -->
+  <div class="modal-overlay" *ngIf="showStreak" (click)="toggleStreak()">
+    <div class="modal-content streak-modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2><i class="fas fa-bolt" style="color: #f59e0b;"></i> Your Learning Streak</h2>
+        <button class="btn-close" (click)="toggleStreak()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="streak-header">
+          <h3>Current Streak: {{ streakDays }} Days!</h3>
+          <p>{{ streakStage.description }}</p>
+        </div>
+        <div class="streak-progress-container">
+          <div class="progress-bar-track"><div class="progress-bar-fill" [style.width.%]="streakStage.progress"></div></div>
+          <div class="stage-markers">
+            <div class="stage-marker" [class.active]="streakDays >= 1"><i class="fa-solid fa-circle-dot"></i><span>Seed</span></div>
+            <div class="stage-marker" [class.active]="streakDays >= 4"><i class="fa-solid fa-leaf"></i><span>Sapling</span></div>
+            <div class="stage-marker" [class.active]="streakDays >= 8"><i class="fa-solid fa-seedling"></i><span>Young Plant</span></div>
+            <div class="stage-marker" [class.active]="streakDays >= 12"><i class="fa-solid fa-tree"></i><span>Full Plant</span></div>
+          </div>
+        </div>
+        <div class="current-stage-info">
+          <div class="stage-icon"><i [class]="streakStage.icon"></i></div>
+          <h4>Current Stage: {{ streakStage.name }}</h4>
+        </div>
+      </div>
     </div>
-    <div class="modal-body">
-      <div class="notes-list">
-        <div class="note-item" *ngFor="let note of notes">
-          <div class="note-icon">
-            <i class="fas fa-file-alt"></i>
+  </div>
+
+  <!-- Notes Modal -->
+  <div class="modal-overlay" *ngIf="showNotes" (click)="toggleNotes()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2><i class="fas fa-book-open" style="color: #8b5cf6;"></i> My Notes</h2>
+        <button class="btn-close" (click)="toggleNotes()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="notes-list">
+          <div class="note-item" *ngFor="let note of notes">
+            <div class="note-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="note-details">
+              <span class="note-title">{{ note.title }}</span>
+              <span class="note-date">Saved on: {{ note.date }}</span>
+            </div>
+            <button class="btn-view-note">View</button>
           </div>
-          <div class="note-details">
-            <span class="note-title">{{ note.title }}</span>
-            <span class="note-date">Saved on: {{ note.date }}</span>
-          </div>
-          <button class="btn-view-note">View</button>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Quiz View -->
+<ng-template #quizView>
+  <div class="quiz-wrapper">
+    <div class="quiz-card">
+      
+      <!-- Quiz In Progress -->
+      <ng-container *ngIf="!isQuizFinished; else quizResult">
+        <div class="quiz-header">
+          <div class="quiz-title">
+            <i class="fas fa-stopwatch"></i>
+            <span>Business Acumen Quiz</span>
+          </div>
+          <button class="btn-quit-quiz" (click)="exitQuiz()">Exit Quiz</button>
+        </div>
+        
+        <div class="quiz-progress-bar-container">
+          <div class="quiz-progress-bar" [style.width.%]="quizProgress"></div>
+        </div>
+
+        <div class="question-counter">Question {{ currentQuestionIndex + 1 }} of {{ quizQuestions.length }}</div>
+        
+        <h2 class="question-text">{{ quizQuestions[currentQuestionIndex].question }}</h2>
+
+        <div class="options-grid">
+          <button 
+            *ngFor="let option of quizQuestions[currentQuestionIndex].options"
+            class="option-btn"
+            [class.selected]="option === selectedAnswer"
+            (click)="selectAnswer(option)">
+            {{ option }}
+          </button>
+        </div>
+
+        <button class="btn-next-question" (click)="nextQuestion()" [disabled]="!selectedAnswer">
+          {{ currentQuestionIndex < quizQuestions.length - 1 ? 'Next Question' : 'Submit Answers' }}
+        </button>
+      </ng-container>
+
+      <!-- Quiz Result -->
+      <ng-template #quizResult>
+        <div class="quiz-result-container">
+          <div class="result-icon">
+            <i class="fas fa-award"></i>
+          </div>
+          <h2 class="result-title">Quiz Completed!</h2>
+          <p class="result-score">
+            You scored <strong>{{ quizScore }}</strong> out of <strong>{{ quizQuestions.length }}</strong>
+          </p>
+          <p class="result-xp-gain">You've earned {{ quizScore * 10 }} XP!</p>
+          <div class="result-actions">
+            <button class="btn-action-secondary" (click)="startQuiz()">Try Again</button>
+            <button class="btn-action-primary" (click)="exitQuiz()">Back to Dashboard</button>
+          </div>
+        </div>
+      </ng-template>
+
+    </div>
+  </div>
+</ng-template>
+
