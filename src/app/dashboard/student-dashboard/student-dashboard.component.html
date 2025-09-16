@@ -1,6 +1,6 @@
 <div class="dashboard-wrapper" [style.backgroundImage]="'url(' + dashboardImageUrl + ')'">
   <div class="content-overlay">
-    
+     
     <!-- Header Welcome -->
     <div class="welcome-header">
       <h1>Welcome, {{ welcomeName }}!</h1>
@@ -16,12 +16,24 @@
         <i class="fas fa-trophy"></i>
         <span>Level {{ level }}</span>
       </div>
+      <div class="stat-item">
+        <i class="fas fa-fire"></i>
+        <span>{{ streakDays }} Day Streak</span>
+      </div>
     </div>
 
     <!-- Interactive Buttons -->
     <div class="interactive-elements">
       <button class="btn-quiz">Start Quiz</button>
-      <button class="btn-achievements" (click)="toggleAchievements()">Achievements</button>
+      <button class="btn-achievements" (click)="toggleAchievements()">
+        <i class="fas fa-medal"></i> Achievements
+      </button>
+      <button class="btn-streak" (click)="toggleStreak()">
+        <i class="fas fa-bolt"></i> View Streak
+      </button>
+      <button class="btn-notes" (click)="toggleNotes()">
+        <i class="fas fa-book-open"></i> My Notes
+      </button>
     </div>
 
   </div>
@@ -36,7 +48,6 @@
     </div>
     <div class="modal-body">
       <div class="achievements-grid">
-        <!-- Badges are generated here -->
         <div class="badge" *ngFor="let ach of achievements" [class.locked]="!ach.unlocked">
           <div class="badge-icon">
             <i [class]="ach.icon"></i>
@@ -49,3 +60,71 @@
   </div>
 </div>
 
+<!-- Streak Modal -->
+<div class="modal-overlay" *ngIf="showStreak" (click)="toggleStreak()">
+  <div class="modal-content streak-modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2><i class="fas fa-bolt" style="color: #f59e0b;"></i> Your Learning Streak</h2>
+      <button class="btn-close" (click)="toggleStreak()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="streak-header">
+        <h3>Current Streak: {{ streakDays }} Days!</h3>
+        <p>{{ streakStage.description }}</p>
+      </div>
+      <div class="streak-progress-container">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" [style.width.%]="streakStage.progress"></div>
+        </div>
+        <div class="stage-markers">
+          <div class="stage-marker" [class.active]="streakDays >= 1">
+            <i class="fa-solid fa-circle-dot"></i>
+            <span>Seed</span>
+          </div>
+          <div class="stage-marker" [class.active]="streakDays >= 4">
+            <i class="fa-solid fa-leaf"></i>
+            <span>Sapling</span>
+          </div>
+          <div class="stage-marker" [class.active]="streakDays >= 8">
+            <i class="fa-solid fa-seedling"></i>
+            <span>Young Plant</span>
+          </div>
+          <div class="stage-marker" [class.active]="streakDays >= 12">
+            <i class="fa-solid fa-tree"></i>
+            <span>Full Plant</span>
+          </div>
+        </div>
+      </div>
+      <div class="current-stage-info">
+        <div class="stage-icon">
+          <i [class]="streakStage.icon"></i>
+        </div>
+        <h4>Current Stage: {{ streakStage.name }}</h4>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Notes Modal -->
+<div class="modal-overlay" *ngIf="showNotes" (click)="toggleNotes()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2><i class="fas fa-book-open" style="color: #8b5cf6;"></i> My Notes</h2>
+      <button class="btn-close" (click)="toggleNotes()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="notes-list">
+        <div class="note-item" *ngFor="let note of notes">
+          <div class="note-icon">
+            <i class="fas fa-file-alt"></i>
+          </div>
+          <div class="note-details">
+            <span class="note-title">{{ note.title }}</span>
+            <span class="note-date">Saved on: {{ note.date }}</span>
+          </div>
+          <button class="btn-view-note">View</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
