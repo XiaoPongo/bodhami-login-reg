@@ -27,17 +27,11 @@ export class ApiService {
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 
-  /**
-   * Creates the authorization headers for API requests.
-   * Handles both JSON and FormData content types.
-   */
   private getAuthHeaders(isFormData: boolean = false): Observable<HttpHeaders> {
-    const session = this.authService.getSession();
-    const token = session?.access_token;
-    
+    const token = this.authService.getToken();
     if (!token) {
-        console.error("Authentication Error: No session token found. API call cancelled.");
-        return throwError(() => new Error('User not authenticated! No token available.'));
+      console.error("Authentication Error: No session token found.");
+      return throwError(() => new Error('User not authenticated! No token available.'));
     }
     
     let headersConfig: { [key: string]: string } = { 'Authorization': `Bearer ${token}` };
@@ -67,9 +61,9 @@ export class ApiService {
 
   uploadMaterial(file: File, classId: number): Observable<HttpEvent<any>> {
     const formData = new FormData();
-    formData.append('displayName', file.name);
     formData.append('file', file, file.name);
     const uploadUrl = `${this.apiUrl}/classrooms/${classId}/materials`;
+    
     return this.getAuthHeaders(true).pipe(
       switchMap(headers => this.http.post(uploadUrl, formData, {
         headers, reportProgress: true, observe: 'events'
@@ -77,16 +71,10 @@ export class ApiService {
     );
   }
   
-  deleteMaterial(id: number): Observable<any> {
-    return this.getAuthHeaders().pipe(
-      switchMap(headers => this.http.delete(`${this.apiUrl}/materials/${id}`, { headers }))
-    );
-  }
-
   deleteMaterials(ids: number[]): Observable<any> {
-    return this.getAuthHeaders().pipe(
-      switchMap(headers => this.http.request('delete', `${this.apiUrl}/materials`, { headers, body: ids }))
-    );
+      return this.getAuthHeaders().pipe(
+          switchMap(headers => this.http.request('delete', `${this.apiUrl}/materials`, { headers, body: { materialIds: ids } }))
+      );
   }
 
   assignMaterials(materialIds: number[], classroomId: number | null): Observable<any> {
@@ -95,17 +83,17 @@ export class ApiService {
       switchMap(headers => this.http.post(`${this.apiUrl}/materials/assign`, payload, { headers }))
     );
   }
-
+  
   // --- Classroom Endpoints ---
-  createClassroom(data: { name: string, description: string }): Observable<Classroom> {
-    return this.getAuthHeaders().pipe(
-      switchMap(headers => this.http.post<Classroom>(`${this.apiUrl}/classrooms`, data, { headers }))
-    );
-  }
-
   getClassrooms(): Observable<Classroom[]> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.get<Classroom[]>(`${this.apiUrl}/classrooms`, { headers }))
+    );
+  }
+  
+  createClassroom(data: { name: string, description: string }): Observable<Classroom> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers => this.http.post<Classroom>(`${this.apiUrl}/classrooms`, data, { headers }))
     );
   }
 
