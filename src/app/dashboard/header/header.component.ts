@@ -1,7 +1,8 @@
 import { Component, ElementRef, HostListener, ViewChild, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { User } from '../../user';
-import { SupabaseService } from '../../services/supabase.service';
+// CRITICAL FIX: Import the unified AuthService instead of the old service.
+import { AuthService } from '../../auth.service';
 
 interface Month {
   name: string;
@@ -57,10 +58,12 @@ export class HeaderComponent implements OnInit {
   @ViewChild('calendarButton') calendarButton!: ElementRef;
   @ViewChild('profileButton') profileButton!: ElementRef;
 
-  constructor(private supabase: SupabaseService) {}
+  // CRITICAL FIX: Inject the unified AuthService.
+  constructor(private authService: AuthService) {}
 
   async ngOnInit() {
-    const { data, error } = await this.supabase.getUser();
+    // CRITICAL FIX: Call the getUser method from the AuthService.
+    const { data, error } = await this.authService.getUser();
 
     if (error) {
       console.error('Error fetching user:', error.message);
@@ -98,7 +101,8 @@ export class HeaderComponent implements OnInit {
   }
 
   async signOut() {
-    await this.supabase.signOut();
+    // CRITICAL FIX: Call the logout method from the AuthService.
+    await this.authService.logout();
     window.location.href = '/'; // redirect to login
   }
 

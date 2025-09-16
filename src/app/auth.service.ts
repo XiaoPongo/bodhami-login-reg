@@ -12,6 +12,7 @@ export class AuthService {
   private session = new BehaviorSubject<Session | null>(null);
 
   constructor() {
+    // This is now the ONLY place in your app where the Supabase client is created.
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseAnonKey, {
       auth: {
         persistSession: true,
@@ -20,16 +21,16 @@ export class AuthService {
       },
     });
 
-    // Load current session
     this.supabase.auth.getSession().then(({ data }) => {
       this.session.next(data.session);
     });
 
-    // Subscribe to auth changes
     this.supabase.auth.onAuthStateChange((_event, session) => {
       this.session.next(session);
     });
   }
+
+  // --- Core Authentication Methods ---
 
   async login(email: string, password: string) {
     const { data, error } = await this.supabase.auth.signInWithPassword({ email, password });
@@ -51,8 +52,18 @@ export class AuthService {
     return await this.supabase.auth.signOut();
   }
 
+  // --- Session & User Management ---
+
   getCurrentUser(): User | null {
     return this.session.value?.user ?? null;
+  }
+  
+  /**
+   * Fetches the latest user details directly from Supabase.
+   * This was previously in supabase.service.ts and is now integrated here.
+   */
+  getUser() {
+    return this.supabase.auth.getUser();
   }
 
   getSession$() {
@@ -65,6 +76,5 @@ export class AuthService {
   
   getToken(): string | null {
     return this.session.value?.access_token ?? null; 
-    // Supabase sessions store JWT as access_token
   }
 }
