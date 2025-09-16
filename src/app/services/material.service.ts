@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { tap, finalize } from 'rxjs/operators';
+import { BehaviorSubject, Observable, tap, firstValueFrom } from 'rxjs';
 import { ApiService, Material } from './api.service';
 
 @Injectable({
@@ -10,35 +9,42 @@ export class MaterialService {
   private readonly _materials = new BehaviorSubject<Material[]>([]);
   public readonly materials$: Observable<Material[]> = this._materials.asObservable();
 
-  private readonly _isLoading = new BehaviorSubject<boolean>(false);
-  public readonly isLoading$: Observable<boolean> = this._isLoading.asObservable();
+  public readonly isLoading$ = new BehaviorSubject<boolean>(false);
 
   constructor(private apiService: ApiService) {}
 
   /** Fetches the latest materials from the API and updates the stream */
   loadMaterials(): void {
-    this._isLoading.next(true);
-    this.apiService.getMaterials().pipe(
-      finalize(() => this._isLoading.next(false))
-    ).subscribe({
-      next: (materials: Material[]) => this._materials.next(materials),
-      error: (err: any) => console.error("Failed to load materials", err)
+    this.isLoading$.next(true);
+    this.apiService.getMaterials().subscribe({
+      next: (materials: Material[]) => {
+        this._materials.next(materials);
+        this.isLoading$.next(false);
+      },
+      error: (err: any) => {
+        console.error("Failed to load materials", err);
+        this.isLoading$.next(false);
+      }
     });
   }
 
   /** Deletes one or more materials via the API and refreshes the list */
   deleteMaterials(ids: number[]): Observable<any> {
-    if (ids.length === 0) return throwError(() => new Error('No material IDs provided for deletion.'));
     return this.apiService.deleteMaterials(ids).pipe(
-      tap(() => this.loadMaterials()) // Auto-refresh on success
+      tap(() => this.loadMaterials()) // Reload the list on success
     );
   }
 
   /** Assigns one or more materials to a class and refreshes the list */
   assignMaterials(ids: number[], classroomId: number | null): Observable<any> {
-    if (ids.length === 0) return throwError(() => new Error('No material IDs provided for assignment.'));
     return this.apiService.assignMaterials(ids, classroomId).pipe(
-      tap(() => this.loadMaterials()) // Auto-refresh on success
+      tap(() => this.loadMaterials())
     );
+  }
+
+  // --- THIS IS THE FIX: The missing method is now implemented ---
+  /** Gets a secure, temporary download URL for a given material */
+  getDownloadUrl(materialId: number): Promise<{url: string}> {
+    return firstValueFrom(this.apiService.getMaterialDownloadUrl(materialId));
   }
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { ApiService, Student } from './api.service';
 import { LEVEL_THRESHOLDS } from '../config/xp-config';
 
 export interface StudentProgress {
@@ -9,53 +10,83 @@ export interface StudentProgress {
   progressPercentage: number;
 }
 
+export interface StreakStage {
+    name: string;
+    icon: string;
+    description: string;
+    progress: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class StudentProgressService {
-  // Use a BehaviorSubject to hold and stream the student's progress
-  private progressSubject = new BehaviorSubject<StudentProgress>(this.calculateProgress(0));
-  public progress$: Observable<StudentProgress> = this.progressSubject.asObservable();
+  public isLoading$ = new BehaviorSubject<boolean>(true);
+  
+  private readonly _progress = new BehaviorSubject<StudentProgress | null>(null);
+  public readonly progress$: Observable<StudentProgress | null> = this._progress.asObservable();
+  
+  // Using a placeholder for streak logic for now
+  private readonly _streakStage = new BehaviorSubject<StreakStage>(this.calculateStreakStage(0));
+  public readonly streakStage$: Observable<StreakStage> = this._streakStage.asObservable();
+  
+  private currentStudent: Student | null = null;
 
-  constructor() {
-    // In a real app, you'd fetch the initial XP from the API here
-    // For now, we start with a mock value, e.g. 650xp
-    this.setXp(650);
+  constructor(private apiService: ApiService) {
+    this.loadInitialProfile();
   }
 
-  // This is the main method to update XP
-  addXp(amount: number): void {
-    const currentXp = this.progressSubject.value.xp + amount;
-    this.setXp(currentXp);
+  private async loadInitialProfile() {
+    this.isLoading$.next(true);
+    try {
+      const student = await this.apiService.getStudentProfile();
+      this.currentStudent = student;
+      this.updateProgress(student.xp);
+    } catch (error) {
+      console.error("Failed to load student profile", error);
+      // Set a default state on failure
+      this.updateProgress(0);
+    } finally {
+      this.isLoading$.next(false);
+    }
   }
   
-  setXp(totalXp: number): void {
-    const newProgress = this.calculateProgress(totalXp);
-    this.progressSubject.next(newProgress);
+  public addXp(amount: number): void {
+    if (!this.currentStudent) return;
+    const newXp = this.currentStudent.xp + amount;
+    // Here you would typically call an API to save the new XP
+    // For now, we update it locally for demonstration
+    this.currentStudent.xp = newXp; 
+    this.updateProgress(newXp);
   }
 
-  // The core logic for calculating level based on XP
+  private updateProgress(xp: number): void {
+    const newProgress = this.calculateProgress(xp);
+    this._progress.next(newProgress);
+  }
+
   private calculateProgress(xp: number): StudentProgress {
     let currentLevel = 1;
-    let xpForNextLevel = LEVEL_THRESHOLDS[1]?.xp || Infinity;
+    let xpForNextLevel = Infinity;
     let progressPercentage = 0;
 
-    // Find the current level
-    for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
-      if (xp >= LEVEL_THRESHOLDS[i].xp) {
-        currentLevel = LEVEL_THRESHOLDS[i].level;
+    const sortedThresholds = [...LEVEL_THRESHOLDS].sort((a, b) => a.xp - b.xp);
+
+    for (let i = sortedThresholds.length - 1; i >= 0; i--) {
+      if (xp >= sortedThresholds[i].xp) {
+        currentLevel = sortedThresholds[i].level;
         break;
       }
     }
 
-    const currentLevelThreshold = LEVEL_THRESHOLDS.find(t => t.level === currentLevel);
-    const nextLevelThreshold = LEVEL_THRESHOLDS.find(t => t.level === currentLevel + 1);
+    const currentLevelData = sortedThresholds.find(t => t.level === currentLevel);
+    const nextLevelData = sortedThresholds.find(t => t.level === currentLevel + 1);
 
-    if (currentLevelThreshold && nextLevelThreshold) {
-      const xpInCurrentLevel = xp - currentLevelThreshold.xp;
-      const xpNeededForLevel = nextLevelThreshold.xp - currentLevelThreshold.xp;
-      xpForNextLevel = nextLevelThreshold.xp;
-      progressPercentage = (xpInCurrentLevel / xpNeededForLevel) * 100;
+    if (currentLevelData && nextLevelData) {
+      const xpInCurrentLevel = xp - currentLevelData.xp;
+      const xpNeededForLevel = nextLevelData.xp - currentLevelData.xp;
+      xpForNextLevel = nextLevelData.xp;
+      progressPercentage = xpNeededForLevel > 0 ? (xpInCurrentLevel / xpNeededForLevel) * 100 : 100;
     } else {
       // Max level reached
       xpForNextLevel = xp;
@@ -66,7 +97,16 @@ export class StudentProgressService {
       xp: xp,
       level: currentLevel,
       xpForNextLevel: xpForNextLevel,
-      progressPercentage: Math.min(progressPercentage, 100) // Cap at 100%
+      progressPercentage: Math.min(progressPercentage, 100)
     };
+  }
+  
+  // Using a placeholder for now
+  private calculateStreakStage(streakDays: number): StreakStage {
+      if (streakDays >= 12) return { name: 'Full Plant', icon: 'fa-solid fa-tree', description: 'Your learning habit is flourishing!', progress: 100 };
+      if (streakDays >= 8) return { name: 'Young Plant', icon: 'fa-solid fa-seedling', description: 'Growing strong! Consistency is key.', progress: 75 };
+      if (streakDays >= 4) return { name: 'Sapling', icon: 'fa-solid fa-leaf', description: 'Your streak has sprouted!', progress: 50 };
+      if (streakDays >= 1) return { name: 'Seed', icon: 'fa-solid fa-circle-dot', description: 'A new streak has been planted.', progress: 25 };
+      return { name: 'No Streak', icon: 'fa-solid fa-circle', description: 'Start a new streak!', progress: 0 };
   }
 }

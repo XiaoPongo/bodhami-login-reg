@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpEvent } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of, throwError, firstValueFrom } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { AuthService } from '../auth.service';
 
@@ -12,11 +12,10 @@ export interface Material {
   displayName: string;
   s3Url: string;
   fileType: string;
+  fileSize: number;
   mentorId: string;
   uploadedAt: Date;
   classroom: Classroom | null;
-  // This property does not exist on the backend, but we can add it for the UI
-  size?: number; 
 }
 export interface Classroom {
   id: number; name: string; description: string; classCode: string; mentorId: string;
@@ -30,30 +29,31 @@ export class ApiService {
   constructor(private http: HttpClient, private authService: AuthService) { }
 
   private getAuthHeaders(isFormData: boolean = false): Observable<HttpHeaders> {
-    const token = this.authService.getToken();
+    const session = this.authService.getSession();
+    const token = session?.access_token;
+    
     if (!token) {
-      console.error("Authentication Error: No session token found.");
-      return throwError(() => new Error('User not authenticated! No token available.'));
+        return throwError(() => new Error('User not authenticated!'));
     }
     
     let headersConfig: { [key: string]: string } = { 'Authorization': `Bearer ${token}` };
-    if (!isFormData) {
-      headersConfig['Content-Type'] = 'application/json';
-    }
+    if (!isFormData) headersConfig['Content-Type'] = 'application/json';
     
     return of(new HttpHeaders(headersConfig));
   }
-
-  // --- Activity CSV Upload ---
-  uploadFile(file: Blob, type: string, fileName: string, classroomId: number): Observable<any> {
-    const formData = new FormData();
-    formData.append('file', file, fileName);
-    const uploadUrl = `${this.apiUrl}/upload/${classroomId}/${type}`;
-    return this.getAuthHeaders(true).pipe(
-      switchMap(headers => this.http.post(uploadUrl, formData, { headers }))
-    );
-  }
   
+  // --- STUDENT ENDPOINTS ---
+  getStudentProfile(): Promise<Student> {
+      return firstValueFrom(this.getAuthHeaders().pipe(
+        switchMap(headers => this.http.get<Student>(`${this.apiUrl}/student/profile`, { headers }))
+      ));
+  }
+  addStudentXp(xp: number): Promise<Student> {
+    return firstValueFrom(this.getAuthHeaders().pipe(
+      switchMap(headers => this.http.post<Student>(`${this.apiUrl}/student/add-xp`, { xp }, { headers }))
+    ));
+  }
+
   // --- MATERIAL ENDPOINTS ---
   getMaterials(): Observable<Material[]> {
     return this.getAuthHeaders().pipe(
@@ -61,70 +61,74 @@ export class ApiService {
     );
   }
 
-  // UPDATED: uploadMaterial can now accept null for the classId
-  uploadMaterial(file: File, classId: number | null): Observable<HttpEvent<any>> {
+  uploadMaterial(file: File): Observable<HttpEvent<any>> {
     const formData = new FormData();
     formData.append('file', file, file.name);
-    
-    // If no classId is provided, upload to a general endpoint
-    const uploadUrl = classId
-      ? `${this.apiUrl}/classrooms/${classId}/materials`
-      : `${this.apiUrl}/materials/upload`; // Assumes a new endpoint for unassigned uploads
-    
     return this.getAuthHeaders(true).pipe(
-      switchMap(headers => this.http.post(uploadUrl, formData, {
+      switchMap(headers => this.http.post(`${this.apiUrl}/materials/upload`, formData, {
         headers, reportProgress: true, observe: 'events'
       }))
     );
   }
-  
-  deleteMaterials(ids: number[]): Observable<any> {
+  getMaterialDownloadUrl(materialId: number): Observable<{url: string}> {
       return this.getAuthHeaders().pipe(
-          switchMap(headers => this.http.request('delete', `${this.apiUrl}/materials`, { headers, body: { materialIds: ids } }))
+          switchMap(headers => this.http.get<{url: string}>(`${this.apiUrl}/materials/${materialId}/download-url`, { headers }))
       );
   }
-
+  deleteMaterials(ids: number[]): Observable<any> {
+      return this.getAuthHeaders().pipe(
+          switchMap(headers => this.http.request('delete', `${this.apiUrl}/materials`, { 
+              headers, 
+              body: { materialIds: ids } 
+          }))
+      );
+  }
   assignMaterials(materialIds: number[], classroomId: number | null): Observable<any> {
     const payload = { materialIds, classroomId };
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.post(`${this.apiUrl}/materials/assign`, payload, { headers }))
     );
   }
-  
+
   // --- Classroom Endpoints ---
   getClassrooms(): Observable<Classroom[]> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.get<Classroom[]>(`${this.apiUrl}/classrooms`, { headers }))
     );
   }
-  
   createClassroom(data: { name: string, description: string }): Observable<Classroom> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.post<Classroom>(`${this.apiUrl}/classrooms`, data, { headers }))
     );
   }
-
   updateClassroom(id: number, data: { name: string, description: string }): Observable<Classroom> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.put<Classroom>(`${this.apiUrl}/classrooms/${id}`, data, { headers }))
     );
   }
-
   deleteClassroom(id: number): Observable<any> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.delete(`${this.apiUrl}/classrooms/${id}`, { headers }))
     );
   }
-
   removeStudentFromClass(classroomId: number, studentId: string): Observable<any> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.delete(`${this.apiUrl}/classrooms/${classroomId}/students/${studentId}`, { headers }))
     );
   }
-
   unassignActivityFromClass(classroomId: number, activityId: number): Observable<any> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.delete(`${this.apiUrl}/classrooms/${classroomId}/activities/${activityId}`, { headers }))
+    );
+  }
+    
+  // --- THIS IS THE FIX: Method restored for other components ---
+  uploadFile(file: Blob, type: string, fileName: string, classroomId: number): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file, fileName);
+    const uploadUrl = `${this.apiUrl}/upload/${classroomId}/${type}`;
+    return this.getAuthHeaders(true).pipe(
+      switchMap(headers => this.http.post(uploadUrl, formData, { headers }))
     );
   }
 }
