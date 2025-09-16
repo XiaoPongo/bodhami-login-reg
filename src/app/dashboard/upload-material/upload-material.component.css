@@ -54,6 +54,7 @@
   padding: 2rem;
   margin-bottom: 2rem;
   border: 1px solid #e5e7eb;
+  align-items: flex-start; /* --- THIS IS THE FIX for the oversized drop zone --- */
 }
 .upload-step { flex: 1; display: flex; gap: 1rem; }
 .step-number {
@@ -77,6 +78,7 @@
   border-radius: 8px;
   transition: box-shadow 0.2s;
   position: relative;
+  height: 100%; /* Make wrapper fill the step height */
 }
 .drop-zone-wrapper.dragging { box-shadow: 0 0 0 3px #c7d2fe; }
 .drop-zone-wrapper.disabled { opacity: 0.5; cursor: not-allowed; }
@@ -88,6 +90,10 @@
   transition: all 0.2s ease-in-out;
   height: 100%;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 .drop-zone-wrapper.dragging .drop-zone { border-color: #4f46e5; background-color: #f5f3ff; }
 .drop-zone i { font-size: 2.5rem; color: #4f46e5; margin-bottom: 1rem; }
@@ -163,3 +169,4 @@
 .input-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
 .input-group select { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; }
+
