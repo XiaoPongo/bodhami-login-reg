@@ -52,7 +52,7 @@ export class StudentDashboardComponent implements OnInit {
   xp: number = 0;
   level: number = 1;
   streakDays: number = 0;
-  dashboardImageUrl = 'https://raw.githubusercontent.com/XiaoPongo/bodhami-login-reg/main/student-dashboard.png';
+  dashboardImageUrl = 'https://raw.githubusercontent.com/XiaoPongo/bodhami-login-reg/main/student-dashboard.';
    
   // Modal visibility
   showAchievements = false;

@@ -1,82 +1,86 @@
 <div class="container">
-<div class="left">
-  <img src="https://placehold.co/960x1080" alt="Illustration Placeholder">
-</div>
-<div class="right">
-  <div class="logo">
-    <img src="https://raw.githubusercontent.com/XiaoPongo/Bodhami-Internship-assets-dump/main/assets/signuplogo.jpg" alt="Logo Placeholder" class="logo-img">
+  <div class="left">
+    <img src="https://github.com/XiaoPongo/bodhami-login-reg/blob/main/student.png" alt="A student studying with books and a laptop">
   </div>
-  <h1>Student Signup</h1>
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label [ngClass]="{'error': firstName.invalid && firstName.touched}">First Name *</label>
-      <input formControlName="firstName" (input)="onInput('firstName')">
-      <div *ngIf="firstName.invalid && firstName.touched" class="error-msg-in-field">
-        <span *ngIf="!firstName.value">First name is required.</span>
-        <span *ngIf="firstName.value && firstName.errors?.['minlength']">Should have at least two characters.</span>
-        <span *ngIf="firstName.value && firstName.errors?.['pattern']">Enter a proper name (letters only).</span>
-      </div>
+  <div class="right">
+    <div class="logo">
+      <img src="https://raw.githubusercontent.com/XiaoPongo/Bodhami-Internship-assets-dump/main/assets/signuplogo.jpg" alt="Elevana Logo" class="logo-img">
     </div>
-    <div class="form-group">
-      <label [ngClass]="{'error': lastName.invalid && lastName.touched}">Last Name *</label>
-      <input formControlName="lastName" (input)="onInput('lastName')">
-      <div *ngIf="lastName.invalid && lastName.touched" class="error-msg-in-field">
-        <span *ngIf="!lastName.value">Last name is required.</span>
-        <span *ngIf="lastName.value && lastName.errors?.['minlength']">Should have at least two characters.</span>
-        <span *ngIf="lastName.value && lastName.errors?.['pattern']">Enter a proper name (letters only).</span>
+    <h1>Student Signup</h1>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label [ngClass]="{'error': firstName.invalid && firstName.touched}">First Name *</label>
+        <input formControlName="firstName" (input)="onInput('firstName')">
+        <div *ngIf="firstName.invalid && firstName.touched" class="error-msg-in-field">
+          <span *ngIf="!firstName.value">First name is required.</span>
+          <span *ngIf="firstName.value && firstName.errors?.['minlength']">Should have at least two characters.</span>
+          <span *ngIf="firstName.value && firstName.errors?.['pattern']">Enter a proper name (letters only).</span>
+        </div>
       </div>
-    </div>
-    <div class="form-group">
-      <label [ngClass]="{'error': email.invalid && email.touched}">Email Address *</label>
-      <input formControlName="email" (input)="onInput('email')">
-      <div *ngIf="email.invalid && email.touched" class="error-msg-in-field">
-        <span *ngIf="!email.value">Email is required.</span>
-        <span *ngIf="email.value && email.errors?.['email']">Enter a valid email address.</span>
+      <div class="form-group">
+        <label [ngClass]="{'error': lastName.invalid && lastName.touched}">Last Name *</label>
+        <input formControlName="lastName" (input)="onInput('lastName')">
+        <div *ngIf="lastName.invalid && lastName.touched" class="error-msg-in-field">
+          <span *ngIf="!lastName.value">Last name is required.</span>
+          <span *ngIf="lastName.value && lastName.errors?.['minlength']">Should have at least two characters.</span>
+          <span *ngIf="lastName.value && lastName.errors?.['pattern']">Enter a proper name (letters only).</span>
+        </div>
       </div>
-    </div>
-    <div class="form-group">
-      <label [ngClass]="{'error': country.invalid && country.touched}">Country *</label>
-      <select formControlName="country" (change)="onInput('country')">
-        <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
-      </select>
-      <div *ngIf="country.invalid && country.touched" class="error-msg-in-field">
-        <span *ngIf="!country.value">Country is required.</span>
+      <div class="form-group">
+        <label [ngClass]="{'error': email.invalid && email.touched}">Email Address *</label>
+        <input formControlName="email" (input)="onInput('email')">
+        <div *ngIf="email.invalid && email.touched" class="error-msg-in-field">
+          <span *ngIf="!email.value">Email is required.</span>
+          <span *ngIf="email.value && email.errors?.['email']">Enter a valid email address.</span>
+        </div>
       </div>
-    </div>
-    <div class="form-group">
-      <label [ngClass]="{'error': phone.invalid && phone.touched}">Phone Number *</label>
-      <input formControlName="phone" (input)="onInput('phone')">
-      <span class="note">Enter mobile without 0</span>
-      <div *ngIf="phone.invalid && phone.touched" class="error-msg-in-field">
-        <span *ngIf="!phone.value">Phone number is required.</span>
-        <span *ngIf="phone.value && phone.errors?.['pattern']">Enter a valid 10-digit Indian phone number.</span>
+      <div class="form-group">
+        <label [ngClass]="{'error': country.invalid && country.touched}">Country *</label>
+        <select formControlName="country" (change)="onInput('country')">
+          <option *ngFor="let c of countries" [value]="c">{{ c }}</option>
+        </select>
+        <div *ngIf="country.invalid && country.touched" class="error-msg-in-field">
+          <span *ngIf="!country.value">Country is required.</span>
+        </div>
       </div>
-    </div>
-    <div class="form-group">
-      <label [ngClass]="{'error': password.invalid && password.touched}">Password *</label>
-      <input type="password" formControlName="password" (input)="onInput('password')">
-      <span class="note">Set new password</span>
-      <div *ngIf="password.invalid && password.touched" class="error-msg-in-field">
-        <span *ngIf="!password.value">Password is required.</span>
-        <span *ngIf="password.value && password.errors?.['pattern']">Must contain lowercase, uppercase, number, and special character.</span>
+      <div class="form-group">
+        <label [ngClass]="{'error': phone.invalid && phone.touched}">Phone Number *</label>
+        <input formControlName="phone" (input)="onInput('phone')">
+        <span class="note">Enter mobile without 0</span>
+        <div *ngIf="phone.invalid && phone.touched" class="error-msg-in-field">
+          <span *ngIf="!phone.value">Phone number is required.</span>
+          <span *ngIf="phone.value && phone.errors?.['pattern']">Enter a valid 10-digit Indian phone number.</span>
+        </div>
       </div>
-    </div>
-    <div class="form-group">
-      <label [ngClass]="{'error': postalCode.invalid && postalCode.touched}">Postal Code</label>
-      <input formControlName="postalCode" (input)="onInput('postalCode')">
-      <div *ngIf="postalCode.invalid && postalCode.touched" class="error-msg-in-field">
-        <span *ngIf="!postalCode.value">Postal code is required.</span>
-        <span *ngIf="postalCode.value && postalCode.errors?.['pattern']">Enter a valid 6-digit postal code.</span>
+      <div class="form-group">
+        <label [ngClass]="{'error': password.invalid && password.touched}">Password *</label>
+        <!-- MODIFIED: Input type is now dynamic -->
+        <input [type]="showPassword ? 'text' : 'password'" formControlName="password" (input)="onInput('password')">
+        <!-- ADDED: Eye icon to toggle visibility -->
+        <i class="password-toggle fas" [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'" (click)="togglePasswordVisibility()"></i>
+        <span class="note">Set new password</span>
+        <div *ngIf="password.invalid && password.touched" class="error-msg-in-field">
+          <span *ngIf="!password.value">Password is required.</span>
+          <span *ngIf="password.value && password.errors?.['pattern']">Must contain lowercase, uppercase, number, and special character.</span>
+        </div>
       </div>
-    </div>
-    <div class="checkbox-group">
-      <input type="checkbox" formControlName="accept" id="accept" (change)="onInput('accept')">
-      <label for="accept" [ngClass]="{'error': accept.invalid && accept.touched && !accept.value}">I accept the Terms and Conditions and Privacy Policy of Bodhami Private Limited.</label>
-      <div *ngIf="accept.invalid && accept.touched && !accept.value" class="error-msg-in-field">
-        You must accept the terms.
+      <div class="form-group">
+        <label [ngClass]="{'error': postalCode.invalid && postalCode.touched}">Postal Code</label>
+        <input formControlName="postalCode" (input)="onInput('postalCode')">
+        <div *ngIf="postalCode.invalid && postalCode.touched" class="error-msg-in-field">
+          <span *ngIf="!postalCode.value">Postal code is required.</span>
+          <span *ngIf="postalCode.value && postalCode.errors?.['pattern']">Enter a valid 6-digit postal code.</span>
+        </div>
       </div>
-    </div>
-    <button type="submit" [disabled]="form.invalid">Validate</button>
-  </form>
-</div>
-</div>
+      <div class="checkbox-group">
+        <input type="checkbox" formControlName="accept" id="accept" (change)="onInput('accept')">
+        <label for="accept" [ngClass]="{'error': accept.invalid && accept.touched && !accept.value}">I accept the Terms and Conditions and Privacy Policy of Bodhami Private Limited.</label>
+        <div *ngIf="accept.invalid && accept.touched && !accept.value" class="error-msg-in-field">
+          You must accept the terms.
+        </div>
+      </div>
+      <button type="submit" [disabled]="form.invalid">Validate</button>
+    </form>
+  </div>
+  </div>
+  

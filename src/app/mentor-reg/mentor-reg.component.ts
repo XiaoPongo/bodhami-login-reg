@@ -15,6 +15,7 @@ export class MentorRegComponent implements OnInit {
   form!: FormGroup;
   error: string = '';
   success: string = '';
+  showPassword = false; // Property to track password visibility
 
   constructor(private authService: AuthService) {}
 
@@ -51,6 +52,11 @@ export class MentorRegComponent implements OnInit {
       ]),
       accept: new FormControl(false, [Validators.requiredTrue])
     });
+  }
+  
+  // Method to toggle password visibility
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 
   // ✅ Getters

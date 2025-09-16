@@ -164,6 +164,21 @@ select.ng-touched.ng-invalid {
   display: inline;
 }
 
+/* ADDED: Styles for the password toggle icon */
+.password-toggle {
+  position: absolute;
+  top: 28px; /* Position it vertically */
+  right: 5px;  /* Position it horizontally */
+  cursor: pointer;
+  color: #9e9e9e; /* Light grey color */
+  z-index: 2; /* Ensure it's above the input's bottom border */
+}
+
+.password-toggle:hover {
+  color: #333; /* Darken on hover */
+}
+
+
 /* Button */
 button {
   width: 100%;

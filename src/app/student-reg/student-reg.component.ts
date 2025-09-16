@@ -15,6 +15,7 @@ export class StudentRegComponent implements OnInit {
   form!: FormGroup;
   error: string = '';
   success: string = '';
+  showPassword = false; // Property to track password visibility
 
   constructor(private authService: AuthService) {}
 
@@ -50,6 +51,11 @@ export class StudentRegComponent implements OnInit {
       ]),
       accept: new FormControl(false, [Validators.requiredTrue])
     });
+  }
+  
+  // Method to toggle password visibility
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 
   // ✅ Easy getters
@@ -97,4 +103,3 @@ export class StudentRegComponent implements OnInit {
     if (control) control.markAsTouched();
   }
 }
-
