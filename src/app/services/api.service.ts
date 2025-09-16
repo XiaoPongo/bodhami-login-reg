@@ -105,7 +105,6 @@ export class ApiService {
     );
   }
   
-  // NEW: Update classroom details
   updateClassroom(id: number, data: { name: string, description: string }): Observable<Classroom> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.put<Classroom>(`${this.apiUrl}/classrooms/${id}`, data, { headers }))
@@ -118,14 +117,12 @@ export class ApiService {
     );
   }
 
-  // NEW: Remove a student from a specific class
   removeStudentFromClass(classroomId: number, studentId: string): Observable<any> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.delete(`${this.apiUrl}/classrooms/${classroomId}/students/${studentId}`, { headers }))
     );
   }
 
-  // NEW: Unassign an activity from a specific class
   unassignActivityFromClass(classroomId: number, activityId: number): Observable<any> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.delete(`${this.apiUrl}/classrooms/${classroomId}/activities/${activityId}`, { headers }))

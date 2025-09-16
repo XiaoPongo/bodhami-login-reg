@@ -37,7 +37,6 @@ export class ClassService {
       this._isLoading.next(false);
       return;
     }
-
     if (id === this._selectedClass.value?.id && !this._isLoading.value) {
         return;
     }
@@ -60,15 +59,18 @@ export class ClassService {
 
   createClass(name: string, description: string): Observable<Classroom> {
     return this.apiService.createClassroom({ name, description }).pipe(
-      tap(() => this.loadClasses())
+      tap((newClassroom) => {
+        const currentClasses = this._classes.getValue();
+        this._classes.next([...currentClasses, newClassroom].sort((a, b) => a.name.localeCompare(b.name)));
+      })
     );
   }
   
   updateClass(id: number, name: string, description: string): Observable<Classroom> {
     return this.apiService.updateClassroom(id, { name, description }).pipe(
       tap((updatedClass) => {
-        this._selectedClass.next(updatedClass); // Immediately update the view
-        this.loadClasses(); // Refresh the list in the background
+        this._selectedClass.next(updatedClass);
+        this.loadClasses(); // Refresh list to reflect name/desc changes
       })
     );
   }
@@ -76,7 +78,9 @@ export class ClassService {
   deleteClass(classId: number): Observable<any> {
     return this.apiService.deleteClassroom(classId).pipe(
       tap(() => {
-        this.loadClasses();
+        const currentClasses = this._classes.getValue().filter(c => c.id !== classId);
+        this._classes.next(currentClasses);
+
         if (this._selectedClass.value?.id === classId) {
           this._selectedClass.next(null);
         }
@@ -86,31 +90,41 @@ export class ClassService {
 
   removeStudent(classId: number, studentId: string): Observable<any> {
     return this.apiService.removeStudentFromClass(classId, studentId).pipe(
-      tap(() => this.refreshSelectedClassData(classId))
+      tap(() => {
+        const currentClass = this._selectedClass.getValue();
+        if (currentClass && currentClass.id === classId) {
+          const updatedStudents = currentClass.students.filter(s => s.id !== studentId);
+          this._selectedClass.next({ ...currentClass, students: updatedStudents });
+        }
+        this.loadClasses(); // Refresh main list for student counts
+      })
     );
   }
 
   unassignMaterial(classId: number, materialId: number): Observable<any> {
-    // Unassigning is done by assigning the material to a `null` classroom
     return this.materialService.assignMaterials([materialId], null).pipe(
-      tap(() => this.refreshSelectedClassData(classId))
+      tap(() => {
+         const currentClass = this._selectedClass.getValue();
+        if (currentClass && currentClass.id === classId) {
+          const updatedMaterials = currentClass.materials.filter(m => m.id !== materialId);
+          this._selectedClass.next({ ...currentClass, materials: updatedMaterials });
+        }
+        this.loadClasses(); // Refresh main list for content counts
+      })
     );
   }
 
   unassignActivity(classId: number, activityId: number): Observable<any> {
     return this.apiService.unassignActivityFromClass(classId, activityId).pipe(
-      tap(() => this.refreshSelectedClassData(classId))
+      tap(() => {
+        const currentClass = this._selectedClass.getValue();
+        if (currentClass && currentClass.id === classId) {
+          const updatedActivities = currentClass.activities.filter(a => a.id !== activityId);
+          this._selectedClass.next({ ...currentClass, activities: updatedActivities });
+        }
+        this.loadClasses(); // Refresh main list for content counts
+      })
     );
-  }
-
-  private refreshSelectedClassData(classId: number): void {
-    this.loadClasses(); // Refresh counts on the left panel
-    // Re-fetch the selected class's data to show the updated content
-    // This is better than just selecting, as it forces a fresh API call
-    this.apiService.getClassroomById(classId).subscribe({
-        next: (classroom) => this._selectedClass.next(classroom),
-        error: (err) => console.error(`Failed to refresh class data for id ${classId}`, err),
-    });
   }
 }
 

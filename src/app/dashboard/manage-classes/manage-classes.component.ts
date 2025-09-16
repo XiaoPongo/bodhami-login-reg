@@ -59,14 +59,12 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
   }
 
   handleSelectClass(classId: number): void {
-    // Only navigate if the class ID in the URL is different
     if (this.route.snapshot.queryParams['classId'] != classId) {
         this.router.navigate([], { queryParams: { classId: classId } });
     } else {
-        // If the same class is clicked again, ensure data is fresh
         this.classService.selectClass(classId);
     }
-    this.isEditingClass = false; // Ensure we exit edit mode when switching classes
+    this.isEditingClass = false;
   }
 
   handleDeleteClass(classId: number, className: string): void {
@@ -76,7 +74,6 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
       message: `Are you sure you want to permanently delete <strong>"${className}"</strong>? This action cannot be undone.`,
       onConfirm: () => {
         this.classService.deleteClass(classId).subscribe(() => {
-          // If the deleted class was the one selected, clear the query params
           if (this.route.snapshot.queryParams['classId'] == classId) {
              this.router.navigate([], { queryParams: {} });
           }
@@ -90,9 +87,15 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
   handleCreateClass(): void {
     if (this.newClassName.trim()) {
       this.classService.createClass(this.newClassName, this.newClassDescription)
-        .subscribe(() => {
-            this.showToast('Class created successfully!');
+        .subscribe({
+          next: (newClass) => {
+            this.showToast(`Class "${newClass.name}" created successfully!`);
             this.closeCreateModal();
+          },
+          error: (err) => {
+            console.error("Failed to create class:", err);
+            this.showToast('Error: Could not create the class. Please try again.');
+          }
         });
     }
   }
