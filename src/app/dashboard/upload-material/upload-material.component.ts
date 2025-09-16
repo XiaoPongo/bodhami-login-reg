@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { Observable, Subscription, BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpEventType, HttpEvent } from '@angular/common/http';
@@ -14,7 +15,6 @@ interface UploadableFile {
   progress: number;
   error?: string;
   subscription?: Subscription;
-  classId: number;
 }
 
 interface Notification {
@@ -25,7 +25,7 @@ interface Notification {
 @Component({
   selector: 'app-upload-material',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './upload-material.component.html',
   styleUrls: ['./upload-material.component.css']
 })
@@ -33,7 +33,6 @@ export class UploadMaterialComponent implements OnInit, OnDestroy {
   
   filesToUpload: UploadableFile[] = [];
   isDragging = false;
-  uploadTargetClassId: string = ''; 
   
   selectedClassFilter: string = 'all';
 
@@ -55,11 +54,16 @@ export class UploadMaterialComponent implements OnInit, OnDestroy {
   private notificationTimeout: any;
 
   confirmModal = { isOpen: false, title: '', message: '', onConfirm: () => {} };
+  
+  // New properties for the details modal
+  isDetailsModalOpen = false;
+  selectedMaterial: Material | null = null;
 
   constructor(
     private apiService: ApiService, 
     public classService: ClassService,
-    public materialService: MaterialService
+    public materialService: MaterialService,
+    private router: Router
   ) {
     this.classes$ = this.classService.classes$;
     this.materials$ = this.materialService.materials$;
@@ -68,7 +72,7 @@ export class UploadMaterialComponent implements OnInit, OnDestroy {
     this.filteredMaterials$ = combineLatest([this.materials$, this.filter]).pipe(
       map(([materials, filterValue]) => {
         if (filterValue === 'all') return materials;
-        if (filterValue === 'unassigned') return materials.filter(m => !m.classroom);
+        // The 'unassigned' filter is now removed
         return materials.filter(m => m.classroom?.id === Number(filterValue));
       })
     );
@@ -99,13 +103,13 @@ export class UploadMaterialComponent implements OnInit, OnDestroy {
   }
   
   getClassNameById(classId: number | null | undefined): string {
-    if (classId === null || classId === undefined) return 'Unassigned';
+    if (classId === null || classId === undefined) return 'Not Assigned';
     const foundClass = this.allClasses.find(c => c.id === classId);
     return foundClass ? foundClass.name : 'Unknown Class';
   }
 
   // --- File Upload Logic ---
-  onDragOver(event: DragEvent) { event.preventDefault(); if (this.uploadTargetClassId) this.isDragging = true; }
+  onDragOver(event: DragEvent) { event.preventDefault(); this.isDragging = true; }
   onDragLeave(event: DragEvent) { event.preventDefault(); this.isDragging = false; }
   onDrop(event: DragEvent) {
     event.preventDefault();
@@ -120,12 +124,8 @@ export class UploadMaterialComponent implements OnInit, OnDestroy {
   }
 
   handleFiles(files: FileList) {
-    if (!this.uploadTargetClassId) {
-      this.showNotificationBanner('error', 'Please select a class before choosing files.');
-      return;
-    }
     const allowedExtensions = ['.pdf', '.docx', '.csv', '.xlsx'];
-    const maxSize = 5 * 1024 * 1024;
+    const maxSize = 5 * 1024 * 1024; // 5MB
 
     Array.from(files).forEach(file => {
       let error = '';
@@ -133,8 +133,7 @@ export class UploadMaterialComponent implements OnInit, OnDestroy {
       if (!allowedExtensions.includes(extension)) error = `Invalid type. Only ${allowedExtensions.join(', ')}.`;
       else if (file.size > maxSize) error = 'File exceeds 5MB limit.';
       
-      const classId = Number(this.uploadTargetClassId);
-      this.filesToUpload.push({ file, status: error ? 'error' : 'pending', progress: 0, error, classId });
+      this.filesToUpload.push({ file, status: error ? 'error' : 'pending', progress: 0, error });
     });
     this.startUploads();
   }
@@ -149,7 +148,8 @@ export class UploadMaterialComponent implements OnInit, OnDestroy {
 
   uploadFile(uploadable: UploadableFile) {
     uploadable.status = 'uploading';
-    uploadable.subscription = this.apiService.uploadMaterial(uploadable.file, uploadable.classId).subscribe({
+    // Uploads are now sent without a classId, they start as unassigned
+    uploadable.subscription = this.apiService.uploadMaterial(uploadable.file, null).subscribe({
       next: (event: HttpEvent<any>) => {
         if (event.type === HttpEventType.UploadProgress && event.total) {
           uploadable.progress = Math.round(100 * event.loaded / event.total);
@@ -164,7 +164,11 @@ export class UploadMaterialComponent implements OnInit, OnDestroy {
         uploadable.subscription?.unsubscribe();
       },
       complete: () => {
-        setTimeout(() => this.removeFileFromQueue(this.filesToUpload.indexOf(uploadable)), 2000);
+         // Auto-refresh the list after a short delay
+        setTimeout(() => {
+          this.removeFileFromQueue(this.filesToUpload.indexOf(uploadable));
+          this.materialService.loadMaterials();
+        }, 2000);
       }
     });
   }
@@ -184,7 +188,6 @@ export class UploadMaterialComponent implements OnInit, OnDestroy {
     this.showBulkToolbar = this.selectedFileIds.size > 0;
   }
   
-  // --- THIS IS THE FIX for NG5002 ---
   openDeleteModal(ids: number | Set<number>, name?: string) {
     const idsToDelete = (typeof ids === 'number') ? [ids] : [...ids];
     const message = name 
@@ -208,7 +211,6 @@ export class UploadMaterialComponent implements OnInit, OnDestroy {
     };
   }
   
-  // --- THIS IS THE FIX for NG5002 ---
   openAssignModal(ids: number | Set<number>) {
     this.selectedFileIds = (typeof ids === 'number') ? new Set([ids]) : ids;
     this.isAssignModalOpen = true;
@@ -237,6 +239,17 @@ export class UploadMaterialComponent implements OnInit, OnDestroy {
     checkboxes.forEach(cb => cb.checked = false);
   }
 
+  // --- New Details Modal Logic ---
+  openDetailsModal(material: Material) {
+    this.selectedMaterial = material;
+    this.isDetailsModalOpen = true;
+  }
+
+  closeDetailsModal() {
+    this.isDetailsModalOpen = false;
+    this.selectedMaterial = null;
+  }
+
   closeConfirmModal = () => this.confirmModal.isOpen = false;
   
   // --- UI Helpers ---
@@ -246,6 +259,14 @@ export class UploadMaterialComponent implements OnInit, OnDestroy {
     if (fileName.endsWith('.xlsx')) return 'fas fa-file-excel';
     if (fileName.endsWith('.pdf')) return 'fas fa-file-pdf';
     return 'fas fa-file';
+  }
+  
+  formatFileSize(bytes: number): string {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
   showNotificationBanner(type: 'success' | 'error', message: string) {

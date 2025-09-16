@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { tap, finalize } from 'rxjs/operators';
-import { ApiService, Classroom } from './api.service';
-import { MaterialService } from './material.service';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { ApiService, Classroom, Student, Activity, Material } from './api.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,40 +12,35 @@ export class ClassService {
   
   private readonly _selectedClass = new BehaviorSubject<Classroom | null>(null);
   public readonly selectedClass$: Observable<Classroom | null> = this._selectedClass.asObservable();
-  
+
   private readonly _isLoading = new BehaviorSubject<boolean>(false);
   public readonly isLoading$: Observable<boolean> = this._isLoading.asObservable();
 
-  private _selectedClassId: number | null = null;
-
-  constructor(
-    private apiService: ApiService,
-    private materialService: MaterialService // Ensure MaterialService is injected if used
-  ) {
+  constructor(private apiService: ApiService) {
     this.loadClasses();
   }
-
+  
   loadClasses(): void {
     this._isLoading.next(true);
-    this.apiService.getClassrooms().pipe(
-      finalize(() => this._isLoading.next(false))
-    ).subscribe({
-      next: (classes: Classroom[]) => {
+    this.apiService.getClassrooms().subscribe({
+      next: (classes) => {
         this._classes.next(classes);
-        // After reloading, re-select the class to get fresh data
-        if (this._selectedClassId) {
-          const refreshedClass = classes.find(c => c.id === this._selectedClassId);
+        // If a class was selected, refresh its data too
+        const selectedId = this.getSelectedClassId();
+        if (selectedId) {
+          const refreshedClass = classes.find(c => c.id === selectedId);
           this._selectedClass.next(refreshedClass || null);
         }
+        this._isLoading.next(false);
       },
-      error: (err: any) => {
+      error: (err) => {
         console.error("Failed to load classrooms", err);
+        this._isLoading.next(false);
       }
     });
   }
 
   selectClass(id: number | null): void {
-    this._selectedClassId = id; // Store the selected ID
     if (id === null) {
       this._selectedClass.next(null);
       return;
@@ -55,43 +49,44 @@ export class ClassService {
     this._selectedClass.next(foundClass || null);
   }
 
+  // --- THIS IS THE FIX: The missing method is now implemented ---
+  public getSelectedClassId(): number | null {
+    // .getValue() synchronously returns the current value from the BehaviorSubject
+    return this._selectedClass.getValue()?.id ?? null;
+  }
+
   createClass(name: string, description: string): Observable<Classroom> {
     return this.apiService.createClassroom({ name, description }).pipe(
-      tap(() => this.loadClasses()) // Auto-refresh on success
+      tap(() => this.loadClasses()) // Refresh list after creating
     );
   }
   
   updateClass(id: number, name: string, description: string): Observable<Classroom> {
     return this.apiService.updateClassroom(id, { name, description }).pipe(
-      tap(() => this.loadClasses()) // Auto-refresh on success
+      tap(() => this.loadClasses()) // Refresh list after updating
     );
   }
 
   deleteClass(classId: number): Observable<any> {
     return this.apiService.deleteClassroom(classId).pipe(
       tap(() => {
-        this._selectedClassId = null; // Clear selection if deleted
-        this.loadClasses(); // Auto-refresh on success
+        if (this.getSelectedClassId() === classId) {
+          this.selectClass(null);
+        }
+        this.loadClasses(); // Refresh list after deleting
       })
     );
   }
 
   removeStudent(classId: number, studentId: string): Observable<any> {
     return this.apiService.removeStudentFromClass(classId, studentId).pipe(
-      tap(() => this.loadClasses()) // Auto-refresh on success
-    );
-  }
-
-  unassignMaterial(classId: number, materialId: number): Observable<any> {
-    // Assuming assigning to `null` unassigns it
-    return this.materialService.assignMaterials([materialId], null).pipe(
-      tap(() => this.loadClasses()) // Auto-refresh on success
+      tap(() => this.loadClasses()) // Refresh to update student count
     );
   }
 
   unassignActivity(classId: number, activityId: number): Observable<any> {
     return this.apiService.unassignActivityFromClass(classId, activityId).pipe(
-      tap(() => this.loadClasses()) // Auto-refresh on success
+      tap(() => this.loadClasses()) // Refresh to update activity count
     );
   }
 }

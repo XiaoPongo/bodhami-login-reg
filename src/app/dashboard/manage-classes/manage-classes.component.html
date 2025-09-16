@@ -1,25 +1,20 @@
-<div class="manage-container" style="position: relative;">
-
+<div class="manage-container">
   <!-- Left Panel: Class List -->
   <div class="left-panel">
     <div class="panel-header">
-      <a routerLink="/mentor/dashboard" class="back-link">
-        <i class="fas fa-arrow-left"></i> Classrooms
-      </a>
-      <!-- NEW: Refresh Button -->
-      <button class="btn-icon" (click)="handleRefresh()" title="Refresh List">
-        <i class="fas fa-sync-alt"></i>
-      </button>
+      <h2>Your Classrooms</h2>
       <button class="btn btn-primary" (click)="openCreateModal()">
         <i class="fas fa-plus"></i> New Class
       </button>
     </div>
+     <div class="panel-controls">
+      <a routerLink="/mentor/dashboard" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+      <button class="btn-icon" (click)="handleRefresh()" title="Refresh Class List">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+    </div>
     <div class="class-list-scroll">
-      <ng-container *ngIf="(isLoading$ | async); else classContent">
-        <div class="class-card placeholder" *ngFor="let i of [1,2,3]"></div>
-      </ng-container>
-
-      <ng-template #classContent>
+      <ng-container *ngIf="!(isLoading$ | async); else loadingClasses">
         <ng-container *ngIf="(classes$ | async) as classes">
           <div *ngIf="classes.length > 0; else noClasses">
             <div 
@@ -31,7 +26,7 @@
                 <span class="class-name">{{ class.name }}</span>
                 <span class="class-code">{{ class.classCode }}</span>
               </div>
-              <p class="class-description">{{ (class.description | slice:0:100) || 'No description provided.' }}{{ class.description && class.description.length > 100 ? '...' : '' }}</p>
+              <p class="class-description">{{ class.description | slice:0:100 }}{{ (class.description?.length || 0) > 100 ? '...' : '' }}</p>
               <div class="class-card-footer">
                 <span><i class="fas fa-users"></i> {{ class.students?.length ?? 0 }}</span>
                 <span><i class="fas fa-file-alt"></i> {{ (class.materials?.length ?? 0) + (class.activities?.length ?? 0) }}</span>
@@ -44,6 +39,9 @@
             </div>
           </ng-template>
         </ng-container>
+      </ng-container>
+      <ng-template #loadingClasses>
+        <div class="class-card placeholder" *ngFor="let i of [1,2,3]"></div>
       </ng-template>
     </div>
   </div>
@@ -51,47 +49,41 @@
   <!-- Right Panel: Class Details -->
   <div class="right-panel">
     <ng-container *ngIf="(selectedClass$ | async) as selectedClass; else noClassSelected">
-      
-      <!-- View/Edit Header -->
-      <ng-container *ngIf="!isEditingClass; else editHeader">
-        <div class="detail-header">
-          <div>
-            <h1>{{ selectedClass.name }}</h1>
-            <p>{{ selectedClass.description || 'No description provided.' }}</p>
-          </div>
-          <div class="header-actions">
-            <div class="code-box" (click)="copyCode(selectedClass.classCode)" title="Copy Join Code">
-              <span>{{ selectedClass.classCode }}</span> <i class="fas fa-copy"></i>
+      <!-- Class Header -->
+       <div class="detail-header">
+        <div class="header-main-content">
+           <ng-container *ngIf="!isEditingClass; else editMode">
+            <div>
+              <h1>{{ selectedClass.name }}</h1>
+              <p>{{ selectedClass.description }}</p>
             </div>
-            <button class="btn btn-secondary" (click)="handleEditClass(selectedClass)">
-              <i class="fas fa-edit"></i> Edit
-            </button>
-            <button class="btn btn-danger" (click)="handleDeleteClass(selectedClass.id, selectedClass.name)">
-              <i class="fas fa-trash"></i> Delete
-            </button>
-          </div>
+           </ng-container>
+           <ng-template #editMode>
+             <form #editClassForm="ngForm" class="edit-form" (ngSubmit)="handleSaveClass(selectedClass.id)">
+                <input type="text" class="form-input" [(ngModel)]="editableClassName" name="editableClassName" required>
+                <textarea class="form-textarea" [(ngModel)]="editableClassDescription" name="editableClassDescription" rows="2"></textarea>
+             </form>
+           </ng-template>
         </div>
-      </ng-container>
-
-      <!-- Edit State Header -->
-      <ng-template #editHeader>
-        <div class="edit-header-form">
-          <div class="input-group">
-            <label for="editableClassName">Class Name *</label>
-            <input type="text" id="editableClassName" [(ngModel)]="editableClassName" name="editableClassName" required>
+        <div class="header-actions">
+          <div class="code-box" (click)="copyCode(selectedClass.classCode)" title="Copy Join Code">
+            <span>{{ selectedClass.classCode }}</span>
+            <i class="fas fa-copy"></i>
           </div>
-          <div class="input-group">
-            <label for="editableClassDescription">Description</label>
-            <textarea id="editableClassDescription" [(ngModel)]="editableClassDescription" name="editableClassDescription" rows="2"></textarea>
-          </div>
-          <div class="header-actions">
-            <button class="btn btn-secondary" (click)="handleCancelEdit()">Cancel</button>
-            <button class="btn btn-primary" [disabled]="!editableClassName.trim()" (click)="handleSaveClass(selectedClass.id)">
-              <i class="fas fa-save"></i> Save Changes
-            </button>
-          </div>
+          <ng-container *ngIf="!isEditingClass; else editActions">
+             <button class="btn btn-secondary" (click)="handleEditClass(selectedClass)">
+               <i class="fas fa-pencil-alt"></i> Edit
+             </button>
+             <button class="btn-danger" (click)="openConfirmModal('deleteClass', selectedClass.id, { className: selectedClass.name })">
+               <i class="fas fa-trash"></i> Delete
+             </button>
+          </ng-container>
+           <ng-template #editActions>
+              <button class="btn btn-secondary" (click)="handleCancelEdit()">Cancel</button>
+              <button class="btn btn-primary" (click)="handleSaveClass(selectedClass.id)" [disabled]="!editableClassName.trim()">Save</button>
+           </ng-template>
         </div>
-      </ng-template>
+      </div>
 
       <!-- Content Tabs -->
       <div class="content-tabs">
@@ -110,72 +102,85 @@
       <div class="tab-content">
         <!-- Students Tab -->
         <div *ngIf="activeContentTab === 'students'">
-          <div class="table-wrapper" *ngIf="selectedClass.students && selectedClass.students.length > 0; else emptyContent">
-            <table class="content-table">
-              <thead><tr><th>Full Name</th><th>Email</th><th>Actions</th></tr></thead>
-              <tbody>
-                <tr *ngFor="let student of selectedClass.students">
-                  <td>
-                    <!-- THIS IS THE FIX: Now displays the student's full name -->
-                    <div class="student-name">{{ student.name || 'Name not available' }}</div>
-                    <div class="student-email">{{ student.email }}</div>
-                  </td>
-                  <td>{{ student.email }}</td>
-                  <td><button class="btn-table-danger" (click)="handleRemoveStudent(selectedClass.id, student)">Remove</button></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+           <div *ngIf="selectedClass.students && selectedClass.students.length > 0; else emptyContent" class="table-wrapper">
+             <table>
+               <thead>
+                 <tr>
+                   <th>Student Name</th>
+                   <th>Email Address</th>
+                   <th>Actions</th>
+                 </tr>
+               </thead>
+               <tbody>
+                 <tr *ngFor="let student of selectedClass.students">
+                   <td>
+                     <div class="student-name">{{ student.name }}</div>
+                   </td>
+                   <td>{{ student.email }}</td>
+                   <td>
+                     <button class="btn-danger-outline" (click)="openConfirmModal('removeStudent', selectedClass.id, { student: student })">Remove</button>
+                   </td>
+                 </tr>
+               </tbody>
+             </table>
+           </div>
         </div>
         <!-- Materials Tab -->
         <div *ngIf="activeContentTab === 'materials'">
-          <div class="table-wrapper" *ngIf="selectedClass.materials && selectedClass.materials.length > 0; else emptyContent">
-            <table class="content-table">
-              <thead><tr><th>File Name</th><th>Type</th><th>Actions</th></tr></thead>
-              <tbody>
-                <tr *ngFor="let material of selectedClass.materials">
-                  <td>{{ material.displayName }}</td>
-                  <td>{{ material.fileType }}</td>
-                  <td><button class="btn-table-danger" (click)="handleUnassignMaterial(selectedClass.id, material)">Unassign</button></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+           <div *ngIf="selectedClass.materials && selectedClass.materials.length > 0; else emptyContent" class="table-wrapper">
+             <ul class="material-list">
+                <li *ngFor="let material of selectedClass.materials">
+                  <a routerLink="/mentor/upload-material">{{ material.displayName }}</a>
+                </li>
+             </ul>
+           </div>
         </div>
         <!-- Activities Tab -->
         <div *ngIf="activeContentTab === 'activities'">
-          <div class="table-wrapper" *ngIf="selectedClass.activities && selectedClass.activities.length > 0; else emptyContent">
-            <table class="content-table">
-               <thead><tr><th>Title</th><th>Type</th><th>Actions</th></tr></thead>
-              <tbody>
-                <tr *ngFor="let activity of selectedClass.activities">
-                  <td>{{ activity.title }}</td>
-                  <td>{{ activity.type }}</td>
-                  <td><button class="btn-table-danger" (click)="handleUnassignActivity(selectedClass.id, activity)">Unassign</button></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <div *ngIf="selectedClass.activities && selectedClass.activities.length > 0; else emptyContent" class="table-wrapper">
+             <table>
+               <thead>
+                 <tr>
+                   <th>Activity Title</th>
+                   <th>Type</th>
+                   <th>XP Value</th>
+                   <th>Actions</th>
+                 </tr>
+               </thead>
+               <tbody>
+                 <tr *ngFor="let activity of selectedClass.activities">
+                   <td>{{ activity.title }}</td>
+                   <td>{{ activity.type }}</td>
+                   <td>{{ activity.xp }}</td>
+                   <td>
+                      <button class="btn-danger-outline" (click)="openConfirmModal('unassignActivity', selectedClass.id, { activity: activity })">Unassign</button>
+                   </td>
+                 </tr>
+               </tbody>
+             </table>
+           </div>
         </div>
       </div>
        <ng-template #emptyContent>
-          <div class="empty-state">
-            <p>Nothing to see here.</p>
-          </div>
-        </ng-template>
+        <div class="empty-content-state">
+          <i class="fas fa-box-open"></i>
+          <h4>Nothing to see here</h4>
+          <p>This section is currently empty.</p>
+        </div>
+      </ng-template>
     </ng-container>
     
     <ng-template #noClassSelected>
       <div class="empty-state-large">
         <i class="fas fa-mouse-pointer"></i>
         <h2>Select a Class</h2>
-        <p>Choose a class from the list to view its details.</p>
+        <p>Choose a class from the list to view its details or create a new one.</p>
       </div>
     </ng-template>
   </div>
 </div>
 
-<!-- All modals remain the same -->
+<!-- Modal for creating a new class -->
 <div *ngIf="isCreateModalOpen" class="modal-overlay" (click)="closeCreateModal()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -186,11 +191,11 @@
       <form #createClassForm="ngForm" (ngSubmit)="handleCreateClass()">
         <div class="input-group">
           <label for="newClassName">Class Name *</label>
-          <input type="text" id="newClassName" [(ngModel)]="newClassName" name="newClassName" required>
+          <input type="text" id="newClassName" class="form-input" [(ngModel)]="newClassName" name="newClassName" required>
         </div>
         <div class="input-group">
           <label for="newClassDescription">Description</label>
-          <textarea id="newClassDescription" [(ngModel)]="newClassDescription" name="newClassDescription" rows="4"></textarea>
+          <textarea id="newClassDescription" class="form-textarea" [(ngModel)]="newClassDescription" name="newClassDescription" rows="4"></textarea>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">Cancel</button>
@@ -201,6 +206,7 @@
   </div>
 </div>
 
+<!-- Universal Confirmation Modal -->
 <div *ngIf="confirmModal.isOpen" class="modal-overlay" (click)="closeConfirmModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
         <div class="modal-header">
@@ -209,18 +215,17 @@
         </div>
         <div class="modal-body">
             <p [innerHTML]="confirmModal.message"></p>
-            <div class="modal-actions">
-                <button type="button" class="btn btn-secondary" (click)="closeConfirmModal()">Cancel</button>
-                <button type="button" class="btn btn-danger" (click)="confirmModal.onConfirm()">Confirm</button>
-            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" (click)="closeConfirmModal()">Cancel</button>
+            <button class="btn-danger" (click)="confirmModal.onConfirm()">Confirm</button>
         </div>
     </div>
 </div>
 
-<div *ngIf="toast.isVisible" 
-     class="toast" 
-     [ngClass]="{'success': toast.type === 'success', 'error': toast.type === 'error'}">
-  <i class="fas" [ngClass]="{'fa-check-circle': toast.type === 'success', 'fa-times-circle': toast.type === 'error'}"></i>
-  {{ toast.message }}
+<!-- Toast Notification -->
+<div *ngIf="toast.isVisible" class="toast-notification" [ngClass]="toast.type">
+  <i [class]="toast.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle'"></i>
+  <span>{{ toast.message }}</span>
 </div>
 

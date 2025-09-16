@@ -15,6 +15,8 @@ export interface Material {
   mentorId: string;
   uploadedAt: Date;
   classroom: Classroom | null;
+  // This property does not exist on the backend, but we can add it for the UI
+  size?: number; 
 }
 export interface Classroom {
   id: number; name: string; description: string; classCode: string; mentorId: string;
@@ -59,10 +61,15 @@ export class ApiService {
     );
   }
 
-  uploadMaterial(file: File, classId: number): Observable<HttpEvent<any>> {
+  // UPDATED: uploadMaterial can now accept null for the classId
+  uploadMaterial(file: File, classId: number | null): Observable<HttpEvent<any>> {
     const formData = new FormData();
     formData.append('file', file, file.name);
-    const uploadUrl = `${this.apiUrl}/classrooms/${classId}/materials`;
+    
+    // If no classId is provided, upload to a general endpoint
+    const uploadUrl = classId
+      ? `${this.apiUrl}/classrooms/${classId}/materials`
+      : `${this.apiUrl}/materials/upload`; // Assumes a new endpoint for unassigned uploads
     
     return this.getAuthHeaders(true).pipe(
       switchMap(headers => this.http.post(uploadUrl, formData, {
