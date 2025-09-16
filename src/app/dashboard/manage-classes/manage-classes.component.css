@@ -61,6 +61,9 @@
 .class-description { font-size: 0.9rem; color: #6b7280; margin: 0 0 1rem; }
 .class-card-footer { display: flex; gap: 1.5rem; font-size: 0.875rem; color: #6b7280; }
 .class-card-footer i { margin-right: 6px; }
+.class-card.placeholder { height: 160px; background-color: #f3f4f6; animation: pulse 1.5s infinite ease-in-out; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
 
 /* --- Right Panel: Details --- */
 .right-panel {
@@ -78,20 +81,69 @@
   align-items: flex-start;
   gap: 1rem;
 }
+.header-main-content { flex-grow: 1; }
 .header-main-content h1 { margin: 0 0 0.5rem; font-size: 2.25rem; font-weight: 800; color: #111827; line-height: 1.2; }
 .header-main-content p { margin: 0; font-size: 1rem; color: #6b7280; }
 .header-actions { display: flex; gap: 0.75rem; align-items: center; }
 .code-box { background-color: #f0f0f0; color: #374151; padding: 0.6rem 1rem; border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; transition: background-color 0.2s; }
 .code-box:hover { background-color: #e5e7eb; }
 
+/* Edit Form Styles */
+.edit-form .form-input, .edit-form .form-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    margin-bottom: 0.5rem;
+}
+.edit-form .form-input { font-size: 2.25rem; font-weight: 800; padding: 0.5rem; }
+
+
 /* Tabs */
+.content-tabs { margin-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb; }
 .content-tabs button { padding: 0.75rem 0; font-size: 1rem; font-weight: 600; border: none; background: none; cursor: pointer; color: #6b7280; margin-right: 2rem; border-bottom: 3px solid transparent; transition: all 0.2s ease; }
 .content-tabs button:hover { color: #374151; }
 .content-tabs button.active { color: #4f46e5; border-bottom-color: #4f46e5; }
 
-/* Lists & Tables */
-.table-wrapper { border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; margin-top: 1.5rem; }
-.material-list { padding: 0.5rem 0; }
+/* --- NEW: Elegant Table Styles --- */
+.table-wrapper { 
+  border: 1px solid #e5e7eb; 
+  border-radius: 12px; 
+  overflow: hidden; 
+  margin-top: 1.5rem; 
+  background-color: #ffffff;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 1rem 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+th {
+  background-color: #f9fafb;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+td {
+  font-size: 0.95rem;
+  color: #374151;
+}
+tbody tr:last-child td {
+  border-bottom: none;
+}
+.student-name { font-weight: 500; color: #111827; }
+
+
+/* Materials List (Remains the same) */
+.material-list { padding: 0.5rem 0; list-style-type: none; margin: 0; }
 .material-item a { display: block; padding: 0.8rem 1.5rem; font-weight: 500; color: #4f46e5; text-decoration: none; border-radius: 8px; transition: background-color 0.2s; }
 .material-item a:hover { background-color: #f5f3ff; }
 
@@ -100,10 +152,36 @@
 .btn-primary { background-color: #4f46e5; color: white; }
 .btn-primary:hover { background-color: #4338ca; }
 .btn-danger { background-color: #ef4444; color: white; }
-.btn-danger-outline { background-color: #fee2e2; color: #991b1b; }
+.btn-danger-outline { background-color: transparent; color: #ef4444; border: 1px solid #fca5a5; padding: 0.5rem 1rem; }
+.btn-danger-outline:hover { background-color: #fee2e2; }
 .btn-secondary { background-color: #e5e7eb; color: #374151; }
 .btn-icon { background: none; border: 1px solid #d1d5db; width: 38px; height: 38px; justify-content: center; color: #6b7280; padding: 0; }
-.back-link { font-weight: 600; color: #4f46e5; text-decoration: none; }
+.btn-icon:hover { background-color: #e5e7eb; }
+.back-link { font-weight: 600; color: #4f46e5; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; }
+.back-link:hover { text-decoration: underline; }
+
+/* Empty States */
+.empty-state, .empty-state-large, .empty-content-state { text-align: center; color: #9ca3af; }
+.empty-state-large { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; }
+.empty-content-state { padding: 4rem 2rem; }
+.empty-content-state i { font-size: 3rem; margin-bottom: 1rem; display: block; color: #d1d5db; }
+.empty-content-state h4 { margin: 0 0 0.5rem; font-size: 1.25rem; color: #374151; }
+.empty-content-state p { margin: 0; color: #6b7280; }
 
 /* Modals & Popups */
-.toast-notification { position: fixed; bottom: 20px; right: 20px; padding: 1rem 1.5rem; border-radius: 8px; color: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
+.modal-overlay, .toast-notification { animation: fadeIn 0.3s ease; }
+.modal-overlay { position: fixed; inset: 0; background-color: rgba(17, 24, 39, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+.modal-content { background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.modal-header h3 { margin: 0; font-size: 1.25rem; }
+.btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #9ca3af; }
+.input-group { margin-bottom: 1rem; }
+.input-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+.form-input, .form-textarea { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem; }
+
+.toast-notification { position: fixed; bottom: 20px; right: 20px; padding: 1rem 1.5rem; border-radius: 8px; color: white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 0.75rem; z-index: 2000; }
+.toast-notification.success { background-color: #059669; }
+.toast-notification.error { background-color: #dc2626; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+

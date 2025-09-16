@@ -68,7 +68,9 @@
           <button *ngIf="!isEditingClass" class="btn btn-secondary" (click)="handleEditClass(selectedClass)"><i class="fas fa-pencil-alt"></i> Edit</button>
           <button *ngIf="isEditingClass" class="btn btn-primary" (click)="handleSaveClass(selectedClass.id)"><i class="fas fa-save"></i> Save</button>
           <button *ngIf="isEditingClass" class="btn btn-secondary" (click)="handleCancelEdit()">Cancel</button>
-          <button class="btn btn-danger" (click)="openConfirmModal('deleteClass', selectedClass.id, {className: selectedClass.name})"><i class="fas fa-trash"></i></button>
+          <button class="btn btn-icon btn-danger-outline" (click)="openConfirmModal('deleteClass', selectedClass.id, {className: selectedClass.name})" title="Delete Class">
+            <i class="fas fa-trash"></i>
+          </button>
         </div>
       </div>
 
