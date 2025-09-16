@@ -9,13 +9,14 @@ import { Classroom, Student, Activity, Material } from '../../services/api.servi
 @Component({
   selector: 'app-manage-classes',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule], // Add RouterModule
+  imports: [CommonModule, FormsModule, RouterModule], 
   templateUrl: './manage-classes.component.html',
   styleUrls: ['./manage-classes.component.css'],
 })
 export class ManageClassesComponent implements OnInit, OnDestroy {
   public classes$: Observable<Classroom[]>;
   public selectedClass$: Observable<Classroom | null>;
+  public isLoading$: Observable<boolean>;
 
   isCreateModalOpen = false;
   newClassName = '';
@@ -27,7 +28,6 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
 
   activeContentTab: 'students' | 'materials' | 'activities' = 'students';
 
-  // --- UI State for Modals and Toasts ---
   toast = { isVisible: false, message: '' };
   confirmModal = { isOpen: false, title: '', message: '', onConfirm: () => {} };
   
@@ -40,6 +40,7 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
   ) {
     this.classes$ = this.classService.classes$;
     this.selectedClass$ = this.classService.selectedClass$;
+    this.isLoading$ = this.classService.isLoading$;
   }
 
   ngOnInit(): void {
@@ -59,10 +60,9 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
 
   handleSelectClass(classId: number): void {
     this.router.navigate([], { queryParams: { classId: classId } });
-    this.isEditingClass = false; // Cancel edit mode on class switch
+    this.isEditingClass = false;
   }
 
-  // --- Class CRUD ---
   handleDeleteClass(classId: number, className: string): void {
     this.confirmModal = {
       isOpen: true,
@@ -107,7 +107,6 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
     this.isEditingClass = false;
   }
   
-  // --- Content Management ---
   handleRemoveStudent(classId: number, student: Student): void {
      this.confirmModal = {
       isOpen: true,
@@ -150,7 +149,6 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
     };
   }
   
-  // --- UI Helpers ---
   openCreateModal(): void { this.isCreateModalOpen = true; }
   closeCreateModal(): void {
     this.isCreateModalOpen = false;
@@ -174,3 +172,4 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
     setTimeout(() => { this.toast.isVisible = false; }, 3000);
   }
 }
+

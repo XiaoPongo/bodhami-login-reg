@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, throwError, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { ApiService, Classroom } from './api.service';
+import { MaterialService } from './material.service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,8 +13,14 @@ export class ClassService {
   
   private readonly _selectedClass = new BehaviorSubject<Classroom | null>(null);
   public readonly selectedClass$: Observable<Classroom | null> = this._selectedClass.asObservable();
+  
+  private readonly _isLoading = new BehaviorSubject<boolean>(false);
+  public readonly isLoading$: Observable<boolean> = this._isLoading.asObservable();
 
-  constructor(private apiService: ApiService) {
+  constructor(
+    private apiService: ApiService,
+    private materialService: MaterialService
+  ) {
     this.loadClasses();
   }
 
@@ -25,19 +32,26 @@ export class ClassService {
   }
 
   selectClass(id: number | null): void {
-    if (id === null || id === this._selectedClass.value?.id) {
-        if(id === null) this._selectedClass.next(null);
+    if (id === null) {
+      this._selectedClass.next(null);
+      return;
+    }
+    if (id === this._selectedClass.value?.id) {
         return;
     }
     
-    // ** FIX: Set to null before fetching to prevent showing stale data and fix glitch **
+    this._isLoading.next(true);
     this._selectedClass.next(null); 
 
     this.apiService.getClassroomById(id).subscribe({
-      next: (classroom: Classroom) => this._selectedClass.next(classroom),
+      next: (classroom: Classroom) => {
+        this._selectedClass.next(classroom);
+        this._isLoading.next(false);
+      },
       error: (err: any) => {
         console.error(`Failed to load class with id ${id}`, err);
-        this._selectedClass.next(null); // Ensure it's cleared on error
+        this._selectedClass.next(null); 
+        this._isLoading.next(false);
       }
     });
   }
@@ -51,8 +65,8 @@ export class ClassService {
   updateClass(id: number, name: string, description: string): Observable<Classroom> {
     return this.apiService.updateClassroom(id, { name, description }).pipe(
       tap((updatedClass) => {
-        this.loadClasses(); // Refresh the list in case name changed
-        this._selectedClass.next(updatedClass); // Update the selected class view immediately
+        this.loadClasses();
+        this._selectedClass.next(updatedClass);
       })
     );
   }
@@ -69,23 +83,26 @@ export class ClassService {
     );
   }
 
-  // --- NEW METHODS for managing class content ---
-
   removeStudent(classId: number, studentId: string): Observable<any> {
     return this.apiService.removeStudentFromClass(classId, studentId).pipe(
-      tap(() => this.selectClass(classId)) // Refresh class data
+      tap(() => this.refreshClassData(classId))
     );
   }
 
   unassignMaterial(classId: number, materialId: number): Observable<any> {
-    return this.apiService.unassignMaterialFromClass(classId, materialId).pipe(
-      tap(() => this.selectClass(classId)) // Refresh class data
+    return this.materialService.assignMaterials([materialId], null).pipe(
+      tap(() => this.refreshClassData(classId))
     );
   }
 
   unassignActivity(classId: number, activityId: number): Observable<any> {
     return this.apiService.unassignActivityFromClass(classId, activityId).pipe(
-      tap(() => this.selectClass(classId)) // Refresh class data
+      tap(() => this.refreshClassData(classId))
     );
+  }
+
+  private refreshClassData(classId: number): void {
+    this.loadClasses();
+    this.selectClass(classId);
   }
 }

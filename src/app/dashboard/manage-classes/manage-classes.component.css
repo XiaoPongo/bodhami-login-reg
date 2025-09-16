@@ -1,8 +1,9 @@
 :host {
   display: flex;
-  height: 100%;
+  height: 100vh;
   background-color: #f9fafb;
   font-family: 'Inter', sans-serif;
+  overflow: hidden;
 }
 
 .manage-container {
@@ -153,6 +154,30 @@
 .empty-state-large h2 { font-size: 1.5rem; }
 .placeholder-text { padding: 2rem; text-align: center; color: #6b7280; background-color: #f9fafb; border-radius: 8px; }
 
+/* Loading Skeleton for Right Panel */
+.loading-skeleton {
+  padding: 2rem;
+}
+.skeleton-box {
+  background-color: #e5e7eb;
+  border-radius: 8px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+.skeleton-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+.skeleton-title { width: 40%; height: 36px; }
+.skeleton-actions { display: flex; gap: 1rem; }
+.skeleton-button { width: 100px; height: 40px; }
+.skeleton-tabs { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+.skeleton-tab { width: 150px; height: 30px; }
+.skeleton-line { width: 100%; height: 20px; margin-bottom: 1rem; }
+
 /* Modal Styles */
 .modal-overlay { position: fixed; inset: 0; background-color: rgba(17, 24, 39, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.3s ease; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -183,3 +208,4 @@
 .toast-notification.show {
   transform: translateX(-50%) translateY(0);
 }
+
