@@ -28,7 +28,6 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
 
   activeContentTab: 'students' | 'materials' | 'activities' = 'students';
 
-  // --- UPDATED TOAST AND MODAL ---
   toast = { isVisible: false, message: '', type: 'success' };
   confirmModal = { isOpen: false, title: '', message: '', onConfirm: () => {} };
   
@@ -46,17 +45,19 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.routeSub = this.route.queryParams.subscribe(params => {
-      const classId = params['classId'];
-      if (classId) {
-        this.classService.selectClass(Number(classId));
-      } else {
-        this.classService.selectClass(null);
-      }
+      const classId = params['classId'] ? Number(params['classId']) : null;
+      this.classService.selectClass(classId);
     });
   }
 
   ngOnDestroy(): void {
     this.routeSub?.unsubscribe();
+  }
+  
+  // --- NEW: Manual Refresh ---
+  handleRefresh(): void {
+    this.showToast('Refreshing class list...', 'success');
+    this.classService.loadClasses();
   }
 
   handleSelectClass(classId: number): void {

@@ -13,7 +13,7 @@
 
 /* Left Panel: Class List */
 .left-panel {
-  width: 350px;
+  width: 380px; /* Slightly wider for new button */
   flex-shrink: 0;
   background-color: #ffffff;
   border-right: 1px solid #e5e7eb;
@@ -27,12 +27,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.panel-header h2 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
+  gap: 0.5rem; /* Add gap for buttons */
 }
 
 /* Back Link */
@@ -45,6 +40,7 @@
   color: #111827;
   text-decoration: none;
   transition: color 0.2s ease;
+  margin-right: auto; /* Pushes other buttons to the right */
 }
 .back-link:hover {
   color: #4f46e5;
@@ -61,7 +57,29 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
 }
+
+/* --- NEW ICON BUTTON FOR REFRESH --- */
+.btn-icon {
+  padding: 0.6rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.btn-icon:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
 
 .btn-primary { background-color: #4f46e5; color: white; }
 .btn-primary:hover { background-color: #4338ca; }
@@ -115,6 +133,7 @@
   font-size: 0.9rem;
   color: #6b7280;
   margin: 0 0 0.75rem;
+  word-wrap: break-word;
 }
 .class-card-footer {
   display: flex;
