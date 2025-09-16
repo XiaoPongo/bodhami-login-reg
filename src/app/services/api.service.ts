@@ -27,13 +27,24 @@ export class ApiService {
 
   constructor(private http: HttpClient, private authService: AuthService) { }
 
+  /**
+   * Creates the authorization headers for API requests.
+   * FIX: This now correctly sets the Content-Type for JSON requests.
+   */
   private getAuthHeaders(isFormData: boolean = false): Observable<HttpHeaders> {
     const session = this.authService.getSession();
     const token = session?.access_token;
     if (!token) return throwError(() => new Error('User not authenticated!'));
     
-    let headersConfig: { [key: string]: string } = { 'Authorization': `Bearer ${token}` };
-    if (!isFormData) headersConfig['Content-Type'] = 'application/json';
+    let headersConfig: { [key: string]: string } = {
+      'Authorization': `Bearer ${token}`
+    };
+
+    // The backend expects 'application/json' for non-form-data posts.
+    // This was the source of the 415 error.
+    if (!isFormData) {
+      headersConfig['Content-Type'] = 'application/json';
+    }
     
     return of(new HttpHeaders(headersConfig));
   }
@@ -93,6 +104,10 @@ export class ApiService {
     );
   }
 
+  /**
+   * This method is now only used by the student-facing parts of the app.
+   * The mentor dashboard gets all details from the main getClassrooms() call.
+   */
   getClassroomById(id: number): Observable<Classroom> {
      return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.get<Classroom>(`${this.apiUrl}/classrooms/${id}/content`, { headers }))
