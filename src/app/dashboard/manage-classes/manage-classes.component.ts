@@ -1,10 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule, NavigationEnd } from '@angular/router';
 import { Subscription, Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { ClassService } from '../../services/class.service';
-import { Classroom, Student, Activity, Material } from '../../services/api.service';
+import { Classroom } from '../../services/api.service';
 
 type ToastType = 'success' | 'error';
 
@@ -34,6 +35,7 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
   confirmModal = { isOpen: false, title: '', message: '', onConfirm: () => {} };
   
   private routeSub: Subscription | undefined;
+  private navSub: Subscription | undefined;
 
   constructor(
     public classService: ClassService,
@@ -46,17 +48,27 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // ✅ Sync selected class with query params
     this.routeSub = this.route.queryParams.subscribe(params => {
       const classId = params['classId'] ? Number(params['classId']) : null;
-      // Ensure the service's selected class is synced with the URL
       if (this.classService.getSelectedClassId() !== classId) {
         this.classService.selectClass(classId);
       }
     });
+
+    // ✅ Refresh list whenever user navigates back to Manage Classes
+    this.navSub = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: any) => {
+        if (event.urlAfterRedirects.includes('/dashboard/manage-classes')) {
+          this.classService.loadClasses();
+        }
+      });
   }
 
   ngOnDestroy(): void {
     this.routeSub?.unsubscribe();
+    this.navSub?.unsubscribe();
   }
   
   handleRefresh(): void {
@@ -65,11 +77,10 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
   }
 
   handleSelectClass(classId: number): void {
-    // Only navigate if the route is different to avoid unnecessary reloads
     if (this.route.snapshot.queryParams['classId'] != classId) {
-        this.router.navigate([], { queryParams: { classId: classId } });
+      this.router.navigate([], { queryParams: { classId: classId } });
     }
-    this.isEditingClass = false; // Always exit edit mode on class switch
+    this.isEditingClass = false;
   }
   
   handleCreateClass(): void {
@@ -79,8 +90,8 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
           next: (newClass) => {
             this.showToast(`Class "${newClass.name}" created successfully!`, 'success');
             this.closeCreateModal();
-            // Navigate to the newly created class
             this.router.navigate([], { queryParams: { classId: newClass.id } });
+            this.classService.loadClasses(); // ✅ refresh list after creating
           },
           error: (err) => {
             console.error("Failed to create class:", err);
@@ -103,8 +114,9 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
         next: () => {
           this.showToast('Class updated successfully!', 'success');
           this.isEditingClass = false;
+          this.classService.loadClasses(); // ✅ refresh after update
         },
-        error: (err) => this.showToast('Error updating class.', 'error')
+        error: () => this.showToast('Error updating class.', 'error')
       });
   }
   
@@ -112,7 +124,6 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
     this.isEditingClass = false;
   }
   
-  // --- THIS IS THE FIX: The missing method is now implemented ---
   openConfirmModal(action: string, id: number, data: any) {
     switch(action) {
       case 'deleteClass':
@@ -127,8 +138,9 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
                   this.router.navigate([], { queryParams: {} });
                 }
                 this.showToast('Class deleted successfully.', 'success');
+                this.classService.loadClasses(); // ✅ refresh after delete
               },
-              error: err => this.showToast('Error deleting class.', 'error')
+              error: () => this.showToast('Error deleting class.', 'error')
             });
             this.closeConfirmModal();
           }
@@ -141,8 +153,11 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
           message: `Are you sure you want to remove <strong>${data.student.name}</strong> from this class?`,
           onConfirm: () => {
             this.classService.removeStudent(id, data.student.id).subscribe({
-              next: () => this.showToast(`${data.student.name} has been removed.`, 'success'),
-              error: err => this.showToast('Error removing student.', 'error')
+              next: () => {
+                this.showToast(`${data.student.name} has been removed.`, 'success');
+                this.classService.loadClasses(); // ✅ refresh after removal
+              },
+              error: () => this.showToast('Error removing student.', 'error')
             });
             this.closeConfirmModal();
           }
@@ -155,8 +170,11 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
           message: `Are you sure you want to unassign <strong>"${data.activity.title}"</strong>?`,
           onConfirm: () => {
             this.classService.unassignActivity(id, data.activity.id).subscribe({
-              next: () => this.showToast(`Activity unassigned.`, 'success'),
-              error: err => this.showToast('Error unassigning activity.', 'error')
+              next: () => {
+                this.showToast(`Activity unassigned.`, 'success');
+                this.classService.loadClasses(); // ✅ refresh after unassign
+              },
+              error: () => this.showToast('Error unassigning activity.', 'error')
             });
             this.closeConfirmModal();
           }
@@ -188,4 +206,3 @@ export class ManageClassesComponent implements OnInit, OnDestroy {
     setTimeout(() => { this.toast.isVisible = false; }, 3000);
   }
 }
-

@@ -28,28 +28,30 @@ type ModalAction = 'assign' | 'delete';
   styleUrls: ['./upload-material.component.css']
 })
 export class UploadMaterialComponent implements OnInit {
+  
   filesToUpload: UploadableFile[] = [];
   isDragging = false;
-
+  
   classes$: Observable<Classroom[]>;
   materials$: Observable<Material[]>;
   filteredMaterials$: Observable<Material[]>;
   isLoading$: Observable<boolean>;
-
+  
   private allClasses: Classroom[] = [];
   public filter = new BehaviorSubject<string>('all');
+  
   public selectedClassFilter: string = 'all';
 
   selectedFileIds = new Set<number>();
   showBulkToolbar = false;
-
+  
   isModalOpen = false;
   modalAction: ModalAction = 'assign';
   modalTitle = '';
   modalMessage = '';
   modalActionClassId: string | null = null;
   filesForModal: number[] = [];
-
+  
   notification: { type: NotificationType, message: string } | null = null;
   private notificationTimeout: any;
 
@@ -59,7 +61,7 @@ export class UploadMaterialComponent implements OnInit {
   };
 
   constructor(
-    private apiService: ApiService,
+    private apiService: ApiService, 
     private classService: ClassService,
     public materialService: MaterialService
   ) {
@@ -118,12 +120,12 @@ export class UploadMaterialComponent implements OnInit {
       const extension = '.' + file.name.split('.').pop()?.toLowerCase();
       if (!allowedExtensions.includes(extension)) error = 'Invalid type. Allowed: .pdf, .docx, .csv, .xlsx';
       else if (file.size > maxSize) error = 'File exceeds 5MB limit.';
-
+      
       this.filesToUpload.push({ file, status: error ? 'error' : 'pending', progress: 0, error });
     });
     this.startUploads();
   }
-
+  
   startUploads() {
     this.filesToUpload.forEach(uploadable => {
       if (uploadable.status === 'pending') {
@@ -134,11 +136,7 @@ export class UploadMaterialComponent implements OnInit {
 
   uploadFile(uploadable: UploadableFile) {
     uploadable.status = 'uploading';
-
-    // 👇 Use selected classroom or default to first one
-    const classroomId = Number(this.selectedClassFilter) || this.allClasses[0]?.id;
-
-    uploadable.subscription = this.apiService.uploadMaterial(uploadable.file, classroomId).subscribe({
+    uploadable.subscription = this.apiService.uploadMaterial(uploadable.file, 1).subscribe({ // 👈 replace "1" with selected classroom if needed
       next: (event: HttpEvent<any>) => {
         if (event.type === HttpEventType.UploadProgress && event.total) {
           uploadable.progress = Math.round(100 * event.loaded / event.total);
@@ -146,11 +144,14 @@ export class UploadMaterialComponent implements OnInit {
           uploadable.status = 'success';
           this.showNotification('success', `"${uploadable.file.name}" uploaded!`);
           uploadable.subscription?.unsubscribe();
+
+          // ✅ Auto-refresh materials after upload
+          this.materialService.loadMaterials();
         }
       },
       error: (err) => {
         uploadable.status = 'error';
-        uploadable.error = err.error?.message || 'Upload failed.';
+        uploadable.error = err.error?.error || 'Upload failed.';
         uploadable.subscription?.unsubscribe();
       }
     });
@@ -225,7 +226,7 @@ export class UploadMaterialComponent implements OnInit {
   }
 
   closeModal() { this.isModalOpen = false; }
-
+  
   getFileTypeIcon(fileName: string): string {
     if (fileName.endsWith('.pdf')) return 'fas fa-file-pdf';
     if (fileName.endsWith('.docx')) return 'fas fa-file-word';
@@ -233,7 +234,7 @@ export class UploadMaterialComponent implements OnInit {
     if (fileName.endsWith('.xlsx')) return 'fas fa-file-excel';
     return 'fas fa-file';
   }
-
+  
   formatBytes(bytes: number, decimals = 2): string {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -248,7 +249,7 @@ export class UploadMaterialComponent implements OnInit {
     this.notification = { type, message };
     this.notificationTimeout = setTimeout(() => this.notification = null, 5000);
   }
-
+  
   async downloadFile(material: Material) {
     try {
       const response = await this.materialService.getDownloadUrl(material.id);
