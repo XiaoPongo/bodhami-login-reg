@@ -1,52 +1,50 @@
-import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ApiService, Classroom } from '../../services/api.service';
+import { Classroom, Material, Activity } from '../../services/api.service';
 
 @Component({
   selector: 'app-student-class-detail',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './student-class-detail.component.html',
-  styleUrls: ['./student-class-detail.component.css'],
+  styleUrls: ['./student-class-detail.component.css']
 })
-export class StudentClassDetailComponent implements OnInit {
+export class StudentClassDetailComponent {
   @Input() classroom!: Classroom;
   @Output() closed = new EventEmitter<void>();
   @Output() left = new EventEmitter<number>();
 
   activeTab: 'materials' | 'activities' = 'materials';
-  isLoading = false;
   error: string | null = null;
 
-  constructor(private api: ApiService) {}
+  constructor() {}
 
-  ngOnInit(): void {
-    this.loadClassContent();
+  // --- Back button handler ---
+  close(): void {
+    this.closed.emit();
   }
 
-  loadClassContent(): void {
-    if (!this.classroom?.id) return;
-    this.isLoading = true;
-    this.api.getClassrooms().subscribe({
-      next: (classes) => {
-        const updated = classes.find((c) => c.id === this.classroom.id);
-        if (updated) this.classroom = updated;
-        this.isLoading = false;
-      },
-      error: () => {
-        this.error = 'Failed to load class content.';
-        this.isLoading = false;
-      },
-    });
-  }
-
+  // --- Leave class handler ---
   leaveClass(): void {
-    if (!confirm('Are you sure you want to leave this class?')) return;
-    this.api.removeStudentFromClass(this.classroom.id, 'me').subscribe({
-      next: () => this.left.emit(this.classroom.id),
-      error: () => {
-        this.error = 'Failed to leave class. Try again.';
-      },
-    });
+    if (!confirm(`Are you sure you want to leave ${this.classroom.name}?`)) return;
+    // Later we will integrate with ApiService.leaveClass
+    this.left.emit(this.classroom.id);
+  }
+
+  // --- Download a material ---
+  downloadMaterial(material: Material): void {
+    if (!material.s3Url) {
+      this.error = 'No download link available for this material.';
+      setTimeout(() => (this.error = null), 3000);
+      return;
+    }
+    window.open(material.s3Url, '_blank');
+  }
+
+  // --- Start an activity ---
+  startActivity(activity: Activity): void {
+    console.log(`Starting activity: ${activity.title}`);
+    this.error = `Activity "${activity.title}" is not implemented yet.`;
+    setTimeout(() => (this.error = null), 3000);
   }
 }
