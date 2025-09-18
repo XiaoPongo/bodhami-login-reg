@@ -90,28 +90,54 @@ export class MinigameFormComponent implements OnInit {
     }
   }
 
+  // --- CSV Export ---
   generateCsvContent(): string {
-    let content = `Title,${this.minigame.title}\nXP,${this.minigame.xp}\n`;
-    this.minigame.wordBank.forEach((w, i) => content += `Word Bank ${i + 1},"${w.replace(/"/g, '""')}"\n`);
+    let csv = `Title,${this.minigame.title}\nXP,${this.minigame.xp}\nDescription,"${this.minigame.description}"\n`;
+    this.minigame.wordBank.forEach((w, i) => csv += `Word Bank ${i + 1},"${w}"\n`);
     this.minigame.wordPairs.forEach((p, i) => {
-      content += `List A Word ${i + 1},"${p.mainWord.replace(/"/g, '""')}"\n`;
-      const correct = Object.keys(p.correctAnswers).filter(key => p.correctAnswers[key]);
-      content += `List A Answers ${i + 1},"${correct.join('|')}"\n`;
+      csv += `List A Word ${i + 1},"${p.mainWord}"\n`;
+      const correct = Object.keys(p.correctAnswers).filter(k => p.correctAnswers[k]);
+      csv += `List A Answers ${i + 1},"${correct.join('|')}"\n`;
     });
-    return content;
-  }
-  
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => this.parseCsvContent(e.target?.result as string);
-      reader.readAsText(file);
-    }
+    return csv;
   }
 
-  parseCsvContent(csvText: string): void {
-     alert('CSV parsing for Minigames is not yet implemented.');
+  // --- CSV Import ---
+  parseCsvContent(csv: string): void {
+    const lines = csv.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const mg = this.getNewMinigame();
+    mg.wordPairs = [];
+    mg.wordBank = [];
+
+    let currentPair: WordPair | null = null;
+
+    for (const line of lines) {
+      const [rawKey, ...rest] = line.split(',');
+      const key = rawKey.trim();
+      const value = rest.join(',').replace(/^"|"$/g, '');
+
+      if (key === 'Title') mg.title = value;
+      else if (key === 'XP') mg.xp = +value;
+      else if (key === 'Description') mg.description = value;
+      else if (key.startsWith('Word Bank')) mg.wordBank.push(value);
+      else if (key.startsWith('List A Word')) {
+        if (currentPair) mg.wordPairs.push(currentPair);
+        currentPair = { mainWord: value, correctAnswers: {} };
+      }
+      else if (key.startsWith('List A Answers') && currentPair) {
+        value.split('|').forEach(v => currentPair!.correctAnswers[v.trim()] = true);
+      }
+    }
+    if (currentPair) mg.wordPairs.push(currentPair);
+    this.minigame = mg;
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => this.parseCsvContent(e.target?.result as string);
+    reader.readAsText(file);
   }
 
   togglePreview(): void {
@@ -122,15 +148,16 @@ export class MinigameFormComponent implements OnInit {
       }, 0);
     }
   }
+
   exportToCsv(): void {
-    const csvContent = this.generateCsvContent();
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([this.generateCsvContent()], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `minigame-template-${this.minigame.title.replace(/\s+/g, '-')}.csv`;
+    link.download = `minigame-${this.minigame.title.replace(/\s+/g, '-')}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
   }
+
   navigateToDashboard(): void { this.router.navigate(['/mentor/dashboard']); }
   resetForm(): void {
     this.minigame = this.getNewMinigame();
@@ -138,4 +165,3 @@ export class MinigameFormComponent implements OnInit {
     this.isPreviewing = false;
   }
 }
-

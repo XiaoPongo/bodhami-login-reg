@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Classroom, Material, Activity } from '../../services/api.service';
+import { ActivityPlayerComponent } from '../activity-player/activity-player.component';
 
 @Component({
   selector: 'app-student-class-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ActivityPlayerComponent],
   templateUrl: './student-class-detail.component.html',
   styleUrls: ['./student-class-detail.component.css']
 })
@@ -17,6 +18,9 @@ export class StudentClassDetailComponent {
   activeTab: 'materials' | 'activities' = 'materials';
   error: string | null = null;
 
+  // ✅ activity state
+  activeActivity: Activity | null = null;
+
   constructor() {}
 
   // --- Back button handler ---
@@ -27,7 +31,6 @@ export class StudentClassDetailComponent {
   // --- Leave class handler ---
   leaveClass(): void {
     if (!confirm(`Are you sure you want to leave ${this.classroom.name}?`)) return;
-    // Later we will integrate with ApiService.leaveClass
     this.left.emit(this.classroom.id);
   }
 
@@ -43,8 +46,11 @@ export class StudentClassDetailComponent {
 
   // --- Start an activity ---
   startActivity(activity: Activity): void {
-    console.log(`Starting activity: ${activity.title}`);
-    this.error = `Activity "${activity.title}" is not implemented yet.`;
-    setTimeout(() => (this.error = null), 3000);
+    this.activeActivity = activity;
+  }
+
+  // --- Close activity ---
+  closeActivity(): void {
+    this.activeActivity = null;
   }
 }

@@ -1,0 +1,48 @@
+<div class="activity-player">
+  <h3>{{ activity.title }}</h3>
+
+  <!-- Question Area -->
+  <div *ngIf="!finished">
+    <p><strong>Q{{ currentIndex + 1 }}:</strong> {{ questions[currentIndex]?.question }}</p>
+
+    <!-- MCQ -->
+    <div *ngIf="questions[currentIndex]?.type === 'mcq'">
+      <div *ngFor="let opt of questions[currentIndex]?.options">
+        <label>
+          <input
+            type="radio"
+            name="mcq"
+            [(ngModel)]="userAnswer"
+            [value]="opt"
+          />
+          {{ opt }}
+        </label>
+      </div>
+    </div>
+
+    <!-- QA or Fill -->
+    <div *ngIf="questions[currentIndex]?.type !== 'mcq'">
+      <input
+        type="text"
+        [(ngModel)]="userAnswer"
+        placeholder="Your answer..."
+      />
+    </div>
+
+    <button (click)="submitAnswer()">Submit</button>
+
+    <!-- Feedback -->
+    <p *ngIf="feedback">{{ feedback }}</p>
+    <div *ngIf="showCongrats" class="congrats-popup">
+      🎉 Correct! +{{ activity.xp }} XP
+    </div>
+  </div>
+
+  <!-- Finished -->
+  <div *ngIf="finished" class="finished">
+    <h4>Mission Complete! 🎯</h4>
+    <p>Total XP earned: {{ earnedXp }}</p>
+    <p>Your Level: {{ progressLevel }}</p>
+    <button (click)="close()">Close</button>
+  </div>
+</div>

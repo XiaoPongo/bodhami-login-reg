@@ -62,4 +62,12 @@
       </li>
     </ul>
   </div>
+
+  <!-- ✅ Activity Player (only shows when activeActivity is set) -->
+  <app-activity-player
+    *ngIf="activeActivity"
+    [activity]="activeActivity"
+    (closed)="closeActivity()"
+  >
+  </app-activity-player>
 </div>

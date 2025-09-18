@@ -13,6 +13,7 @@ interface Problem {
   question: string;
   options: { text: string }[];
   correctAnswer: string;
+  guidance: string;
   timerInSeconds: number;
 }
 interface CaseStudy {
@@ -65,7 +66,7 @@ export class CaseStudyFormComponent implements OnInit {
   }
 
   getNewProblem(): Problem {
-    return { type: 'qa', question: '', options: [{ text: '' }], correctAnswer: '', timerInSeconds: 0 };
+    return { type: 'qa', question: '', options: [{ text: '' }], correctAnswer: '', guidance: '', timerInSeconds: 0 };
   }
 
   addProblem() { this.caseStudy.problems.push(this.getNewProblem()); }
@@ -103,32 +104,60 @@ export class CaseStudyFormComponent implements OnInit {
     }
   }
 
+  // --- CSV Export ---
   generateCsvContent(): string {
-    let content = `Title,${this.caseStudy.title}\nXP,${this.caseStudy.xp}\n`;
-    content += `Passage,"${this.caseStudy.passage.replace(/"/g, '""')}"\n`;
+    let csv = `Title,${this.caseStudy.title}\nXP,${this.caseStudy.xp}\nPassage,"${this.caseStudy.passage}"\n`;
     this.caseStudy.problems.forEach((p, i) => {
-      content += `Problem ${i + 1} Type,${p.type}\n`;
-      content += `Problem ${i + 1} Question,"${p.question.replace(/"/g, '""')}"\n`;
-      content += `Problem ${i + 1} Timer,${p.timerInSeconds}\n`;
-      p.options.forEach((o, j) => content += `Problem ${i + 1} Option ${j + 1},"${o.text.replace(/"/g, '""')}"\n`);
-      content += `Problem ${i + 1} Answer,"${p.correctAnswer.replace(/"/g, '""')}"\n`;
+      csv += `Problem ${i + 1} Type,${p.type}\n`;
+      csv += `Problem ${i + 1} Question,"${p.question}"\n`;
+      csv += `Problem ${i + 1} Timer,${p.timerInSeconds}\n`;
+      p.options.forEach((o, j) => {
+        csv += `Problem ${i + 1} Option ${j + 1},"${o.text}"\n`;
+      });
+      csv += `Problem ${i + 1} Answer,"${p.correctAnswer}"\n`;
+      csv += `Problem ${i + 1} Guidance,"${p.guidance}"\n`;
     });
-    return content;
-  }
-  
-  onFileSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => this.parseCsvContent(e.target?.result as string);
-      reader.readAsText(file);
-    }
+    return csv;
   }
 
+  // --- CSV Import ---
   parseCsvContent(csvText: string): void {
-     alert('CSV parsing for Case Studies is not yet implemented.');
+    const lines = csvText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const cs = this.getNewCaseStudy();
+    cs.problems = [];
+    let current: Problem | null = null;
+
+    for (const line of lines) {
+      const [rawKey, ...rest] = line.split(',');
+      const key = rawKey.trim();
+      const value = rest.join(',').replace(/^"|"$/g, '');
+
+      if (key === 'Title') cs.title = value;
+      else if (key === 'XP') cs.xp = +value;
+      else if (key === 'Passage') cs.passage = value;
+      else if (key.includes('Type')) {
+        if (current) cs.problems.push(current);
+        current = this.getNewProblem();
+        current.type = value as any;
+      }
+      else if (key.includes('Question')) current!.question = value;
+      else if (key.includes('Timer')) current!.timerInSeconds = +value;
+      else if (key.includes('Option')) current!.options.push({ text: value });
+      else if (key.includes('Answer')) current!.correctAnswer = value;
+      else if (key.includes('Guidance')) current!.guidance = value;
+    }
+    if (current) cs.problems.push(current);
+    this.caseStudy = cs;
   }
-  
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => this.parseCsvContent(e.target?.result as string);
+    reader.readAsText(file);
+  }
+
   togglePreview(): void {
     this.isPreviewing = !this.isPreviewing;
     if (this.isPreviewing) {
@@ -137,15 +166,16 @@ export class CaseStudyFormComponent implements OnInit {
       }, 0);
     }
   }
+
   exportToCsv(): void {
-    const csvContent = this.generateCsvContent();
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([this.generateCsvContent()], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `case-study-template-${this.caseStudy.title.replace(/\s+/g, '-')}.csv`;
+    link.download = `case-study-${this.caseStudy.title.replace(/\s+/g, '-')}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
   }
+
   navigateToDashboard(): void { this.router.navigate(['/mentor/dashboard']); }
   resetForm(): void {
     this.caseStudy = this.getNewCaseStudy();
@@ -153,4 +183,3 @@ export class CaseStudyFormComponent implements OnInit {
     this.isPreviewing = false;
   }
 }
-

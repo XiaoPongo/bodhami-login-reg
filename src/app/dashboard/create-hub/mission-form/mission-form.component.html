@@ -1,7 +1,6 @@
 <div class="form-container mission-theme">
   <!-- Success Screen -->
   <div *ngIf="submissionSuccess" class="success-overlay">
-    <!-- FIX: Template reference is now on the inner box -->
     <div class="success-box" #successBox>
       <i class="fas fa-check-circle"></i>
       <h2>Mission Created!</h2>
@@ -14,35 +13,46 @@
     </div>
   </div>
 
-  <!-- Preview Mode -->
+  <!-- Preview -->
   <div *ngIf="isPreviewing" class="preview-overlay">
-      <!-- FIX: Template reference is now on the inner box -->
-      <div class="preview-box" #previewBox>
-        <h2>Preview: {{ mission.title || 'Untitled Mission' }}</h2>
-        <p><strong>XP:</strong> {{ mission.xp }}</p>
-        <div *ngFor="let passage of mission.passages; let i = index">
-            <strong>Passage {{i + 1}}:</strong><p>{{ passage || 'No content.' }}</p>
-        </div>
-        <hr>
-        <div *ngFor="let scenario of mission.scenarios; let i = index" class="preview-problem">
-            <strong>Problem {{i + 1}} ({{scenario.type | uppercase}})</strong>
-            <p>{{ scenario.question || 'No question provided.' }}</p>
-            <p><em>Answer: {{ scenario.correctAnswer || 'No answer set.' }}</em></p>
-        </div>
-        <button (click)="togglePreview()" class="btn btn-secondary">Close Preview</button>
+    <div class="preview-box" #previewBox>
+      <h2>Preview: {{ mission.title || 'Untitled Mission' }}</h2>
+      <p><strong>XP:</strong> {{ mission.xp }}</p>
+      <p><strong>Description:</strong> {{ mission.description || 'No description.' }}</p>
+      <hr>
+      <div *ngFor="let scenario of mission.scenarios; let i = index" class="preview-problem">
+        <strong>Problem {{i + 1}} ({{scenario.type | uppercase}}):</strong>
+        <p>{{ scenario.question || 'No question provided.' }}</p>
+        <p>
+          <em>Answer:
+            <ng-container *ngIf="scenario.type === 'mcq'; else nonMcq">
+              {{ (scenario.correctAnswer !== '' && scenario.correctAnswer !== null && scenario.correctAnswer !== undefined && scenario.options[+scenario.correctAnswer]) 
+                  ? scenario.options[+scenario.correctAnswer].text 
+                  : 'No answer set.' }}
+            </ng-container>
+            <ng-template #nonMcq>
+              {{ scenario.correctAnswer || 'No answer set.' }}
+            </ng-template>
+          </em>
+        </p>        
       </div>
+      <button (click)="togglePreview()" class="btn btn-secondary">Close Preview</button>
+    </div>
   </div>
 
+  <!-- Header -->
   <div class="form-header">
     <i class="fas fa-rocket"></i>
     <h1>Create a New Mission</h1>
   </div>
 
+  <!-- Guidelines -->
   <div class="guidelines">
     <h4><i class="fas fa-info-circle"></i> Quick Guide: Missions</h4>
-    <p>Missions are task-oriented challenges. Use passages for context and scenarios for questions. You can add timers and multiple question types for each problem.</p>
+    <p>Missions are task-oriented challenges. Add scenarios with questions, timers, and different formats (QA, MCQ, Fill in the blanks).</p>
   </div>
 
+  <!-- CSV Upload -->
   <div class="csv-upload">
     <p>Have a pre-filled CSV? Upload it here to auto-fill the form.</p>
     <label for="mission-csv-upload" class="btn-secondary"><i class="fas fa-upload"></i> Upload CSV Template</label>
@@ -50,6 +60,7 @@
   </div>
 
   <form #missionForm="ngForm" (ngSubmit)="submitForm()">
+    <!-- Basic Info -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-clipboard-list"></i> Basic Info</h3>
       <div class="input-group">
@@ -60,25 +71,19 @@
         <label for="xp">XP Allotment *</label>
         <input type="number" id="xp" name="xp" [(ngModel)]="mission.xp" required min="0">
       </div>
-    </div>
-
-    <div class="form-section">
-      <h3 class="section-title"><i class="fas fa-file-alt"></i> Passages</h3>
-      <div class="dynamic-list">
-        <div *ngFor="let passage of mission.passages; let i = index; trackBy: trackByFn" class="list-item">
-          <textarea placeholder="Enter passage content here..." [(ngModel)]="mission.passages[i]" [name]="'passage' + i"></textarea>
-          <button type="button" class="btn-remove" (click)="removePassage(i)" title="Remove Passage"><i class="fas fa-times"></i></button>
-        </div>
+      <div class="input-group">
+        <label for="description">Description *</label>
+        <textarea id="description" name="description" [(ngModel)]="mission.description" rows="4" required></textarea>
       </div>
-      <button type="button" class="btn-add" (click)="addPassage()"><i class="fas fa-plus"></i> Add Passage</button>
     </div>
 
+    <!-- Scenarios -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-question-circle"></i> Scenarios (Problems)</h3>
       <div *ngFor="let scenario of mission.scenarios; let i = index; trackBy: trackByFn" class="dynamic-list nested">
         <div class="scenario-header">
           <h4>Problem {{i + 1}}</h4>
-          <button type="button" class="btn-remove" (click)="removeScenario(i)" title="Remove Problem"><i class="fas fa-times"></i></button>
+          <button type="button" class="btn-remove" (click)="removeScenario(i)"><i class="fas fa-times"></i></button>
         </div>
         <div class="input-grid">
           <div class="input-group">
@@ -103,13 +108,13 @@
         <div *ngIf="scenario.type === 'mcq'">
           <label class="sub-label">Options</label>
           <div *ngFor="let option of scenario.options; let j = index; trackBy: trackByFn" class="list-item mcq-option">
-            <input type="radio" [value]="option.text" [(ngModel)]="scenario.correctAnswer" [name]="'correctAnswer' + i" title="Set as correct answer">
-            <input type="text" placeholder="Option {{j + 1}}" [(ngModel)]="option.text" [name]="'option' + i + '_' + j">
+            <input type="radio" [value]="j" [(ngModel)]="scenario.correctAnswer" [name]="'correctAnswer' + i">
+            <input type="text" placeholder="Option {{j + 1}}" [(ngModel)]="option.text" [name]="'optionText' + i + '_' + j">
             <button type="button" class="btn-remove small" (click)="removeOption(scenario, j)"><i class="fas fa-times"></i></button>
           </div>
           <button type="button" class="btn-add small" (click)="addOption(scenario)"><i class="fas fa-plus"></i> Add Option</button>
         </div>
-        <div *ngIf="scenario.type !== 'mcq'" class="input-group">
+        <div class="input-group" *ngIf="scenario.type !== 'mcq'">
           <label [for]="'answer' + i">Correct Answer *</label>
           <input type="text" [id]="'answer' + i" [(ngModel)]="scenario.correctAnswer" [name]="'correctAnswer' + i" required>
         </div>
@@ -117,6 +122,7 @@
       <button type="button" class="btn-add" (click)="addScenario()"><i class="fas fa-plus"></i> Add Problem</button>
     </div>
 
+    <!-- Class Assignment -->
     <div class="form-section">
       <h3 class="section-title"><i class="fas fa-chalkboard-teacher"></i> Class Assignment</h3>
       <div *ngIf="(availableClasses$ | async) as classes" class="class-grid">
@@ -128,11 +134,10 @@
     </div>
 
     <div class="action-buttons">
-       <button type="button" (click)="togglePreview()" class="btn btn-secondary"><i class="fas fa-eye"></i> Preview</button>
+      <button type="button" (click)="togglePreview()" class="btn btn-secondary"><i class="fas fa-eye"></i> Preview</button>
       <button type="submit" class="btn btn-primary" [disabled]="missionForm.invalid || isSubmitting">
         <i class="fas fa-paper-plane"></i> {{ isSubmitting ? 'Submitting...' : 'Submit Mission' }}
       </button>
     </div>
   </form>
 </div>
-
