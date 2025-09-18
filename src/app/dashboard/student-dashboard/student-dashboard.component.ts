@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
+import { Router } from '@angular/router';
 import { AuthService } from '../../auth.service';
 import { StudentProgress, StudentProgressService, StreakStage } from '../../services/student-progress.service';
 
@@ -15,11 +16,6 @@ interface Note {
   title: string;
   date: string;
 }
-interface QuizQuestion {
-  question: string;
-  options: string[];
-  correctAnswer: string;
-}
 
 @Component({
   selector: 'app-student-dashboard',
@@ -31,10 +27,11 @@ interface QuizQuestion {
 export class StudentDashboardComponent implements OnInit {
   isLoading$: Observable<boolean>;
   welcomeName: string = 'Student';
-  
-  // Corrected Background Image URL
-  dashboardImageUrl = 'https://raw.githubusercontent.com/XiaoPongo/bodhami-login-reg/main/student-dashboard.png?raw=true';
-   
+
+  // ✅ Fixed: raw image link
+  dashboardImageUrl =
+    'https://raw.githubusercontent.com/XiaoPongo/bodhami-login-reg/main/student-dashboard.png?raw=true';
+
   progress$: Observable<StudentProgress | null>;
   streakStage$: Observable<StreakStage>;
 
@@ -42,13 +39,6 @@ export class StudentDashboardComponent implements OnInit {
   showAchievements = false;
   showStreak = false;
   showNotes = false;
-  showQuiz = false;
-
-  // Quiz State
-  currentQuestionIndex: number = 0;
-  selectedAnswer: string | null = null;
-  quizScore: number = 0;
-  isQuizFinished: boolean = false;
 
   // Mock Data for modals
   achievements: Achievement[] = [
@@ -57,19 +47,16 @@ export class StudentDashboardComponent implements OnInit {
     { icon: 'fa-solid fa-fire', title: 'On a Roll!', description: 'Maintain a 3-day login streak.', unlocked: true },
     { icon: 'fa-solid fa-star', title: 'Employee of the Month', description: 'Maintain a 30-day login streak.', unlocked: false },
   ];
+
   notes: Note[] = [
     { title: 'Market Analysis Insights', date: '2025-09-15' },
     { title: 'Startup Growth Factors', date: '2025-09-12' },
   ];
-  quizQuestions: QuizQuestion[] = [
-    { question: "What is the primary goal of a SWOT analysis?", options: ["To forecast sales", "To analyze competitors", "To identify internal and external factors", "To set marketing budgets"], correctAnswer: "To identify internal and external factors" },
-    { question: "Which is a key component of a business plan?", options: ["Work schedule", "Executive Summary", "Contact list", "Supply inventory"], correctAnswer: "Executive Summary" },
-    { question: "What does ROI stand for?", options: ["Return on Investment", "Rate of Inflation", "Risk of Insolvency", "Revenue of Interest"], correctAnswer: "Return on Investment" },
-  ];
 
   constructor(
     private authService: AuthService,
-    public progressService: StudentProgressService
+    public progressService: StudentProgressService,
+    private router: Router
   ) {
     this.progress$ = this.progressService.progress$;
     this.isLoading$ = this.progressService.isLoading$;
@@ -81,43 +68,12 @@ export class StudentDashboardComponent implements OnInit {
     this.welcomeName = user?.user_metadata?.['firstName'] || 'Student';
   }
 
-  toggleAchievements = () => this.showAchievements = !this.showAchievements;
-  toggleStreak = () => this.showStreak = !this.showStreak;
-  toggleNotes = () => this.showNotes = !this.showNotes;
-  
-  startQuiz() {
-    this.resetQuiz();
-    this.showQuiz = true;
-  }
-  exitQuiz() {
-    this.showQuiz = false;
-  }
+  toggleAchievements = () => (this.showAchievements = !this.showAchievements);
+  toggleStreak = () => (this.showStreak = !this.showStreak);
+  toggleNotes = () => (this.showNotes = !this.showNotes);
 
-  selectAnswer(option: string) { this.selectedAnswer = option; }
-
-  nextQuestion() {
-    if (this.selectedAnswer === this.quizQuestions[this.currentQuestionIndex].correctAnswer) {
-      this.quizScore++;
-    }
-    if (this.currentQuestionIndex < this.quizQuestions.length - 1) {
-      this.currentQuestionIndex++;
-      this.selectedAnswer = null;
-    } else {
-      this.isQuizFinished = true;
-      const earnedXp = this.quizScore * 10;
-      this.progressService.addXp(earnedXp);
-    }
-  }
-
-  resetQuiz() {
-    this.currentQuestionIndex = 0;
-    this.selectedAnswer = null;
-    this.quizScore = 0;
-    this.isQuizFinished = false;
-  }
-
-  get quizProgress(): number {
-    return ((this.currentQuestionIndex + 1) / this.quizQuestions.length) * 100;
+  // 🔑 Navigate to classes page
+  goToClasses() {
+    this.router.navigate(['/student/classes']);
   }
 }
-

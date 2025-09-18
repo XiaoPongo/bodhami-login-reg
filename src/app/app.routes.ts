@@ -11,6 +11,7 @@ import { StudentDashboardComponent } from './dashboard/student-dashboard/student
 import { CreateHubComponent } from './dashboard/create-hub/create-hub.component';
 import { ManageClassesComponent } from './dashboard/manage-classes/manage-classes.component'; 
 import { UploadMaterialComponent } from './dashboard/upload-material/upload-material.component';
+import { StudentClassesComponent } from './dashboard/student-classes/student-classes.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -25,9 +26,7 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: MentorDashboardComponent },
       { path: 'create', component: CreateHubComponent },
-      // Corrected path to 'manage-classes'
       { path: 'manage-classes', component: ManageClassesComponent }, 
-      // Added new route for material uploader
       { path: 'upload-material', component: UploadMaterialComponent },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ],
@@ -40,6 +39,7 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: 'dashboard', component: StudentDashboardComponent },
+      { path: 'classes', component: StudentClassesComponent }, // 🔑 new route
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ],
   },

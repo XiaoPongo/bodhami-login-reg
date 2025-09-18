@@ -1,0 +1,64 @@
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+// --- Interfaces ---
+// (It's good practice to move these to a shared interfaces file)
+export interface Material {
+  id: number;
+  displayName: string;
+  fileType: string;
+  s3url: string;
+}
+
+export interface Activity {
+  id: number;
+  title: string;
+  type: string;
+  xp: number;
+}
+
+export interface Classroom {
+  id: number;
+  name: string;
+  materials?: Material[];
+  activities?: Activity[];
+}
+
+@Component({
+  selector: 'app-student-class-detail', // Correct selector
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './student-class-detail.component.html',
+  styleUrls: ['./class-detail.component.css'] // Corrected path
+})
+export class StudentClassDetailComponent {
+  @Input() classroom!: Classroom;
+  @Output() closed = new EventEmitter<void>();
+
+  activeTab: 'materials' | 'activities' = 'materials';
+  error: string | null = null;
+
+  constructor() {}
+
+  leaveClass(): void {
+    console.log(`Leaving class: ${this.classroom.name}`);
+    this.error = 'Leave class functionality is not yet implemented.';
+    setTimeout(() => this.error = null, 3000);
+  }
+
+  // --- ADDED THIS METHOD TO FIX THE ERROR ---
+  downloadMaterial(material: Material): void {
+    console.log(`Downloading material: ${material.displayName}`);
+    // This will open the material's URL in a new browser tab.
+    window.open(material.s3url, '_blank');
+  }
+
+  // --- ADDED THIS METHOD TO FIX THE ERROR ---
+  startActivity(activity: Activity): void {
+    console.log(`Starting activity: ${activity.title}`);
+    // In a real application, this would likely navigate to a new
+    // component to handle the quiz or assignment.
+    this.error = `Starting '${activity.title}' is not yet implemented.`;
+    setTimeout(() => this.error = null, 3000);
+  }
+}

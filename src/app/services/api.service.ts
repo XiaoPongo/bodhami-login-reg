@@ -18,8 +18,15 @@ export interface Material {
   classroom: Classroom | null;
 }
 export interface Classroom {
-  id: number; name: string; description: string; classCode: string; mentorId: string;
-  allowNewStudents: boolean; materials: Material[]; activities: Activity[]; students: Student[];
+  id: number;
+  name: string;
+  description: string;
+  classCode: string;
+  mentorId: string;
+  allowNewStudents: boolean;
+  materials: Material[];
+  activities: Activity[];
+  students: Student[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -100,7 +107,7 @@ export class ApiService {
     );
   }
 
-  // --- CLASSROOM ENDPOINTS ---
+  // --- CLASSROOM ENDPOINTS (Mentor) ---
   getClassrooms(): Observable<Classroom[]> {
     return this.getAuthHeaders().pipe(
       switchMap(headers => this.http.get<Classroom[]>(`${this.apiUrl}/classrooms`, { headers }))
@@ -137,7 +144,48 @@ export class ApiService {
     );
   }
 
-  // legacy method, keep for compatibility if needed
+  // --- STUDENT CLASS ENDPOINTS ---
+  joinClass(classCode: string): Observable<{ success: boolean; message?: string }> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers =>
+        this.http.post<{ success: boolean; message?: string }>(
+          `${this.apiUrl}/classrooms/join`,   // <-- corrected to match backend
+          { classCode: classCode.trim().toUpperCase() },
+          { headers }
+        )
+      )
+    );
+  }
+  
+  getEnrolledClasses(): Observable<Classroom[]> {
+    return this.getAuthHeaders().pipe(
+      switchMap(headers =>
+        this.http.get<Classroom[]>(`${this.apiUrl}/student/classes`, { headers })
+      )
+    );
+  }
+  
+  // services/api.service.ts
+
+/** Get classroom content (materials + activities) */
+getClassroomContent(classroomId: number): Observable<Classroom> {
+  return this.getAuthHeaders().pipe(
+    switchMap(headers =>
+      this.http.get<Classroom>(`${this.apiUrl}/classrooms/${classroomId}/content`, { headers })
+    )
+  );
+}
+
+/** Leave a class */
+leaveClass(classroomId: number): Observable<any> {
+  return this.getAuthHeaders().pipe(
+    switchMap(headers =>
+      this.http.delete(`${this.apiUrl}/student/classes/${classroomId}/leave`, { headers })
+    )
+  );
+}
+
+  // --- LEGACY UPLOAD ---
   uploadFile(file: Blob, type: string, fileName: string, classroomId: number): Observable<any> {
     const formData = new FormData();
     formData.append('file', file, fileName);
@@ -146,5 +194,4 @@ export class ApiService {
       switchMap(headers => this.http.post(uploadUrl, formData, { headers }))
     );
   }
-
 }

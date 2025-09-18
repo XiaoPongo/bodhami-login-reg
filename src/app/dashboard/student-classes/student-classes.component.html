@@ -1,0 +1,104 @@
+<div class="classes-page">
+  <!-- Page Header -->
+  <div class="header" *ngIf="!selectedClass">
+    <div class="header-title">
+      <i class="fas fa-chalkboard-teacher"></i>
+      <h1>My Classes</h1>
+    </div>
+    <div class="actions">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input
+          type="text"
+          placeholder="Search classes..."
+          [(ngModel)]="query"
+        />
+      </div>
+      <button class="btn-primary" (click)="openJoinModal()">
+        <i class="fas fa-plus-circle"></i> Join Class
+      </button>
+      <button class="btn-icon" (click)="refresh()" title="Refresh Classes">
+        <i class="fas fa-sync-alt"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <span>Loading classes...</span>
+  </div>
+
+  <!-- Class List -->
+  <section class="my-classes" *ngIf="!selectedClass">
+    <div
+      *ngIf="enrolledClasses.length === 0 && !isLoading"
+      class="empty-state"
+    >
+      <i class="fas fa-folder-open"></i>
+      <p>You are not enrolled in any classes yet.</p>
+      <span>Use the "Join Class" button to add your first class.</span>
+    </div>
+    <div class="grid">
+      <article
+        class="class-card enrolled-card"
+        *ngFor="let c of filteredClasses"
+        (click)="openClass(c)"
+      >
+        <div class="card-header">
+          <h3>{{ c.name }}</h3>
+          <span class="badge enrolled-badge">Enrolled</span>
+        </div>
+        <small>by {{ c.mentorId }}</small>
+        <p>{{ c.description || 'No description available.' }}</p>
+        <div class="card-footer">
+          <span>View Content <i class="fas fa-arrow-right"></i></span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Detail View -->
+  <app-student-class-detail
+    *ngIf="selectedClass"
+    [classroom]="selectedClass"
+    (closed)="onCloseDetail()"
+    (left)="onLeaveClass($event)"
+  ></app-student-class-detail>
+
+  <!-- Join Class Modal -->
+  <div class="modal-overlay" *ngIf="joining" (click)="closeJoinModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Join a New Class</h3>
+        <button class="modal-close" (click)="closeJoinModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Enter the unique class code provided by your mentor to enroll.</p>
+        <div class="input-group">
+          <i class="fas fa-key"></i>
+          <input
+            type="text"
+            placeholder="Enter Class Code"
+            [(ngModel)]="joinCode"
+            (keydown.enter)="submitJoinCode()"
+          />
+        </div>
+        <div class="feedback">
+          <div *ngIf="joinError" class="feedback-error">
+            <i class="fas fa-exclamation-circle"></i> {{ joinError }}
+          </div>
+          <div *ngIf="joinSuccessMsg" class="feedback-success">
+            <i class="fas fa-check-circle"></i> {{ joinSuccessMsg }}
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeJoinModal()">Cancel</button>
+        <button class="btn-primary" (click)="submitJoinCode()">Join Class</button>
+      </div>
+    </div>
+  </div>
+</div>

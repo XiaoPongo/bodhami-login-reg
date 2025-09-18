@@ -1,9 +1,17 @@
-:host { 
-  display: block; 
-  height: 100%; 
-  width: 100%; 
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
   font-family: 'Inter', sans-serif;
-} 
+  overflow: hidden; /* 🔑 prevent scrollbars on the dashboard component */
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* 🔑 ensure page itself never scrolls */
+}
 
 /* --- Loading Spinner --- */
 .loading-overlay {
@@ -24,16 +32,17 @@
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.dashboard-wrapper { 
-  height: 100%; 
-  width: 100%; 
-  background-size: cover; 
-  background-position: center; 
-  position: relative; 
+.dashboard-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  position: relative;
   display: grid;
   place-items: center;
+  overflow: hidden; /* 🔑 contain children, prevent scrollbars */
 } 
-
+ 
 .content-overlay { 
   position: relative; 
   width: 100%; 
@@ -45,7 +54,7 @@
 .welcome-header { 
   position: absolute; 
   top: 40px; 
-  left: 50%; 
+  left: 47%; 
   transform: translateX(-50%); 
   color: #fff;
   text-align: center; 
@@ -56,8 +65,8 @@
 /* Stats Bar */ 
 .stats-bar { 
   position: absolute; 
-  top: 13%; 
-  left: 50%;
+  top: 2%; 
+  left: 47%;
   transform: translateX(-50%);
   width: 45%;
   min-width: 400px;
@@ -74,14 +83,39 @@
 .stat-item i { color: #f59e0b; } 
 .stat-item .fa-trophy { color: #10b981; }
 
-/* Interactive Buttons */ 
-.interactive-elements { position: absolute; width: 100%; height: 100%; } 
-.btn-quiz { position: absolute; top: 260px; left: 450px; background-color: #3b82f6; color: white; padding: 18px 60px; border-radius: 12px; font-size: 1.5rem; font-weight: bold; border: none; cursor: pointer; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4); transition: all 0.2s ease-in-out; } 
-.btn-quiz:hover { background-color: #2563eb; transform: translateY(-2px); } 
-
-.btn-achievements, .btn-notes { 
+/* --- Interactive Buttons --- */
+.interactive-elements { 
   position: absolute; 
-  top: 160px; 
+  width: 100%; 
+  height: 100%; 
+} 
+
+/* Quiz button */
+.btn-quiz { 
+  position: absolute; 
+  top: 245px; 
+  left: 380px; 
+  background-color: #3b82f6; 
+  color: white; 
+  padding: 18px 60px; 
+  border-radius: 12px; 
+  font-size: 1.5rem; 
+  font-weight: bold; 
+  border: none; 
+  cursor: pointer; 
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4); 
+  transition: all 0.2s ease-in-out; 
+} 
+.btn-quiz:hover { 
+  background-color: #2563eb; 
+  transform: translateY(-2px); 
+} 
+
+/* Achievements button */
+.btn-achievements { 
+  position: absolute; 
+  top: 170px; 
+  left: 823px; 
   background-color: #10b981; 
   color: white; 
   padding: 12px 24px; 
@@ -96,31 +130,57 @@
   align-items: center; 
   gap: 8px; 
 } 
-.btn-achievements:hover, .btn-notes:hover { transform: translateY(-2px); }
-.btn-achievements { left: 890px; }
-.btn-achievements:hover { background-color: #059669; }
-
-/* --- NEW: Icon Button Style for Streak --- */
-.btn-icon {
-  position: absolute;
-  background-color: #f97316;
-  color: white;
-  width: 50px; /* Circle shape */
-  height: 50px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3);
-  transition: all 0.2s ease-in-out;
-  display: grid;
-  place-items: center;
-  font-size: 1.5rem;
+.btn-achievements:hover { 
+  background-color: #059669; 
+  transform: translateY(-2px); 
 }
-.btn-icon:hover { transform: translateY(-2px); background-color: #ea580c;}
-.btn-streak { top: 210px; left: 890px; } /* Position it */
 
-.btn-notes { top: 270px; left: 890px; background-color: #8b5cf6; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3); }
-.btn-notes:hover { background-color: #7c3aed; }
+/* Streak button (circle icon) */
+.btn-streak { 
+  position: absolute; 
+  top: 380px; 
+  left: 45px; 
+  background-color: #f97316; 
+  color: white; 
+  width: 50px; 
+  height: 50px; 
+  border-radius: 50%; 
+  border: none; 
+  cursor: pointer; 
+  box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3); 
+  transition: all 0.2s ease-in-out; 
+  display: grid; 
+  place-items: center; 
+  font-size: 1.5rem; 
+} 
+.btn-streak:hover { 
+  background-color: #ea580c; 
+  transform: translateY(-2px); 
+}
+
+/* Notes button */
+.btn-notes { 
+  position: absolute; 
+  top: 330px; 
+  left: 850px; 
+  background-color: #8b5cf6; 
+  color: white; 
+  padding: 12px 24px; 
+  border-radius: 50px; 
+  font-size: 1rem; 
+  font-weight: 600; 
+  border: none; 
+  cursor: pointer; 
+  box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3); 
+  transition: all 0.2s ease-in-out; 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+} 
+.btn-notes:hover { 
+  background-color: #7c3aed; 
+  transform: translateY(-2px); 
+}
 
 /* --- Generic Modal Styles --- */ 
 .modal-overlay { position: fixed; inset: 0; background-color: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); display: grid; place-items: center; z-index: 3000; animation: fadeIn 0.3s ease; } 
@@ -213,4 +273,3 @@
 .btn-action-primary:hover { background-color: #2563eb; }
 .btn-action-secondary { background-color: #e2e8f0; color: #334155; }
 .btn-action-secondary:hover { background-color: #cbd5e1; }
-
