@@ -33,7 +33,7 @@ export class StudentDashboardComponent implements OnInit {
   welcomeName: string = 'Student';
   
   // Corrected Background Image URL
-  dashboardImageUrl = 'https://raw.githubusercontent.com/XiaoPongo/bodhami-login-reg/main/student-dashboard-new.png';
+  dashboardImageUrl = 'https://raw.githubusercontent.com/XiaoPongo/bodhami-login-reg/main/student-dashboard.png';
    
   progress$: Observable<StudentProgress | null>;
   streakStage$: Observable<StreakStage>;
