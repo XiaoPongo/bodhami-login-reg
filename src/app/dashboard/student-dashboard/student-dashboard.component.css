@@ -94,7 +94,7 @@ html, body {
 .btn-quiz { 
   position: absolute; 
   top: 245px; 
-  left: 380px; 
+  left: 410px; 
   background-color: #3b82f6; 
   color: white; 
   padding: 18px 60px; 
@@ -115,7 +115,7 @@ html, body {
 .btn-achievements { 
   position: absolute; 
   top: 170px; 
-  left: 823px; 
+  left: 830px; 
   background-color: #10b981; 
   color: white; 
   padding: 12px 24px; 
@@ -139,7 +139,7 @@ html, body {
 .btn-streak { 
   position: absolute; 
   top: 380px; 
-  left: 45px; 
+  left: 52px; 
   background-color: #f97316; 
   color: white; 
   width: 50px; 
